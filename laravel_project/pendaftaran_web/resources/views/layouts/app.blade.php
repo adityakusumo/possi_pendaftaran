@@ -258,6 +258,7 @@
             font-size: 18px;
             font-weight: 500;
             white-space: nowrap;
+            text-indent: 20px;
         }
 
         .sidebar.close .profile-details i,
@@ -307,6 +308,13 @@
             font-weight: 600;
         }
 
+        .possi-logo {
+            width: 50px;
+            height: 50px;
+            /* Optional: maintain aspect ratio */
+            object-fit: contain;
+        }
+
         @media screen and (max-width: 400px) {
             .sidebar {
                 width: 240px;
@@ -344,164 +352,234 @@
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex"> {{-- Add flex container to body's main div --}}
 
-        <div class="sidebar close">
-            <div class="logo-details">
-                <i class='bx bxl-c-plus-plus'></i>
-                <span class="logo_name">CodingLab</span>
-            </div>
-            <ul class="nav-links">
-                <li>
-                    <a href="#">
-                        <i class='bx bx-grid-alt'></i>
-                        <span class="link_name">Dashboard</span>
-                    </a>
-                    <ul class="sub-menu blank">
-                        <li><a class="link_name" href="#">Category</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <div class="iocn-link">
+        {{-- <div class="sidebar close"> --}}
+            <div class="sidebar">
+                <div class="logo-details">
+                    {{-- <i class='bx bxl-c-plus-plus'></i> --}}
+                    <img src="{{ asset('image/possi_logo.png') }}" alt="possilogo" class="possi-logo">
+                    <span class="logo_name">Possi Jatim</span>
+                </div>
+                <ul class="nav-links">
+                    {{-- <li>
                         <a href="#">
-                            <i class='bx bx-collection'></i>
-                            <span class="link_name">Category</span>
+                            <i class='bx bx-grid-alt'></i>
+                            <span class="link_name">Dashboard</span>
                         </a>
-                        <i class='bx bxs-chevron-down arrow'></i>
-                    </div>
-                    <ul class="sub-menu">
-                        <li><a class="link_name" href="#">Category</a></li>
-                        <li><a href="#">HTML & CSS</a></li>
-                        <li><a href="#">JavaScript</a></li>
-                        <li><a href="#">PHP & MySQL</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <div class="iocn-link">
-                        <a href="#">
-                            <i class='bx bx-book-alt'></i>
-                            <span class="link_name">Posts</span>
-                        </a>
-                        <i class='bx bxs-chevron-down arrow'></i>
-                    </div>
-                    <ul class="sub-menu">
-                        <li><a class="link_name" href="#">Posts</a></li>
-                        <li><a href="#">Web Design</a></li>
-                        <li><a href="#">Login Form</a></li>
-                        <li><a href="#">Card Design</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class='bx bx-pie-chart-alt-2'></i>
-                        <span class="link_name">Analytics</span>
-                    </a>
-                    <ul class="sub-menu blank">
-                        <li><a class="link_name" href="#">Analytics</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class='bx bx-line-chart'></i>
-                        <span class="link_name">Chart</span>
-                    </a>
-                    <ul class="sub-menu blank">
-                        <li><a class="link_name" href="#">Chart</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <div class="iocn-link">
-                        <a href="#">
-                            <i class='bx bx-plug'></i>
-                            <span class="link_name">Plugins</span>
-                        </a>
-                        <i class='bx bxs-chevron-down arrow'></i>
-                    </div>
-                    <ul class="sub-menu">
-                        <li><a class="link_name" href="#">Plugins</a></li>
-                        <li><a href="#">UI Face</a></li>
-                        <li><a href="#">Pigments</a></li>
-                        <li><a href="#">Box Icons</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class='bx bx-compass'></i>
-                        <span class="link_name">Explore</span>
-                    </a>
-                    <ul class="sub-menu blank">
-                        <li><a class="link_name" href="#">Explore</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class='bx bx-history'></i>
-                        <span class="link_name">History</span>
-                    </a>
-                    <ul class="sub-menu blank">
-                        <li><a class="link_name" href="#">History</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class='bx bx-cog'></i>
-                        <span class="link_name">Setting</span>
-                    </a>
-                    <ul class="sub-menu blank">
-                        <li><a class="link_name" href="#">Setting</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <div class="profile-details">
-                        <div class="profile-content">
-                            <img src="{{ asset('image/harald_gloocker.jpeg') }}" alt="profileImg">
+                        <ul class="sub-menu blank">
+                            <li><a class="link_name" href="#">Category</a></li>
+                        </ul>
+                    </li> --}}
+                    <li>
+                        <div class="iocn-link">
+                            <a href="#">
+                                {{-- <i class='bx bx-collection'></i> --}}
+                                <span class="link_name">Form A1</span>
+                            </a>
+                            <i class='bx bxs-chevron-down arrow'></i>
                         </div>
-                        <div class="name-job">
-                            <div class="profile_name">Igun Pro Maxx</div>
-                            <div class="job">Web Desginer</div>
+                        <ul class="sub-menu">
+                            <li><a class="link_name" href="#">Category</a></li>
+                            <li><a href="#">Kontingen Kota/Kab</a></li>
+                            <li><a href="#">Nama Atlet</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <div class="iocn-link">
+                            <a href="#">
+                                {{-- <i class='bx bx-book-alt'></i> --}}
+                                <span class="link_name">Form A3</span>
+                            </a>
+                            <i class='bx bxs-chevron-down arrow'></i>
                         </div>
-                        <i class='bx bx-log-out'></i>
-                    </div>
-                </li>
-            </ul>
-        </div>
+                        <ul class="sub-menu">
+                            <li><a class="link_name" href="#">Posts</a></li>
+                            <li><a href="#">Nomor Perorangan</a></li>
+                            <li><a href="#">Nomor Estafet</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <div class="iocn-link">
+                            <a href="#">
+                                {{-- <i class='bx bx-pie-chart-alt-2'></i> --}}
+                                <span class="link_name">Kirim ke Panitia</span>
+                            </a>
+                            <i class='bx bxs-chevron-down arrow'></i>
+                        </div>
+                        <ul class="sub-menu">
+                            <li><a class="link_name" href="#">Analytics</a></li>
+                            <li><a href="#">Form A3 untuk Panitia</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <div class="iocn-link">
+                            <a href="#">
+                                {{-- <i class='bx bx-line-chart'></i> --}}
+                                <span class="link_name">Biaya</span>
+                            </a>
+                            <i class='bx bxs-chevron-down arrow'></i>
+                        </div>
+                        <ul class="sub-menu">
+                            <li><a class="link_name" href="#">biaya</a></li>
+                            <li><a href="#">Total Biaya</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <div class="iocn-link">
+                            <a href="#">
+                                {{-- <i class='bx bx-plug'></i> --}}
+                                <span class="link_name">Cek Hasil Entry(opsional)</span>
+                            </a>
+                            <i class='bx bxs-chevron-down arrow'></i>
+                        </div>
+                        <ul class="sub-menu">
+                            <li><a class="link_name" href="#">cek_hasil_entry</a></li>
+                            <li><a href="#">Cek Hasil Entry Form A3</a></li>
+                        </ul>
+                    </li>
+                    {{-- <li>
+                        <a href="#">
+                            <i class='bx bx-compass'></i>
+                            <span class="link_name">Explore</span>
+                        </a>
+                        <ul class="sub-menu blank">
+                            <li><a class="link_name" href="#">Explore</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class='bx bx-history'></i>
+                            <span class="link_name">History</span>
+                        </a>
+                        <ul class="sub-menu blank">
+                            <li><a class="link_name" href="#">History</a></li>
+                        </ul>
+                    </li> --}}
+                    @role('admin')
+                    <li>
+                        <a href="{{ route('settings') }}">
+                            <i class='bx bx-cog'></i>
+                            <span class="link_name">Setting</span>
+                        </a>
+                        <ul class="sub-menu blank">
+                            <li><a class="link_name" href="{{ route('settings') }}">Setting</a></li> {{-- Also update this if it's a sub-menu link --}}
+                            {{-- You might add more specific admin links here, e.g., --}}
+                            <li><a href="{{ route('admin.users.index') }}">Manage Users</a></li>
+                            <li><a href="{{ route('admin.roles.index') }}">Manage Roles</a></li>
+                        </ul>
+                    </li>
+                    @endrole
+                    <li>
+                        <div class="profile-details">
+                            <div class="profile-content">
+                                <img src="{{ asset('image/harald_gloocker.jpeg') }}" alt="profileImg">
+                            </div>
+                            <div class="name-job">
+                                {{-- <div class="profile_name">Igun Pro Maxx</div> --}}
+                                <div class="profile_name">{{ Auth::user()->name }}</div>
+                                <div class="job">Web Designer</div>
+                            </div>
+                            {{-- <i class='bx bx-log-out'></i> --}}
+                            <form method="POST" action="{{ route('logout') }}" class="logout-form"> {{-- Added a class
+                                for potential styling if needed --}}
+                                @csrf
 
-
-
-        <section class="home-section">
-            <div class="home-content">
-                <i class='bx bx-menu'></i>
-                {{-- <span class="text">Drop Down Sidebar</span> --}}
+                                {{-- The bx-log-out icon will trigger the logout --}}
+                                <i class='bx bx-log-out'
+                                    onclick="event.preventDefault(); this.closest('form').submit();"></i>
+                            </form>
+                        </div>
+                    </li>
+                </ul>
             </div>
 
-            {{-- Main content area (including header and slot) needs to be inside the flex container --}}
-            <div class="flex-1"> {{-- This div will take up the remaining space next to the sidebar --}}
-                @include('layouts.navigation') {{-- This is your top navigation (if not part of sidebar) --}}
 
-                @isset($header)
+
+            <section class="home-section">
+                {{-- <div class="home-content">
+                    <i cla ss='bx bx-menu'></i> --}}
+                    {{-- <span class="text">Drop Down Sidebar</span>
+                </div> --}}
+
+                {{-- Main content area (including header and slot) needs to be inside the flex container --}}
+                <div class="flex-1">
+                    @include('layouts.navigation')
+
+                    @isset($header)
+                        <header class="bg-white dark:bg-gray-800 shadow">
+                            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                                {{ $header }}
+                            </div>
+                        </header>
+                    @endisset
+
+                    <main class="p-4">
+                        {{ $slot }}
+                    </main>
+                </div>
+
+                {{-- Main content area --}}
+                {{-- <div class="flex-1">
+                    @include('layouts.navigation')
+
+                    @isset($header)
                     <header class="bg-white dark:bg-gray-800 shadow">
                         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                             {{ $header }}
                         </div>
                     </header>
-                @endisset
+                    @endisset
 
-                <main class="p-4"> {{-- Add padding to main content --}}
-                    {{ $slot }}
-                </main>
-            </div>
-        </section>
+                    <main class="p-4">
 
-    </div> {{-- End of the main flex container --}}
+                        <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6">
+                            @role('admin')
+                            <p class="text-gray-900 dark:text-gray-100 mb-2">Welcome, Admin! You have access to
+                                administrative features.</p>
+                            <a href="/admin/dashboard" class="text-indigo-600 dark:text-indigo-400 hover:underline">Go
+                                to Admin Dashboard</a>
+                            @else
 
-    {{-- Link your custom script properly.
-    If it's managed by Vite, it should be imported into resources/js/app.js.
-    If it's a standalone file in public, use asset().
-    Place it at the end of the body for better performance.
-    --}}
-    {{-- <script src="{{ asset('js/script.js') }}"></script> Assuming script.js is in public/js/ --}}
+                            @auth
+                            <p class="text-gray-900 dark:text-gray-100">Welcome, {{ Auth::user()->name }}. You are a
+                                regular user.</p>
+                            @else
+                            <p class="text-gray-900 dark:text-gray-100">Welcome, Guest! Please log in.</p>
+                            @endauth
+                            @endrole
+                        </div>
 
-    {{-- If you're using Bootstrap JS --}}
-    {{--
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> --}}
+                        <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6">
+                            @hasrole('admin')
+                            <p class="text-gray-900 dark:text-gray-100">This content is only visible to users with the
+                                'admin' role (using @hasrole).</p>
+                            @endhasrole
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6">
+                            @if(Auth::check() && Auth::user()->hasRole('admin'))
+                            <p class="text-gray-900 dark:text-gray-100">You are logged in and are an admin (using @if
+                                with hasRole()).</p>
+                            @endif
+                        </div>
+
+                        {{ $slot }}
+                    </main>
+                </div> --}}
+            </section>
+
+        </div> {{-- End of the main flex container --}}
+
+        {{-- Link your custom script properly.
+        If it's managed by Vite, it should be imported into resources/js/app.js.
+        If it's a standalone file in public, use asset().
+        Place it at the end of the body for better performance.
+        --}}
+        {{--
+        <script src="{{ asset('js/script.js') }}"></script> Assuming script.js is in public/js/ --}}
+
+        {{-- If you're using Bootstrap JS --}}
+        {{--
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> --}}
 
 </body>
 

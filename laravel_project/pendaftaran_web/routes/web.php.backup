@@ -3,22 +3,9 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
 Route::get('/', function () {
-    // If the user is already logged in, redirect them to the dashboard
-    if (Auth::check()) {
-        return redirect()->route('dashboard');
-    }
-
-    // Otherwise, show the login page
-    return view('auth.login'); // Breeze's login view is typically in 'resources/views/auth/login.blade.php'
+    return view('welcome');
 });
-
-Route::get('/settings', function () {
-    return view('settings'); // This will look for resources/views/settings.blade.php
-})->middleware(['auth'])->name('settings');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
