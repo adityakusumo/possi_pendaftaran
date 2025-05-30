@@ -15,6 +15,39 @@ class UserManagementController extends Controller
     //     $this->middleware(['auth', 'role:admin']);
     // }
 
+    public function index(Request $request)
+    {
+        // dd('Index method hit!');
+        // Get the search term from the request
+        $cari = $request->cari;
+
+        // Start a query on the User model
+        $usersQuery = User::query();
+
+        // If a search term is present, apply the search conditions
+        if ($cari) {
+            $usersQuery->where(function ($query) use ($cari) {
+                $query->where('name', 'like', "%" . $cari . "%")
+                    ->orWhere('email', 'like', "%" . $cari . "%");
+            });
+        }
+
+        // Paginate the results, showing 10 users per page
+        $users = $usersQuery->paginate(10);
+
+        // dd($users);
+
+        // Get all roles for the dropdowns (as you already do)
+        $roles = Role::all();
+
+        // Return the view with the users, roles, and the search term (to persist it in the input)
+        return view('settings', [
+            'users' => $users,
+            'roles' => $roles,
+            'cari' => $cari // Pass the search term back to the view
+        ]);
+    }
+
     /**
      * Update the specified user's role.
      */
@@ -22,10 +55,10 @@ class UserManagementController extends Controller
     {
         // DD 1: See all incoming request data
         // dd($request->all());
-    
-        // $request->validate([
-        //     'role' => ['required', 'string', 'exists:roles,name'], // Validate role exists in your roles table
-        // ]);
+
+        $request->validate([
+            'role' => ['required', 'string', 'exists:roles,name'], // Validate role exists in your roles table
+        ]);
 
         // DD 2: See the specific role name being requested
         // dd($request->role);

@@ -13,6 +13,26 @@
                         General Account Settings
                     </h3>
 
+                    {{-- Search Form --}}
+                    <div class="mb-4 flex items-center">
+                        <form action="{{ route('settings') }}" method="GET" class="flex-grow flex items-center">
+                            <label for="search-input" class="sr-only">Cari Pengguna</label>
+                            <input type="text" name="cari" id="search-input"
+                                placeholder="Cari Pengguna (Nama atau Email)..."
+                                value="{{ request('cari') }}" {{-- Keep the search term in the input --}}
+                                class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm w-full max-w-md">
+                            <button type="submit"
+                                class="ms-3 px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                                {{ __('CARI') }}
+                            </button>
+                            @if(request('cari'))
+                                <a href="{{ route('settings') }}" class="ms-3 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">
+                                    {{ __('Clear Search') }}
+                                </a>
+                            @endif
+                        </form>
+                    </div>                    
+
                     {{-- User Management Table --}}
                     <div class="overflow-x-auto"> {{-- Add this div for horizontal scrolling on small screens --}}
                         <table class="min-w-full divide-y divide-gray-200">
@@ -94,6 +114,11 @@
                             </tbody>
                         </table>
                     </div> {{-- End of overflow-x-auto div --}}
+
+                    {{-- Pagination Links --}}
+                    {{-- <div class="mt-4">
+                        {{ $users->links() }}
+                    </div>                     --}}
 
                     <p class="mt-4 text-gray-700 dark:text-gray-300">You can add forms, options, and other settings
                         here.</p>

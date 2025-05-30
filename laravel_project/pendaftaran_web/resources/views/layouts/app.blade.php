@@ -470,9 +470,9 @@
                     @endrole
                     <li>
                         <div class="profile-details">
-                            <div class="profile-content">
+                            {{-- <div class="profile-content">
                                 <img src="{{ asset('image/harald_gloocker.jpeg') }}" alt="profileImg">
-                            </div>
+                            </div> --}}
                             <div class="name-job">
                                 {{-- <div class="profile_name">Igun Pro Maxx</div> --}}
                                 <div class="profile_name">{{ Auth::user()->name }}</div>
