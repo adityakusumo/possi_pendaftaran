@@ -2,6 +2,10 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use Spatie\Permission\Models\Role;
+use App\Http\Controllers\Admin\UserManagementController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -16,9 +20,30 @@ Route::get('/', function () {
     return view('auth.login'); // Breeze's login view is typically in 'resources/views/auth/login.blade.php'
 });
 
+// Route::get('/settings', function () {
+//     return view('settings'); // This will look for resources/views/settings.blade.php
+// })->middleware(['auth'])->name('settings');
+
 Route::get('/settings', function () {
-    return view('settings'); // This will look for resources/views/settings.blade.php
-})->middleware(['auth'])->name('settings');
+    // Fetch all users
+    $users = User::all();
+
+    // Fetch all roles (assuming you're using Spatie's laravel-permission)
+    $roles = Role::all();
+
+    // Pass users and roles to the view
+    return view('settings', compact('users', 'roles'));
+})->middleware(['auth', 'role:admin'])->name('settings');
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    // Route to update a user's role
+    Route::patch('/settings/users/{user}/update-role', [UserManagementController::class, 'updateRole'])
+        ->name('settings.update-role');
+
+    // Route to delete a user
+    Route::delete('/settings/users/{user}/delete', [UserManagementController::class, 'destroyUser'])
+        ->name('settings.destroy-user');
+});
 
 Route::get('/dashboard', function () {
     return view('dashboard');

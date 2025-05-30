@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
 
 class RegisteredUserController extends Controller
 {
@@ -40,6 +41,19 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
+        // Ensure the 'user' role exists in your database first!
+        $userRole = Role::where('name', 'user')->first();
+
+        if ($userRole) {
+            $user->assignRole($userRole);
+        } else {
+            // Optional: Log an error or create the role if it doesn't exist
+            \Log::warning("Role 'user' not found during registration for user: " . $user->email);
+            // Example to create it if missing (handle this carefully in production)
+            // Role::create(['name' => 'user', 'guard_name' => 'web']);
+            // $user->assignRole('user');
+        }        
 
         event(new Registered($user));
 

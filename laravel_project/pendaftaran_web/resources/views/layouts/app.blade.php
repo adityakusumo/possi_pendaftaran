@@ -463,8 +463,8 @@
                         <ul class="sub-menu blank">
                             <li><a class="link_name" href="{{ route('settings') }}">Setting</a></li> {{-- Also update this if it's a sub-menu link --}}
                             {{-- You might add more specific admin links here, e.g., --}}
-                            <li><a href="{{ route('admin.users.index') }}">Manage Users</a></li>
-                            <li><a href="{{ route('admin.roles.index') }}">Manage Roles</a></li>
+                            {{-- <li><a href="{{ route('admin.users.index') }}">Manage Users</a></li> --}}
+                            {{-- <li><a href="{{ route('admin.roles.index') }}">Manage Roles</a></li> --}}
                         </ul>
                     </li>
                     @endrole
@@ -476,7 +476,14 @@
                             <div class="name-job">
                                 {{-- <div class="profile_name">Igun Pro Maxx</div> --}}
                                 <div class="profile_name">{{ Auth::user()->name }}</div>
-                                <div class="job">Web Designer</div>
+                                <div class="job">
+                                    @auth {{-- Check if user is logged in first --}}
+                                        @role('admin')
+                                            Admin
+                                        @endrole
+                                        {{-- No @else block here, so it shows nothing if not admin --}}
+                                    @endauth
+                                </div>
                             </div>
                             {{-- <i class='bx bx-log-out'></i> --}}
                             <form method="POST" action="{{ route('logout') }}" class="logout-form"> {{-- Added a class
@@ -569,18 +576,11 @@
 
         </div> {{-- End of the main flex container --}}
 
-        {{-- Link your custom script properly.
-        If it's managed by Vite, it should be imported into resources/js/app.js.
-        If it's a standalone file in public, use asset().
-        Place it at the end of the body for better performance.
-        --}}
-        {{--
-        <script src="{{ asset('js/script.js') }}"></script> Assuming script.js is in public/js/ --}}
+        {{-- Vite JS assets, which includes app.js etc. --}}
+        @vite('resources/js/app.js')
 
-        {{-- If you're using Bootstrap JS --}}
-        {{--
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> --}}
-
+        {{-- >>>>>> ADD THIS LINE HERE <<<<<< --}}
+        @stack('scripts')        
 </body>
 
 </html>
