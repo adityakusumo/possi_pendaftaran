@@ -53,7 +53,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     // Make sure your other settings-related routes are also defined here,
     // pointing to your UserManagementController methods
-    Route::patch('/settings/{user}/update-role', [UserManagementController::class, 'updateRole'])->name('settings.update-role');
+    Route::patch('/settings/{user}/update', [UserManagementController::class, 'updateUser'])->name('settings.update');
     Route::delete('/settings/{user}/delete-user', [UserManagementController::class, 'destroyUser'])->name('settings.destroy-user');
 });
 

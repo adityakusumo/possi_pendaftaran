@@ -22,6 +22,15 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'KDPROP',
+        'NAMAPROP',
+        'KDJENIS',
+        'JENIS',
+        'KDKOTA',
+        'NAMAKOTA',
+        'KDCLUB',
+        'NAMACLUB',
+        'IDCLUB',        
     ];
 
     /**

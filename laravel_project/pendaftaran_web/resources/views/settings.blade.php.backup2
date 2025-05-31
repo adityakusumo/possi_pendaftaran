@@ -49,7 +49,13 @@
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Email
-                                    </th>                                    
+                                    </th>
+                                    {{-- NEW "Club" COLUMN HEADER --}}
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                        Club
+                                    </th>
+                                    {{-- END NEW "Club" COLUMN HEADER --}}
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Role
@@ -58,20 +64,31 @@
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Action
                                     </th>
+                                    {{-- NEW "Date Created" COLUMN HEADER --}}
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                        Date Created
+                                    </th>
+                                    {{-- END NEW "Date Created" COLUMN HEADER --}}
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200">
                                 @foreach ($users as $key => $user)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                            {{ $key + 1 }}
+                                            {{ $users->firstItem() + $loop->index }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                             {{ $user->name }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                             {{ $user->email }}
-                                        </td>                                        
+                                        </td>
+                                        {{-- NEW "Club" COLUMN DATA --}}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                            {{ $user->club ?? 'N/A' }} {{-- Display club name or 'N/A' if null --}}
+                                        </td>
+                                        {{-- END NEW "Club" COLUMN DATA --}}
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                             {{-- Use a form for role changes --}}
                                             <form id="role-form-{{ $user->id }}"
@@ -109,6 +126,11 @@
                                                 </button>
                                             </form>
                                         </td>
+                                        {{-- NEW "Date Created" COLUMN DATA --}}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                            {{ $user->created_at->format('Y-m-d') }}
+                                        </td>
+                                        {{-- END NEW "Date Created" COLUMN DATA --}}
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -116,9 +138,9 @@
                     </div> {{-- End of overflow-x-auto div --}}
 
                     {{-- Pagination Links --}}
-                    {{-- <div class="mt-4">
+                    <div class="mt-4">
                         {{ $users->links() }}
-                    </div>                     --}}
+                    </div>                     
 
                     <p class="mt-4 text-gray-700 dark:text-gray-300">You can add forms, options, and other settings
                         here.</p>
@@ -187,92 +209,4 @@
             });
         </script>
     @endpush
-
-    {{-- @push('scripts')
-    <script>
-        console.log('*** SCRIPT BLOCK STARTED ***'); // TOP-LEVEL CHECK 1
-
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('*** DOMContentLoaded fired! ***'); // TOP-LEVEL CHECK 2
-
-            const editButtons = document.querySelectorAll('.edit-button');
-            const deleteButtons = document.querySelectorAll('.delete-button');
-
-            console.log('Number of edit buttons found:', editButtons.length); // DIAGNOSTIC: Should be > 0
-            console.log('Number of delete buttons found:', deleteButtons.length); // Already confirmed, but keep for full picture
-
-            editButtons.forEach(button => {
-                console.log('Edit button found (inside forEach):', button); // DIAGNOSTIC: Should run for each edit button
-
-                button.addEventListener('click', function () {
-                    console.log('Edit button clicked!'); // DIAGNOSTIC: Is the click event firing?
-                    const row = this.closest('tr');
-                    console.log('Parent row found:', row); // DIAGNOSTIC: Is the row found?
-
-                    const selectElement = row.querySelector('.role-select');
-                    console.log('Role select element found:', selectElement); // DIAGNOSTIC: Is the select element found?
-
-                    if (!selectElement) {
-                        console.error('Error: Could not find the role select element for this row.');
-                        return; // Stop execution if select element not found
-                    }
-
-                    // Toggle disabled state
-                    selectElement.disabled = !selectElement.disabled;
-                    console.log('Select element disabled state toggled to:', selectElement.disabled); // DIAGNOSTIC
-
-                    // Optionally, change button text or appearance
-                    if (!selectElement.disabled) {
-                        this.textContent = 'Save'; // Change text to 'Save'
-                        this.classList.remove('text-indigo-600', 'hover:text-indigo-900', 'dark:text-indigo-400', 'dark:hover:text-indigo-600');
-                        this.classList.add('text-green-600', 'hover:text-green-900', 'dark:text-green-400', 'dark:hover:text-green-600');
-                        row.classList.add('editing-row');
-                        console.log('Edit button changed to Save state.');
-                    } else {
-                        this.textContent = 'Edit'; // Change text back to 'Edit'
-                        this.classList.remove('text-green-600', 'hover:text-green-900', 'dark:text-green-400', 'dark:hover:text-green-600');
-                        this.classList.add('text-indigo-600', 'hover:text-indigo-900', 'dark:text-indigo-400', 'dark:hover:text-indigo-600');
-                        row.classList.remove('editing-row');
-                        console.log('Edit button changed to Edit state (should trigger save).');
-
-                        // If the dropdown was re-disabled (meaning 'Save' was clicked)
-                        // Trigger the form submission for role update
-                        const submitButton = row.querySelector('.update-role-submit-btn');
-                        if (submitButton) {
-                            submitButton.click();
-                            console.log('Hidden submit button clicked.'); // DIAGNOSTIC
-                        } else {
-                            console.error('Error: Could not find the hidden submit button.');
-                        }
-                    }
-                });
-            });
-
-            deleteButtons.forEach(button => {
-                console.log('Delete button found (inside forEach):', button); // DIAGNOSTIC: Should run for each button
-                button.addEventListener('click', function (event) {
-                    console.log('Delete button clicked!');
-                    event.preventDefault();
-
-                    const formElement = this.closest('form');
-                    console.log('Found form:', formElement);
-
-                    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-                        console.log('Confirmation received: YES');
-                        if (formElement) {
-                            formElement.submit();
-                            console.log('Form submission initiated.');
-                        } else {
-                            console.error('Error: Could not find the parent form for deletion.');
-                        }
-                    } else {
-                        console.log('Confirmation received: NO');
-                    }
-                });
-            });
-
-            console.log('*** SCRIPT BLOCK ENDED ***'); // TOP-LEVEL CHECK 3
-        });
-    </script>
-    @endpush --}}
 </x-app-layout>
