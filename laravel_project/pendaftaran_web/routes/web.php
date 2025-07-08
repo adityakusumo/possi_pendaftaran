@@ -55,6 +55,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // pointing to your UserManagementController methods
     Route::patch('/settings/{user}/update', [UserManagementController::class, 'updateUser'])->name('settings.update');
     Route::delete('/settings/{user}/delete-user', [UserManagementController::class, 'destroyUser'])->name('settings.destroy-user');
+
+    Route::get('/competition-settings', function () {
+        return view('competition_settings');
+    })->name('competition_settings');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -77,4 +81,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

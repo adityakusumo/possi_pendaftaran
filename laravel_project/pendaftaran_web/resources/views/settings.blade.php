@@ -31,7 +31,7 @@
                                 </a>
                             @endif
                         </form>
-                    </div>                    
+                    </div>
 
                     {{-- User Management Table --}}
                     <div class="overflow-x-auto">
@@ -143,7 +143,7 @@
 
                     <div class="mt-4">
                         {{ $users->links() }}
-                    </div>                     
+                    </div>
 
                     <p class="mt-4 text-gray-700 dark:text-gray-300">You can add forms, options, and other settings
                         here.</p>
@@ -159,7 +159,7 @@
                 OK
             </button>
         </div>
-    </div>    
+    </div>
 
     @push('scripts')
         <script>
@@ -188,7 +188,7 @@
                     row.classList.remove('editing-row'); // Remove any editing row classes
                 });
                 // --- END NEW ---
-                
+
                 const editButtons = document.querySelectorAll('.edit-button');
                 const deleteButtons = document.querySelectorAll('.delete-button');
 
@@ -206,7 +206,7 @@
                 }
 
 	            // Event listener for the modal's OK button
-	            clubValidationOkBtn.addEventListener('click', hideClubValidationModal); 
+	            clubValidationOkBtn.addEventListener('click', hideClubValidationModal);
 
                 editButtons.forEach(button => {
                     button.addEventListener('click', function () {
@@ -243,7 +243,7 @@
                             // *** NEW VALIDATION LOGIC HERE ***
                             if (selectedClubId === '') { // Check if the "Select Club" option (value="") is chosen
                                 showClubValidationModal();
-                                
+
                                 // Revert UI to initial "Edit" state immediately, as submission was blocked
                                 roleSelectElement.disabled = true;
                                 clubSelectElement.disabled = true;
@@ -252,10 +252,10 @@
                                 this.classList.add('text-indigo-600', 'hover:text-indigo-900', 'dark:text-indigo-400', 'dark:hover:text-indigo-600');
                                 row.classList.remove('editing-row');
 
-                                console.log('Validation failed. UI reverted to disabled state.');                                
+                                console.log('Validation failed. UI reverted to disabled state.');
                                 return; // STOP here, do not proceed with form submission
                             }
-                            // *** END NEW VALIDATION LOGIC ***                            
+                            // *** END NEW VALIDATION LOGIC ***
 
                             // 2. Create a hidden input for the club ID
                             let hiddenClubInput = form.querySelector('input[name="club_IDCLUB"]');
