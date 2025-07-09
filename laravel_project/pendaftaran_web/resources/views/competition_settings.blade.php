@@ -27,34 +27,44 @@
                         {{ __('Competition Type (Jenis Kejuaraan)') }}
                     </h3>
 
-                    <div class="space-y-4"> {{-- Adds vertical spacing between radio buttons --}}
-                        {{-- Radio Button: Kota/Kab --}}
-                        <div class="flex items-center">
-                            <input id="jenis_kejuaraan_kota_kab" name="jenis_kejuaraan" type="radio" value="Kota/Kab"
-                                class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 dark:bg-gray-700 dark:border-gray-600">
-                            <label for="jenis_kejuaraan_kota_kab" class="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {{ __('Kota/Kab') }}
-                            </label>
-                        </div>
+                    {{-- Form for radio buttons --}}
+                    <form id="competition-type-form">
+                        @csrf {{-- CSRF token for security --}}
+                        <div class="space-y-4">
+                            {{-- Radio Button: Kota/Kab --}}
+                            <div class="flex items-center">
+                                <input id="jenis_kejuaraan_kota_kab" name="jenis_kejuaraan" type="radio" value="K" data-description="ANTAR KOTA"
+                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 dark:bg-gray-700 dark:border-gray-600"
+                                    {{ (isset($currentKompetisiSetting) && $currentKompetisiSetting->JNSKOMPETISI === 'K') ? 'checked' : '' }}>
+                                <label for="jenis_kejuaraan_kota_kab" class="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    {{ __('Kota/Kab') }}
+                                </label>
+                            </div>
 
-                        {{-- Radio Button: Club --}}
-                        <div class="flex items-center">
-                            <input id="jenis_kejuaraan_club" name="jenis_kejuaraan" type="radio" value="Club"
-                                class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 dark:bg-gray-700 dark:border-gray-600">
-                            <label for="jenis_kejuaraan_club" class="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {{ __('Club') }}
-                            </label>
-                        </div>
+                            {{-- Radio Button: Club --}}
+                            <div class="flex items-center">
+                                <input id="jenis_kejuaraan_club" name="jenis_kejuaraan" type="radio" value="C" data-description="ANTAR CLUB"
+                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 dark:bg-gray-700 dark:border-gray-600"
+                                    {{ (isset($currentKompetisiSetting) && $currentKompetisiSetting->JNSKOMPETISI === 'C') ? 'checked' : '' }}>
+                                <label for="jenis_kejuaraan_club" class="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    {{ __('Club') }}
+                                </label>
+                            </div>
 
-                        {{-- Radio Button: Provinsi --}}
-                        <div class="flex items-center">
-                            <input id="jenis_kejuaraan_provinsi" name="jenis_kejuaraan" type="radio" value="Provinsi"
-                                class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 dark:bg-gray-700 dark:border-gray-600">
-                            <label for="jenis_kejuaraan_provinsi" class="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {{ __('Provinsi') }}
-                            </label>
+                            {{-- Radio Button: Provinsi --}}
+                            <div class="flex items-center">
+                                <input id="jenis_kejuaraan_provinsi" name="jenis_kejuaraan" type="radio" value="P" data-description="ANTAR PROVINSI"
+                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 dark:bg-gray-700 dark:border-gray-600"
+                                    {{ (isset($currentKompetisiSetting) && $currentKompetisiSetting->JNSKOMPETISI === 'P') ? 'checked' : '' }}>
+                                <label for="jenis_kejuaraan_provinsi" class="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    {{ __('Provinsi') }}
+                                </label>
+                            </div>
                         </div>
-                    </div>
+                    </form>
+
+                    {{-- Success/Error Message Display --}}
+                    <div id="status-message" class="mt-4 p-3 rounded-md text-center hidden"></div>
 
                     {{-- You can add more settings segments here --}}
 
@@ -62,4 +72,48 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('competition-type-form');
+            const radioButtons = form.querySelectorAll('input[name="jenis_kejuaraan"]');
+            const statusMessage = document.getElementById('status-message');
+
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const typeCode = this.value;
+                    const typeDescription = this.dataset.description; // Get description from data attribute
+
+                    // Clear previous messages and hide
+                    statusMessage.classList.add('hidden');
+                    statusMessage.textContent = '';
+                    statusMessage.classList.remove('bg-green-100', 'text-green-600', 'bg-red-100', 'text-red-600'); // Clear styling
+
+                    // Send AJAX request using Axios (already available in Breeze/Jetstream)
+                    axios.post('{{ route('competition_settings.update_type') }}', {
+                        type_code: typeCode,
+                        type_description: typeDescription,
+                        _token: '{{ csrf_token() }}' // Include CSRF token for security
+                    })
+                    .then(response => {
+                        statusMessage.textContent = response.data.message || 'Settings updated successfully!';
+                        statusMessage.classList.add('bg-green-100', 'text-green-600'); // Success styling
+                        statusMessage.classList.remove('hidden'); // Show message
+                        console.log('Success:', response.data);
+                    })
+                    .catch(error => {
+                        const errorMessage = error.response && error.response.data && error.response.data.message
+                                            ? error.response.data.message
+                                            : 'An error occurred while updating settings.';
+                        statusMessage.textContent = errorMessage;
+                        statusMessage.classList.add('bg-red-100', 'text-red-600'); // Error styling
+                        statusMessage.classList.remove('hidden'); // Show message
+                        console.error('Error:', error.response ? error.response.data : error);
+                    });
+                });
+            });
+        });
+    </script>
+    @endpush
 </x-app-layout>

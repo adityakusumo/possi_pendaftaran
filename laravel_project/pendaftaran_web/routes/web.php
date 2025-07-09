@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\CompetitionSettingController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -56,12 +57,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::patch('/settings/{user}/update', [UserManagementController::class, 'updateUser'])->name('settings.update');
     Route::delete('/settings/{user}/delete-user', [UserManagementController::class, 'destroyUser'])->name('settings.destroy-user');
 
-    Route::get('/competition-settings', function () {
-        return view('competition_settings');
-    })->name('competition_settings');
-});
-
-Route::middleware(['auth', 'role:admin'])->group(function () {
     // Route to update a user's role
     Route::patch('/settings/users/{user}/update-role', [UserManagementController::class, 'updateRole'])
         ->name('settings.update-role');
@@ -69,6 +64,18 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Route to delete a user
     Route::delete('/settings/users/{user}/delete', [UserManagementController::class, 'destroyUser'])
         ->name('settings.destroy-user');
+
+
+
+    Route::get('/competition-settings', function () {
+        return view('competition_settings');
+    })->name('competition_settings');
+
+    // Route to display the competition settings page
+    Route::get('/competition-settings', [CompetitionSettingController::class, 'index'])->name('competition_settings');
+
+    // Route to handle AJAX request for updating competition type
+    Route::post('/competition-settings/update-type', [CompetitionSettingController::class, 'updateCompetitionType'])->name('competition_settings.update_type');
 });
 
 Route::get('/dashboard', function () {
