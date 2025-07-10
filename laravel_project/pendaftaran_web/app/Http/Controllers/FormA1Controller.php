@@ -7,9 +7,9 @@ use Illuminate\View\View;
 use App\Models\Kompetisi;
 use App\Models\PilihanPesertaKotaKab;
 use App\Models\MstClub;
-use App\Models\SpecialUser;
+use App\Models\SpecialUser; // Keep this for SpecialUser table check
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use Carbon\Carbon; // Keep this for expiry date check
 
 class FormA1Controller extends Controller
 {
@@ -31,13 +31,10 @@ class FormA1Controller extends Controller
         $pilihanPesertaKotaKabDetails = [];
 
         $user = Auth::user();
-        $userClubNameFromUsersTable = null;
-        $userEmail = null;
-        $isUserAdminOperator = false;
-        $isUserSpecial = false;
-
-        $userRoleString = 'user'; // <--- NEW: Initialize a user role string
-        $appliedMode = 2;
+        $userClubNameFromUsersTable = null; // Still needed for auto-fill logic if appliedMode is 2
+        $userEmail = null; // Still needed for auto-fill logic if appliedMode is 2
+        $userRoleString = 'user'; // Default role string
+        $appliedMode = 2; // Default to disabled mode for regular users
 
         $autoSelectedClubValue = null;
         $autoFillDetails = null;
@@ -52,71 +49,81 @@ class FormA1Controller extends Controller
 
 
         if ($user) {
-            $userClubNameFromUsersTable = $user->NAMACLUB;
-            $userEmail = $user->email;
+            $userEmail = $user->email; // Get email for SpecialUser check
 
-            $normalizedUserClubFromUsersTable = mb_strtoupper($userClubNameFromUsersTable, 'UTF-8');
-            if (in_array($normalizedUserClubFromUsersTable, ['ADMIN', 'OPERATOR'])) {
-                $isUserAdminOperator = true;
-                $userRoleString = $normalizedUserClubFromUsersTable; // <--- NEW: Set role string
-            }
+            // --- NEW: Determine appliedMode and userRoleString based on Spatie roles AND SpecialUser table ---
+            $isUserAdminViaSpatie = $user->hasRole('admin');
+            $isUserOperatorViaSpatie = $user->hasRole('operator');
+            $isUserSpecialViaTable = false;
 
-            if (!$isUserAdminOperator && $userEmail) {
+            if ($userEmail) { // Only check SpecialUser table if user has an email
                 $specialUser = SpecialUser::where('email', $userEmail)
-                    ->where('expired_at', '>', Carbon::now())
+                    ->where('expired_at', '>', Carbon::now()) // Check if not expired
                     ->first();
                 if ($specialUser) {
-                    $isUserSpecial = true;
-                    $userRoleString = 'special'; // <--- NEW: Set role string
+                    $isUserSpecialViaTable = true;
                 }
             }
+
+            if ($isUserAdminViaSpatie) {
+                $appliedMode = 1;
+                $userRoleString = 'admin';
+            } elseif ($isUserOperatorViaSpatie) {
+                $appliedMode = 1;
+                $userRoleString = 'operator';
+            } elseif ($isUserSpecialViaTable) {
+                $appliedMode = 1;
+                $userRoleString = 'special'; // Indicate it's a special user from the table
+            } else {
+                $appliedMode = 2; // Regular user (no admin, operator, or active special status)
+                $userRoleString = 'user';
+            }
+            // --- END NEW Logic ---
+
+            // This is still used in the Mode 2 auto-fill logic, so we retrieve it here
+            $userClubNameFromUsersTable = $user->NAMACLUB;
         }
 
-        // Determine the applied mode
-        if ($isUserAdminOperator || $isUserSpecial) {
-            $appliedMode = 1; // Mode 1: Enabled (Admin, Operator, or Special User)
-            $autoSelectedClubValue = null;
-            $autoFillDetails = null;
-        } else {
-            $appliedMode = 2; // Mode 2: Disabled (Regular User)
-            // Logic for auto-selection and auto-fill for Mode 2
-            if ($user && $userClubNameFromUsersTable) {
-                $userMstClubDetails = MstClub::whereRaw('UPPER(NAMACLUB) = ?', [$normalizedUserClubFromUsersTable])->first();
+        // --- Logic for auto-selection and auto-fill for Mode 2 (Regular User) ---
+        // This block only runs if $appliedMode is 2 (i.e., user is NOT admin/operator/special status)
+        if ($appliedMode === 2 && $user && $userClubNameFromUsersTable) {
+            $normalizedUserClubFromUsersTable = mb_strtoupper($userClubNameFromUsersTable, 'UTF-8');
+            $userMstClubDetails = MstClub::whereRaw('UPPER(NAMACLUB) = ?', [$normalizedUserClubFromUsersTable])->first();
 
-                if ($jnsKompetisi === 'C') {
-                    $autoSelectedClubValue = $formatDetailValue($userClubNameFromUsersTable);
-                    if ($userMstClubDetails) {
+            if ($jnsKompetisi === 'C') {
+                $autoSelectedClubValue = $formatDetailValue($userClubNameFromUsersTable);
+                if ($userMstClubDetails) {
+                    $autoFillDetails = [
+                        'JENIS' => $formatDetailValue($userMstClubDetails->JENIS),
+                        'NAMAKOTA' => $formatDetailValue($userMstClubDetails->NAMAKOTA),
+                        'NAMAPROP' => $formatDetailValue($userMstClubDetails->NAMAPROP),
+                    ];
+                }
+            } elseif ($jnsKompetisi === 'K') {
+                if ($userMstClubDetails && $userMstClubDetails->NAMAKOTA) {
+                    $autoSelectedClubValue = $formatDetailValue($userMstClubDetails->NAMAKOTA);
+                    $relatedPilihanPeserta = PilihanPesertaKotaKab::whereRaw('UPPER(NAMAKOTA) = ?', [$autoSelectedClubValue])->first();
+                    if ($relatedPilihanPeserta) {
                         $autoFillDetails = [
-                            'JENIS' => $formatDetailValue($userMstClubDetails->JENIS),
-                            'NAMAKOTA' => $formatDetailValue($userMstClubDetails->NAMAKOTA),
-                            'NAMAPROP' => $formatDetailValue($userMstClubDetails->NAMAPROP),
+                            'JENIS' => $formatDetailValue($relatedPilihanPeserta->JENIS),
+                            'NAMAKOTA' => $formatDetailValue($relatedPilihanPeserta->NAMAKOTA),
+                            'NAMAPROP' => $formatDetailValue($relatedPilihanPeserta->NAMAPROPINSI),
                         ];
                     }
-                } elseif ($jnsKompetisi === 'K') {
-                    if ($userMstClubDetails && $userMstClubDetails->NAMAKOTA) {
-                        $autoSelectedClubValue = $formatDetailValue($userMstClubDetails->NAMAKOTA);
-                        $relatedPilihanPeserta = PilihanPesertaKotaKab::whereRaw('UPPER(NAMAKOTA) = ?', [$autoSelectedClubValue])->first();
-                        if ($relatedPilihanPeserta) {
-                            $autoFillDetails = [
-                                'JENIS' => $formatDetailValue($relatedPilihanPeserta->JENIS),
-                                'NAMAKOTA' => $formatDetailValue($relatedPilihanPeserta->NAMAKOTA),
-                                'NAMAPROP' => $formatDetailValue($relatedPilihanPeserta->NAMAPROPINSI),
-                            ];
-                        }
-                    }
-                } elseif ($jnsKompetisi === 'P') {
-                    if ($userMstClubDetails && $userMstClubDetails->NAMAPROP) {
-                        $autoSelectedClubValue = $formatDetailValue($userMstClubDetails->NAMAPROP);
-                        $autoFillDetails = null;
-                    }
                 }
-            } else {
-                $autoSelectedClubValue = null;
-                $autoFillDetails = null;
+            } elseif ($jnsKompetisi === 'P') {
+                if ($userMstClubDetails && $userMstClubDetails->NAMAPROP) {
+                    $autoSelectedClubValue = $formatDetailValue($userMstClubDetails->NAMAPROP);
+                    $autoFillDetails = null;
+                }
             }
+        } else {
+            // If mode is 1 (Admin/Operator/Special via table), ensure these are null
+            $autoSelectedClubValue = null;
+            $autoFillDetails = null;
         }
 
-        // --- Fetch all options for Select2 ---
+        // --- Fetch all options for Select2 --- (This part remains largely unchanged)
         $mstClubData = MstClub::select('NAMACLUB', 'JENIS', 'NAMAKOTA', 'NAMAPROP')
             ->whereNotNull('NAMACLUB')
             ->orderBy('NAMACLUB', 'asc')
@@ -181,12 +188,13 @@ class FormA1Controller extends Controller
             'appliedMode',
             'autoSelectedClubValue',
             'autoFillDetails',
-            'userRoleString' // <--- NEW: Pass userRoleString to the view
+            'userRoleString'
         ));
     }
 
     public function addSpecialUser(Request $request)
     {
+        // This method remains as is, managing temporary special access via the SpecialUser table.
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:special_users,email',

@@ -18,13 +18,11 @@ class RolesAndPermissionsSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // 2. Clear existing permissions and roles to prevent duplicates on re-seed
-        //    This is CRUCIAL if you run the seeder multiple times during development
-        //    BE CAREFUL: This deletes all existing roles and permissions!
         Role::query()->delete();
         Permission::query()->delete();
 
 
-        // 3. Create Permissions - ADD 'guard_name' => 'web' to EACH ONE
+        // 3. Create Permissions
         Permission::create(['name' => 'create users', 'guard_name' => 'web']);
         Permission::create(['name' => 'edit users', 'guard_name' => 'web']);
         Permission::create(['name' => 'delete users', 'guard_name' => 'web']);
@@ -36,36 +34,49 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'publish posts', 'guard_name' => 'web']);
         Permission::create(['name' => 'view posts', 'guard_name' => 'web']);
 
-        // 4. Create Roles - ADD 'guard_name' => 'web' to EACH ONE
+        // --- NEW: Permissions for Settings ---
+        Permission::create(['name' => 'view settings', 'guard_name' => 'web']);
+        Permission::create(['name' => 'manage settings', 'guard_name' => 'web']); // Broader permission if needed
+        // --- END NEW ---
+
+
+        // 4. Create Roles
         $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'web']);
         $editorRole = Role::create(['name' => 'editor', 'guard_name' => 'web']);
         $userRole = Role::create(['name' => 'user', 'guard_name' => 'web']);
+        $operatorRole = Role::create(['name' => 'operator', 'guard_name' => 'web']);
 
 
         // 5. Assign Permissions to Roles
-        //    Now assign permissions to roles, as permissions definitely exist and have guards
-        $adminRole->givePermissionTo(Permission::all()); // Admin gets all permissions
+        $adminRole->givePermissionTo(Permission::all()); // Admin gets ALL permissions (including new ones)
 
-        $editorRole->givePermissionTo(['view posts', 'create posts', 'edit posts', 'publish posts']);
+        $editorPermissions = ['view posts', 'create posts', 'edit posts', 'publish posts'];
+        $editorRole->givePermissionTo($editorPermissions);
 
-        $userRole->givePermissionTo(['view posts']); // Basic users can only view posts
+        $userRole->givePermissionTo(['view posts']);
+
+        $operatorRole->givePermissionTo($editorPermissions); // Operator gets same permissions as editor
 
 
         // 6. Assign roles to existing users (example)
-        //    Ensure these users actually exist in your database before running
-        $user1 = User::find(1); // Assuming user with ID 1 exists
+        $user1 = User::find(1);
         if ($user1) {
             $user1->assignRole('admin');
         }
 
-        $user2 = User::find(2); // Assuming user with ID 2 exists
+        $user2 = User::find(2);
         if ($user2) {
             $user2->assignRole('editor');
         }
 
-        $user3 = User::find(3); // Assuming user with ID 3 exists
+        $user3 = User::find(3);
         if ($user3) {
             $user3->assignRole('user');
+        }
+
+        $user4 = User::find(4);
+        if ($user4) {
+            $user4->assignRole('operator');
         }
     }
 }
