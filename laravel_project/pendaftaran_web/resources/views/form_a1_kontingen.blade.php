@@ -129,22 +129,18 @@
             var jnsKompetisi = '{{ $jnsKompetisi }}';
             console.log('Current Jenis Kompetisi (from Blade):', jnsKompetisi);
 
-            // New variables from Controller
             var appliedMode = @json($appliedMode); // 1 for enabled, 2 for disabled
             var autoSelectedClubValue = @json($autoSelectedClubValue);
             var autoFillDetails = @json($autoFillDetails);
-            var userRole = @json($userRoleString ?? 'user'); // <--- NEW: Define userRole here
+            var userRole = @json($userRoleString ?? 'user');
 
-            // --- START NEW DEBUG CONSOLE LOGS ---
             console.log('DEBUG: Value of $appliedMode from Blade:', appliedMode);
             console.log('DEBUG: Value of $autoSelectedClubValue from Blade:', autoSelectedClubValue);
             console.log('DEBUG: Value of $autoFillDetails from Blade:', autoFillDetails);
-            console.log('DEBUG: Value of $userRoleString from Blade:', userRole); // <--- NEW: Log the new variable
-            // --- END NEW DEBUG CONSOLE LOGS ---
+            console.log('DEBUG: Value of $userRoleString from Blade:', userRole);
 
-            // Your existing console.log lines (now reflecting the actual values)
             console.log('User Club Name:', autoSelectedClubValue);
-            console.log('User Role:', userRole); // <--- Use the new variable here
+            console.log('User Role:', userRole);
             console.log('User Club Details:', autoFillDetails);
 
 
@@ -162,18 +158,18 @@
             var namaPropinsiPilihanPesertaData = @json($namaPropinsiPilihanPeserta ?? []);
             var pilihanPesertaKotaKabDetails = @json($pilihanPesertaKotaKabDetails ?? []);
 
-            // --- NEW DEBUG CONSOLE LOGS FOR SELECT2 DATA SOURCES ---
+            // DEBUG CONSOLE LOGS FOR SELECT2 DATA SOURCES (keep these for now)
             console.log('DEBUG: namaClubsMstClubData for Select2:', namaClubsMstClubData);
             console.log('DEBUG: namaClubsPilihanPesertaData for Select2:', namaClubsPilihanPesertaData);
             console.log('DEBUG: namaPropinsiPilihanPesertaData for Select2:', namaPropinsiPilihanPesertaData);
-            // --- END NEW DEBUG CONSOLE LOGS ---
 
             var isSettingNamaKontingenValue = false;
 
             // Helper function to initialize Select2
-            function initSelect2(element, data, placeholder, allowTags = true, isMultiple = false, isDisabled = false) {
+            // We will add a 'clear' argument here
+            function initSelect2(element, data, placeholder, allowTags = true, isMultiple = false, isDisabled = false, clearPrevious = true) {
                 if (element.length) {
-                    if (element.data('select2')) {
+                    if (element.data('select2') && clearPrevious) { // Only destroy if we want to clear previous state
                         element.select2('destroy');
                         console.log('Destroyed existing Select2 for:', element.attr('id'));
                     }
@@ -215,27 +211,6 @@
                 }
             }
 
-            // --- Initial UI State Setup ---
-            $('#div_nama_kontingen').show();
-
-            function hideAndClearDetailFields() {
-                $('#div_jenis_kota_kab').hide();
-                $('#div_nama_kota_kab').hide();
-                $('#div_provinsi_input').hide();
-                jenisKotaKabElement.prop('disabled', true).val('');
-                namaKotaKabElement.prop('disabled', true).val('');
-                provinsiInputElement.prop('disabled', true).val('');
-            }
-
-            function showAndEnableDetailFields() {
-                $('#div_jenis_kota_kab').show();
-                $('#div_nama_kota_kab').show();
-                $('#div_provinsi_input').show();
-                jenisKotaKabElement.prop('disabled', false);
-                namaKotaKabElement.prop('disabled', false);
-                provinsiInputElement.prop('disabled', false);
-            }
-
             // Centralized function to handle selection and detail update
             function handleNamaKontingenSelection(selectedIdValue, detailsSource, jenisPropName, kotaPropName, propinsiPropName) {
                 if (isSettingNamaKontingenValue) {
@@ -246,14 +221,17 @@
                 var normalizedSelectedId = (selectedIdValue || '').toUpperCase();
                 var detail = detailsSource[normalizedSelectedId];
 
+                // Ensure the selected option is actually in the Select2 data
                 var optionExists = namaKontingenElement.find("option[value='" + normalizedSelectedId + "']").length > 0;
                 if (!optionExists && normalizedSelectedId) {
+                    // If it doesn't exist, add it. This is more for tag creation, but safe here.
                     var newOption = new Option(normalizedSelectedId, normalizedSelectedId, true, true);
                     namaKontingenElement.append(newOption);
                 }
 
+                // This is the key line to update Select2's visual display
                 namaKontingenElement.val(normalizedSelectedId).trigger('change');
-                namaKontingenElement.trigger('select2:close');
+                namaKontingenElement.trigger('select2:close'); // Close dropdown after selection
 
                 console.log('Nama Kontingen (after forceful set) val():', namaKontingenElement.val());
                 console.log('Nama Kontingen (after forceful set) data():', namaKontingenElement.select2('data'));
@@ -273,20 +251,45 @@
                 isSettingNamaKontingenValue = false;
             }
 
-            // --- Main Logic based on appliedMode ---
-            // userRole is now defined!
+            // Helper functions for UI state
+            function hideAndClearDetailFields() {
+                $('#div_jenis_kota_kab').hide();
+                $('#div_nama_kota_kab').hide();
+                $('#div_provinsi_input').hide();
+                jenisKotaKabElement.prop('disabled', true).val('');
+                namaKotaKabElement.prop('disabled', true).val('');
+                provinsiInputElement.prop('disabled', true).val('');
+            }
+
+            function showAndEnableDetailFields() {
+                $('#div_jenis_kota_kab').show();
+                $('#div_nama_kota_kab').show();
+                $('#div_provinsi_input').show();
+                jenisKotaKabElement.prop('disabled', false);
+                namaKotaKabElement.prop('disabled', false);
+                provinsiInputElement.prop('disabled', false);
+            }
+
+            // --- Initial UI State Setup ---
+            $('#div_nama_kontingen').show(); // Ensure kontingen field is shown
+
+            // Main Logic based on appliedMode
             if (appliedMode === 1) { // Mode 1: Enabled (Admin, Operator, Special User)
                 console.log('Applied Mode 1: Nama Kontingen combo box enabled.');
 
+                // Ensure previous event handlers are removed before adding new ones for Mode 1
+                namaKontingenElement.off('change');
+
                 if (jnsKompetisi === 'C') {
-                    initSelect2(namaKontingenElement, namaClubsMstClubData, namaKontingenElement.data('placeholder'), true, false, false);
+                    initSelect2(namaKontingenElement, namaClubsMstClubData, 'Pilih Nama Club', true, false, false);
                 } else if (jnsKompetisi === 'K') {
-                    initSelect2(namaKontingenElement, namaClubsPilihanPesertaData, 'Pilih Nama Kontingen', true, false, false);
+                    initSelect2(namaKontingenElement, namaClubsPilihanPesertaData, 'Pilih Nama Kota/Kab', true, false, false);
                 } else if (jnsKompetisi === 'P') {
-                    initSelect2(namaKontingenElement, namaPropinsiPilihanPesertaData, 'Pilih Provinsi', true, false, false);
+                    initSelect2(namaKontingenElement, namaPropinsiPilihanPesertaData, 'Pilih Nama Provinsi', true, false, false);
                 }
 
-                namaKontingenElement.off('change').on('change', function(e) {
+                // Attach the change handler *after* initialization and off()
+                namaKontingenElement.on('change', function(e) {
                     if (isSettingNamaKontingenValue) {
                         return;
                     }
@@ -299,14 +302,21 @@
                     } else if (jnsKompetisi === 'K') {
                         handleNamaKontingenSelection(selectedId, pilihanPesertaKotaKabDetails, 'JENIS', 'NAMAKOTA', 'NAMAPROPINSI');
                     } else if (jnsKompetisi === 'P') {
-                        handleNamaKontingenSelection(selectedId, {}, '', '', '');
-                        hideAndClearDetailFields();
+                        // For 'P', no details, just select the province name
+                        handleNamaKontingenSelection(selectedId, {}, '', '', ''); // Pass empty details for 'P'
+                        hideAndClearDetailFields(); // And hide fields
                     }
                 });
+
+                // Clear any pre-selected value from previous loads for Admin mode
                 namaKontingenElement.val(null).trigger('change');
+                hideAndClearDetailFields(); // Initially hide details for Admin until selection
 
             } else { // Mode 2: Disabled (Regular User)
                 console.log('Applied Mode 2: Nama Kontingen combo box disabled and auto-selected.');
+
+                // Ensure previous event handlers are removed for Mode 2
+                namaKontingenElement.off('change'); // Ensure no lingering change handlers
 
                 hideAndClearDetailFields();
 
@@ -318,7 +328,8 @@
                     }];
                 }
 
-                initSelect2(namaKontingenElement, autoSelectData, autoSelectedClubValue || 'N/A', false, false, true);
+                // For Mode 2, we don't want to clear data because we're force-setting it
+                initSelect2(namaKontingenElement, autoSelectData, autoSelectedClubValue || 'N/A', false, false, true, false); // clearPrevious = false
 
                 if (autoSelectedClubValue) {
                     namaKontingenElement.val(autoSelectedClubValue).trigger('change');
@@ -335,11 +346,10 @@
                     namaKontingenElement.val(null).trigger('change');
                     hideAndClearDetailFields();
                 }
-
-                namaKontingenElement.off('change');
             }
 
             // For JNSKOMPETISI P, ensure detail fields are always hidden regardless of mode
+            // This is a final override for 'P' type
             if (jnsKompetisi === 'P') {
                 hideAndClearDetailFields();
             }
