@@ -13,5 +13,6 @@ class Kompetisi extends Model
     protected $fillable = [
         'JNSKOMPETISI',
         'KETKOMPETISI',
+        'WAJIBNIAS',
     ];
 }

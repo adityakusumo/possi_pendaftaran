@@ -25,6 +25,9 @@
     {{--
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> --}}
 
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
     <style>
         /* Add your custom sidebar specific CSS here or in resources/css/app.css
            It's crucial to write CSS that complements Tailwind, not conflicts.
@@ -346,241 +349,221 @@
                 width: calc(100% - 78px);
             }
         }
+
+        /* Basic Dark Mode compatibility for Select2 */
+        .select2-container--default .select2-selection--single {
+            background-color: var(--tw-bg-gray-700, #4a5568);
+            border-color: var(--tw-border-gray-600, #4a5568);
+            color: var(--tw-text-gray-300, #d1d5db);
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: var(--tw-text-gray-300, #d1d5db);
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: var(--tw-text-gray-400, #9ca3af);
+        }
+
+        .select2-dropdown {
+            background-color: var(--tw-bg-gray-700, #4a5568);
+            border-color: var(--tw-border-gray-600, #4a5568);
+        }
+
+        .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+            background-color: var(--tw-bg-indigo-600, #4f46e5);
+            color: white;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            background-color: var(--tw-bg-gray-800, #2d3748);
+            border-color: var(--tw-border-gray-600, #4a5568);
+            color: var(--tw-text-gray-300, #d1d5db);
+        }
+
+        /* --- NEW STYLES FOR HEIGHT CONSISTENCY --- */
+        /* Target the main Select2 container for height and padding */
+        .select2-container--default .select2-selection--single {
+            height: 42px;
+            /* Common height for Tailwind default inputs (approx. py-2 + font-size) */
+            padding-top: 0.375rem;
+            /* Equivalent to px-3 or 12px padding top/bottom */
+            padding-bottom: 0.375rem;
+        }
+
+        /* Adjust the rendered text area inside Select2 */
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 1.5rem;
+            /* Match Tailwind's default line-height for inputs (e.g., text-base) */
+            padding-left: 0.75rem;
+            /* Equivalent to px-3 (12px padding left) */
+            /* Ensure no extra vertical padding here if already set on parent */
+        }
+
+        /* Adjust the arrow position to be vertically centered */
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 100%;
+            /* Make the arrow container span full height */
+            top: 0;
+            right: 0;
+            width: 2rem;
+            /* Give it some width */
+            display: flex;
+            /* Use flexbox to center the actual arrow icon */
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 
 <body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex"> {{-- Add flex container to body's main div --}}
+    {{-- Biarkan CDN jQuery dan Select2 di sini, karena mereka adalah dependensi global --}}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-        {{-- <div class="sidebar close"> --}}
-            <div class="sidebar">
-                <div class="logo-details">
-                    {{-- <i class='bx bxl-c-plus-plus'></i> --}}
-                    <img src="{{ asset('image/possi_logo.png') }}" alt="possilogo" class="possi-logo">
-                    <span class="logo_name">Possi Jatim</span>
-                </div>
-                <ul class="nav-links">
-                    {{-- <li>
-                        <a href="#">
-                            <i class='bx bx-grid-alt'></i>
-                            <span class="link_name">Dashboard</span>
-                        </a>
-                        <ul class="sub-menu blank">
-                            <li><a class="link_name" href="#">Category</a></li>
-                        </ul>
-                    </li> --}}
-                    <li>
-                        <div class="iocn-link">
-                            <a href="#">
-                                {{-- <i class='bx bx-collection'></i> --}}
-                                <span class="link_name">Form A1</span>
-                            </a>
-                            <i class='bx bxs-chevron-down arrow'></i>
-                        </div>
-                        <ul class="sub-menu">
-                            <li><a class="link_name" href="#">Category</a></li>
-                            <li><a href="#">Kontingen Kota/Kab</a></li>
-                            <li><a href="#">Nama Atlet</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <div class="iocn-link">
-                            <a href="#">
-                                {{-- <i class='bx bx-book-alt'></i> --}}
-                                <span class="link_name">Form A3</span>
-                            </a>
-                            <i class='bx bxs-chevron-down arrow'></i>
-                        </div>
-                        <ul class="sub-menu">
-                            <li><a class="link_name" href="#">Posts</a></li>
-                            <li><a href="#">Nomor Perorangan</a></li>
-                            <li><a href="#">Nomor Estafet</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <div class="iocn-link">
-                            <a href="#">
-                                {{-- <i class='bx bx-pie-chart-alt-2'></i> --}}
-                                <span class="link_name">Kirim ke Panitia</span>
-                            </a>
-                            <i class='bx bxs-chevron-down arrow'></i>
-                        </div>
-                        <ul class="sub-menu">
-                            <li><a class="link_name" href="#">Analytics</a></li>
-                            <li><a href="#">Form A3 untuk Panitia</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <div class="iocn-link">
-                            <a href="#">
-                                {{-- <i class='bx bx-line-chart'></i> --}}
-                                <span class="link_name">Biaya</span>
-                            </a>
-                            <i class='bx bxs-chevron-down arrow'></i>
-                        </div>
-                        <ul class="sub-menu">
-                            <li><a class="link_name" href="#">biaya</a></li>
-                            <li><a href="#">Total Biaya</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <div class="iocn-link">
-                            <a href="#">
-                                {{-- <i class='bx bx-plug'></i> --}}
-                                <span class="link_name">Cek Hasil Entry(opsional)</span>
-                            </a>
-                            <i class='bx bxs-chevron-down arrow'></i>
-                        </div>
-                        <ul class="sub-menu">
-                            <li><a class="link_name" href="#">cek_hasil_entry</a></li>
-                            <li><a href="#">Cek Hasil Entry Form A3</a></li>
-                        </ul>
-                    </li>
-                    {{-- <li>
-                        <a href="#">
-                            <i class='bx bx-compass'></i>
-                            <span class="link_name">Explore</span>
-                        </a>
-                        <ul class="sub-menu blank">
-                            <li><a class="link_name" href="#">Explore</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <i class='bx bx-history'></i>
-                            <span class="link_name">History</span>
-                        </a>
-                        <ul class="sub-menu blank">
-                            <li><a class="link_name" href="#">History</a></li>
-                        </ul>
-                    </li> --}}
-                    @role('admin')
-                    <li>
-                        <a href="{{ route('settings') }}">
-                            <i class='bx bx-cog'></i>
-                            <span class="link_name">Setting</span>
-                        </a>
-                        <ul class="sub-menu blank">
-                            <li><a class="link_name" href="{{ route('settings') }}">Setting</a></li> {{-- Also update this if it's a sub-menu link --}}
-                            {{-- You might add more specific admin links here, e.g., --}}
-                            {{-- <li><a href="{{ route('admin.users.index') }}">Manage Users</a></li> --}}
-                            {{-- <li><a href="{{ route('admin.roles.index') }}">Manage Roles</a></li> --}}
-                        </ul>
-                    </li>
-                    @endrole
-                    <li>
-                        <div class="profile-details">
-                            {{-- <div class="profile-content">
-                                <img src="{{ asset('image/harald_gloocker.jpeg') }}" alt="profileImg">
-                            </div> --}}
-                            <div class="name-job">
-                                {{-- <div class="profile_name">Igun Pro Maxx</div> --}}
-                                <div class="profile_name">{{ Auth::user()->name }}</div>
-                                <div class="job">
-                                    @auth {{-- Check if user is logged in first --}}
-                                        @role('admin')
-                                            Admin
-                                        @endrole
-                                        {{-- No @else block here, so it shows nothing if not admin --}}
-                                    @endauth
-                                </div>
-                            </div>
-                            {{-- <i class='bx bx-log-out'></i> --}}
-                            <form method="POST" action="{{ route('logout') }}" class="logout-form"> {{-- Added a class
-                                for potential styling if needed --}}
-                                @csrf
+    {{-- >>>>> HAPUS SELURUH BLOK SCRIPT SELECT2 DARI SINI <<<<< --}}
+    <!-- {{-- <script>
+        $(document).ready(function() {
+            // Initialize Select2 for Nama Kontingen
+            var namaKontingenElement = $('#nama_kontingen');
+            var namaKontingenPlaceholderText = namaKontingenElement.data('placeholder');
 
-                                {{-- The bx-log-out icon will trigger the logout --}}
-                                <i class='bx bx-log-out'
-                                    onclick="event.preventDefault(); this.closest('form').submit();"></i>
-                            </form>
-                        </div>
-                    </li>
-                </ul>
+            namaKontingenElement.select2({
+                tags: true,
+                placeholder: namaKontingenPlaceholderText,
+                allowClear: true,
+                data: [ { id: 'KONTINGEN_A', text: 'Kontingen A' }, { id: 'KONTINGEN_B', text: 'Kontingen B' }, { id: 'KONTINGEN_C', text: 'Kontingen C' } ],
+                createTag: function(params) { /* ... */ },
+                templateResult: function(data) { /* ... */ }
+            });
+        });
+    </script> --}} -->
+
+    <div class="min-h-screen bg-gray-100 dark:bg-gray-900 flex">
+        <div class="sidebar">
+            <div class="logo-details">
+                <img src="{{ asset('image/possi_logo.png') }}" alt="possilogo" class="possi-logo">
+                <span class="logo_name">Possi Jatim</span>
             </div>
-
-
-
-            <section class="home-section">
-                {{-- <div class="home-content">
-                    <i cla ss='bx bx-menu'></i> --}}
-                    {{-- <span class="text">Drop Down Sidebar</span>
-                </div> --}}
-
-                {{-- Main content area (including header and slot) needs to be inside the flex container --}}
-                <div class="flex-1">
-                    @include('layouts.navigation')
-
-                    @isset($header)
-                        <header class="bg-white dark:bg-gray-800 shadow">
-                            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                                {{ $header }}
+            <ul class="nav-links">
+                <li>
+                    <div class="iocn-link">
+                        <a href="#">
+                            <span class="link_name">Form A1</span>
+                        </a>
+                        <i class='bx bxs-chevron-down arrow'></i>
+                    </div>
+                    <ul class="sub-menu">
+                        <li><a class="link_name" href="#">Category</a></li>
+                        <li><a href="{{ route('form_a1.kontingen') }}">Kontingen Kota/Kab</a></li>
+                        <li><a href="#">Nama Atlet</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <div class="iocn-link">
+                        <a href="#">
+                            <span class="link_name">Form A3</span>
+                        </a>
+                        <i class='bx bxs-chevron-down arrow'></i>
+                    </div>
+                    <ul class="sub-menu">
+                        <li><a class="link_name" href="#">Posts</a></li>
+                        <li><a href="#">Nomor Perorangan</a></li>
+                        <li><a href="#">Nomor Estafet</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <div class="iocn-link">
+                        <a href="#">
+                            <span class="link_name">Kirim ke Panitia</span>
+                        </a>
+                        <i class='bx bxs-chevron-down arrow'></i>
+                    </div>
+                    <ul class="sub-menu">
+                        <li><a class="link_name" href="#">Analytics</a></li>
+                        <li><a href="#">Form A3 untuk Panitia</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <div class="iocn-link">
+                        <a href="#">
+                            <span class="link_name">Biaya</span>
+                        </a>
+                        <i class='bx bxs-chevron-down arrow'></i>
+                    </div>
+                    <ul class="sub-menu">
+                        <li><a class="link_name" href="#">biaya</a></li>
+                        <li><a href="#">Total Biaya</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <div class="iocn-link">
+                        <a href="#">
+                            <span class="link_name">Cek Hasil Entry(opsional)</span>
+                        </a>
+                        <i class='bx bxs-chevron-down arrow'></i>
+                    </div>
+                    <ul class="sub-menu">
+                        <li><a class="link_name" href="#">cek_hasil_entry</a></li>
+                        <li><a href="#">Cek Hasil Entry Form A3</a></li>
+                    </ul>
+                </li>
+                @role('admin')
+                <li>
+                    <a href="{{ route('settings') }}">
+                        <i class='bx bx-cog'></i>
+                        <span class="link_name">Setting</span>
+                    </a>
+                    <ul class="sub-menu blank">
+                        <li><a class="link_name" href="{{ route('settings') }}">Setting</a></li>
+                    </ul>
+                </li>
+                @endrole
+                <li>
+                    <div class="profile-details">
+                        <div class="name-job">
+                            <div class="profile_name">{{ Auth::user()->name }}</div>
+                            <div class="job">
+                                @auth
+                                @role('admin')
+                                Admin
+                                @endrole
+                                @endauth
                             </div>
-                        </header>
-                    @endisset
-
-                    <main class="p-4">
-                        {{ $slot }}
-                    </main>
-                </div>
-
-                {{-- Main content area --}}
-                {{-- <div class="flex-1">
-                    @include('layouts.navigation')
-
-                    @isset($header)
-                    <header class="bg-white dark:bg-gray-800 shadow">
-                        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                            {{ $header }}
                         </div>
-                    </header>
-                    @endisset
+                        <form method="POST" action="{{ route('logout') }}" class="logout-form">
+                            @csrf
+                            <i class='bx bx-log-out' onclick="event.preventDefault(); this.closest('form').submit();"></i>
+                        </form>
+                    </div>
+                </li>
+            </ul>
+        </div>
 
-                    <main class="p-4">
+        <section class="home-section">
+            <div class="flex-1">
+                @include('layouts.navigation')
 
-                        <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6">
-                            @role('admin')
-                            <p class="text-gray-900 dark:text-gray-100 mb-2">Welcome, Admin! You have access to
-                                administrative features.</p>
-                            <a href="/admin/dashboard" class="text-indigo-600 dark:text-indigo-400 hover:underline">Go
-                                to Admin Dashboard</a>
-                            @else
+                @isset($header)
+                <header class="bg-white dark:bg-gray-800 shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+                @endisset
 
-                            @auth
-                            <p class="text-gray-900 dark:text-gray-100">Welcome, {{ Auth::user()->name }}. You are a
-                                regular user.</p>
-                            @else
-                            <p class="text-gray-900 dark:text-gray-100">Welcome, Guest! Please log in.</p>
-                            @endauth
-                            @endrole
-                        </div>
+                <main class="p-4">
+                    {{ $slot }}
+                </main>
+            </div>
+        </section>
 
-                        <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6">
-                            @hasrole('admin')
-                            <p class="text-gray-900 dark:text-gray-100">This content is only visible to users with the
-                                'admin' role (using @hasrole).</p>
-                            @endhasrole
-                        </div>
+    </div>
 
-                        <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 mb-6">
-                            @if(Auth::check() && Auth::user()->hasRole('admin'))
-                            <p class="text-gray-900 dark:text-gray-100">You are logged in and are an admin (using @if
-                                with hasRole()).</p>
-                            @endif
-                        </div>
+    @vite('resources/js/app.js')
 
-                        {{ $slot }}
-                    </main>
-                </div> --}}
-            </section>
-
-        </div> {{-- End of the main flex container --}}
-
-        {{-- Vite JS assets, which includes app.js etc. --}}
-        @vite('resources/js/app.js')
-
-        {{-- >>>>>> ADD THIS LINE HERE <<<<<< --}}
-        @stack('scripts')        
+    {{-- >>>>> TAMBAHKAN BARIS INI UNTUK MENERIMA SCRIPT <<<<< --}}
+    @stack('scripts')
 </body>
 
 </html>

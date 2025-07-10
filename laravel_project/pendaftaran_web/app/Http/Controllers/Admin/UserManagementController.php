@@ -8,6 +8,9 @@ use App\Models\User;
 use App\Models\MstClub;
 use Spatie\Permission\Models\Role; // Import Spatie's Role model
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash; // Import Hash facade
+use Illuminate\Validation\Rules\Password; // Import Password rules for strong validation
+use Illuminate\Support\Facades\Log; // Ensure Log is imported for error logging
 
 class UserManagementController extends Controller
 {
@@ -76,7 +79,7 @@ class UserManagementController extends Controller
     //     }
 
     //     // DD 4: See what roles the user *currently* has right before syncRoles
-    //     // dd($user->getRoleNames());        
+    //     // dd($user->getRoleNames());
 
     //     // Remove all current roles and assign the new one
     //     $user->syncRoles($request->role);
@@ -85,7 +88,7 @@ class UserManagementController extends Controller
     //     // dd($user->getRoleNames()); // This should show the new role if successful
 
     //     // DD 6: If you reach here, it means syncRoles executed without crashing
-    //     // dd('Role updated successfully (before redirect)');        
+    //     // dd('Role updated successfully (before redirect)');
 
     //     return back()->with('status', 'User role updated successfully!');
     // }
@@ -161,5 +164,37 @@ class UserManagementController extends Controller
         $user->delete();
 
         return back()->with('status', 'User deleted successfully!');
+    }
+
+    /**
+     * Resets the password for a given user.
+     */
+    public function resetPassword(Request $request, User $user)
+    {
+        // Validate the new password received from the frontend
+        // This ensures the generated password meets your server-side requirements
+        $request->validate([
+            'new_password' => [
+                'required',
+                'string',
+                Password::min(20) // Minimum 20 characters
+                    ->mixedCase() // At least one uppercase and one lowercase
+                    ->numbers()   // At least one number
+                    ->symbols(),  // At least one special character
+            ],
+        ]);
+
+        try {
+            // Hash the new password before saving it to the database
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            return response()->json(['message' => 'Password reset successfully!'], 200);
+        } catch (\Exception $e) {
+            // Log the error for debugging purposes
+            Log::error('Error resetting password for user ' . $user->id . ': ' . $e->getMessage());
+            // Return an error response to the frontend
+            return response()->json(['message' => 'Failed to reset password. Please try again.', 'error' => $e->getMessage()], 500);
+        }
     }
 }

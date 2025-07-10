@@ -7,6 +7,7 @@ use App\Models\User;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\CompetitionSettingController;
+use App\Http\Controllers\FormA1Controller;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -67,15 +68,24 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 
 
+    // Route to reset a user's password via POST request (AJAX)
+    Route::post('/settings/users/{user}/reset-password', [UserManagementController::class, 'resetPassword'])->name('settings.reset-password');
+
+
+
     Route::get('/competition-settings', function () {
         return view('competition_settings');
     })->name('competition_settings');
-
     // Route to display the competition settings page
     Route::get('/competition-settings', [CompetitionSettingController::class, 'index'])->name('competition_settings');
-
     // Route to handle AJAX request for updating competition type
     Route::post('/competition-settings/update-type', [CompetitionSettingController::class, 'updateCompetitionType'])->name('competition_settings.update_type');
+
+
+
+    // Route for updating Wajib Nias setting
+    Route::post('/competition-settings/update-wajib-nias', [CompetitionSettingController::class, 'updateWajibNias'])->name('competition_settings.update_wajib_nias');
+
 });
 
 Route::get('/dashboard', function () {
@@ -86,6 +96,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/form-a1/kontingen', [FormA1Controller::class, 'kontingen'])->name('form_a1.kontingen');
 });
 
 require __DIR__ . '/auth.php';

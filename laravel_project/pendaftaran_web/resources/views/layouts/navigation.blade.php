@@ -16,6 +16,10 @@
                     {{ __('Dashboard') }}
                 </x-nav-link>
 
+                <x-nav-link :href="route('settings')" :active="request()->routeIs('settings')">
+                    {{ __('User Settings') }}
+                </x-nav-link>
+
                 <x-nav-link :href="route('competition_settings')" :active="request()->routeIs('competition_settings')">
                     {{ __('Competition Settings') }}
                 </x-nav-link>
