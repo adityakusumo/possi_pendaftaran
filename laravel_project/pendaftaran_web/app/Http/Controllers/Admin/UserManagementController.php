@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\MstClub;
+use App\Models\SpecialUser; // NEW: Import the SpecialUser model
 use Spatie\Permission\Models\Role; // Import Spatie's Role model
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash; // Import Hash facade
 use Illuminate\Validation\Rules\Password; // Import Password rules for strong validation
 use Illuminate\Support\Facades\Log; // Ensure Log is imported for error logging
+use Carbon\Carbon; // NEW: Import Carbon for date calculations
 
 class UserManagementController extends Controller
 {
@@ -56,54 +58,42 @@ class UserManagementController extends Controller
     }
 
     /**
-     * Update the specified user's role.
-     */
-    // public function updateRole(Request $request, User $user)
-    // {
-    //     // DD 1: See all incoming request data
-    //     // dd($request->all());
-
-    //     $request->validate([
-    //         'role' => ['required', 'string', 'exists:roles,name'], // Validate role exists in your roles table
-    //     ]);
-
-    //     // DD 2: See the specific role name being requested
-    //     // dd($request->role);
-
-    //     // DD 3: See the user object before role change and their current roles
-    //     // dd($user, $user->getRoleNames());
-
-    //     // Prevent admin from changing their own role (optional but recommended)
-    //     if (auth()->user()->id === $user->id && $request->role !== 'admin') {
-    //         return back()->withErrors(['role' => 'You cannot change your own role from admin.']);
-    //     }
-
-    //     // DD 4: See what roles the user *currently* has right before syncRoles
-    //     // dd($user->getRoleNames());
-
-    //     // Remove all current roles and assign the new one
-    //     $user->syncRoles($request->role);
-
-    //     // DD 5: See what roles the user *now* has immediately after syncRoles
-    //     // dd($user->getRoleNames()); // This should show the new role if successful
-
-    //     // DD 6: If you reach here, it means syncRoles executed without crashing
-    //     // dd('Role updated successfully (before redirect)');
-
-    //     return back()->with('status', 'User role updated successfully!');
-    // }
-
-    /**
      * Update the user's role and club information.
      */
     public function updateUser(Request $request, User $user)
     {
+        // $allowedSpatieRoles = Role::pluck('name')->toArray();
+        // dd('Allowed Spatie Roles:', $allowedSpatieRoles, 'Submitted Role:', $request->input('role')); // Check what's actually being used for validation
+
+
+        // try {
+        //     $validatedData = $request->validate([
+        //         'role' => ['required', 'string', Rule::in(Role::pluck('name')->toArray(), 'special')],
+        //         'club_IDCLUB' => [
+        //             'nullable',
+        //             'string',
+        //             Rule::exists('MstClub', 'IDCLUB')
+        //         ],
+        //     ]);
+        // } catch (\Illuminate\Validation\ValidationException $e) {
+        //     // Log the validation errors
+        //     Log::error('Validation failed for user update:', $e->errors());
+        //     // Dump and die to see errors directly in browser
+        //     dd('Validation Errors:', $e->errors());
+        //     // Return back with errors (if dd() is commented out)
+        //     // return back()->withErrors($e->errors())->withInput();
+        // }
+
+        // dd('Validation passed! Request data:', $validatedData); // After successful validation
+
+
         $request->validate([
-            'role' => ['required', 'string', 'exists:roles,name'],
-            'club_IDCLUB' => [ // <-- Changed to club_IDCLUB
+            // NEW: Allow 'special' in the role validation
+            'role' => ['required', 'string', Rule::in(Role::pluck('name')->toArray(), 'special')],
+            'club_IDCLUB' => [
                 'nullable',
                 'string', // Or 'integer' if IDCLUB is numeric
-                Rule::exists('MstClub', 'IDCLUB') // <-- Changed to IDCLUB
+                Rule::exists('MstClub', 'IDCLUB')
             ],
         ]);
 
@@ -112,13 +102,37 @@ class UserManagementController extends Controller
             return back()->withErrors(['role' => 'You cannot change your own role from admin.']);
         }
 
-        // 1. Update Role
-        $user->syncRoles($request->role);
+        // --- NEW: Handle Role Assignment (including 'special' logic) ---
+        $newRole = $request->input('role');
+        $userEmail = $user->email; // Get user's email for special_users table operations
 
-        // 2. Update Club Properties
+        // 1. Remove all current Spatie roles from the user
+        $user->syncRoles([]);
+
+        // 2. Assign the new Spatie role IF it's not 'special'
+        if ($newRole !== 'special') {
+            $user->assignRole($newRole);
+            // If the user's role is changed FROM 'special' to another role, remove them from special_users table
+            SpecialUser::where('email', $userEmail)->delete();
+            Log::info("User {$user->id} ({$user->email}) role changed to '{$newRole}'. Removed from special_users table.");
+        } else {
+            // If the new role IS 'special'
+            // Insert/update into special_users table with an expiry date
+            SpecialUser::updateOrCreate(
+                ['email' => $userEmail],
+                [
+                    'name' => $user->name, // Use user's current name
+                    'expired_at' => Carbon::now()->addDays(30),
+                ]
+            );
+            Log::info("User {$user->id} ({$user->email}) assigned 'special' role. Added/updated in special_users table.");
+        }
+        // --- END NEW Role Logic ---
+
+        // 2. Update Club Properties (remains mostly the same, ensuring it happens AFTER role)
         $selectedClub = null;
-        if ($request->filled('club_IDCLUB')) { // <-- Changed to club_IDCLUB
-            $selectedClub = MstClub::where('IDCLUB', $request->club_IDCLUB)->first(); // <-- Changed to IDCLUB
+        if ($request->filled('club_IDCLUB')) {
+            $selectedClub = MstClub::where('IDCLUB', $request->club_IDCLUB)->first();
         }
 
         if ($selectedClub) {
@@ -129,10 +143,11 @@ class UserManagementController extends Controller
                 'JENIS' => $selectedClub->JENIS,
                 'KDKOTA' => $selectedClub->KDKOTA,
                 'NAMAKOTA' => $selectedClub->NAMAKOTA,
-                'KDCLUB' => $selectedClub->KDCLUB, // This column is also saved from MstClub
-                'IDCLUB' => $selectedClub->IDCLUB, // <-- Ensure this is saved
+                'KDCLUB' => $selectedClub->KDCLUB,
+                'IDCLUB' => $selectedClub->IDCLUB,
                 'NAMACLUB' => $selectedClub->NAMACLUB,
             ]);
+            Log::info("User {$user->id} club updated to {$selectedClub->NAMACLUB}.");
         } else {
             // If no club selected or club not found
             $user->update([
@@ -143,9 +158,10 @@ class UserManagementController extends Controller
                 'KDKOTA' => null,
                 'NAMAKOTA' => null,
                 'KDCLUB' => null,
-                'IDCLUB' => null, // <-- Ensure this is nullified
+                'IDCLUB' => null,
                 'NAMACLUB' => null,
             ]);
+            Log::info("User {$user->id} club details cleared.");
         }
 
         return back()->with('status', 'User updated successfully!');
@@ -160,6 +176,10 @@ class UserManagementController extends Controller
         if (auth()->user()->id === $user->id) {
             return back()->withErrors(['delete_user' => 'You cannot delete your own account.']);
         }
+
+        // NEW: Before deleting the user, also remove them from special_users table if they exist
+        SpecialUser::where('email', $user->email)->delete();
+        Log::info("User {$user->id} ({$user->email}) deleted. Removed from special_users table (if existed).");
 
         $user->delete();
 
@@ -188,6 +208,7 @@ class UserManagementController extends Controller
             // Hash the new password before saving it to the database
             $user->password = Hash::make($request->new_password);
             $user->save();
+            Log::info("Password reset for user {$user->id} ({$user->email}).");
 
             return response()->json(['message' => 'Password reset successfully!'], 200);
         } catch (\Exception $e) {

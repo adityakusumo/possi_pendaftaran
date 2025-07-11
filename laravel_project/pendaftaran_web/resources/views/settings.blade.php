@@ -113,6 +113,9 @@
                                                     {{ $role->name }}
                                                 </option>
                                                 @endforeach
+                                                <option value="special" {{ $user->isSpecialUserActive() ? 'selected' : '' }}>
+                                                    special
+                                                </option>
                                             </select>
                                             <button type="submit" class="hidden update-role-submit-btn"></button>
                                         </form>

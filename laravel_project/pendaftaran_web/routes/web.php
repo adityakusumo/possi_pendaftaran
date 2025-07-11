@@ -5,87 +5,39 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
-use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\UserManagementController; // Ensure this is correct namespace
 use App\Http\Controllers\CompetitionSettingController;
 use App\Http\Controllers\FormA1Controller;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
 Route::get('/', function () {
-    // If the user is already logged in, redirect them to the dashboard
     if (Auth::check()) {
         return redirect()->route('dashboard');
     }
-
-    // Otherwise, show the login page
-    return view('auth.login'); // Breeze's login view is typically in 'resources/views/auth/login.blade.php'
+    return view('auth.login');
 });
 
-// Route::get('/settings', function () {
-//     return view('settings'); // This will look for resources/views/settings.blade.php
-// })->middleware(['auth'])->name('settings');
-
-// Route::get('/settings', function () {
-//     // Fetch all users
-//     $users = User::all();
-
-//     // Fetch all roles (assuming you're using Spatie's laravel-permission)
-//     $roles = Role::all();
-
-//     // Pass users and roles to the view
-//     return view('settings', compact('users', 'roles'));
-// })->middleware(['auth', 'role:admin'])->name('settings');
-
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    // OLD ROUTE (REMOVE OR COMMENT OUT THIS BLOCK):
-    /*
-    Route::get('/settings', function () {
-        // Fetch all users
-        $users = User::all();
-        // Fetch all roles (assuming you're using Spatie's laravel-permission)
-        $roles = Role::all();
-        // Pass users and roles to the view
-        return view('settings', compact('users', 'roles'));
-    })->name('settings');
-    */
-
-    // NEW ROUTE (USE THIS ONE):
+    // User Management Routes
     Route::get('/settings', [UserManagementController::class, 'index'])->name('settings');
 
-    // Make sure your other settings-related routes are also defined here,
-    // pointing to your UserManagementController methods
+    // This route handles both role and club updates for a user
     Route::patch('/settings/{user}/update', [UserManagementController::class, 'updateUser'])->name('settings.update');
+
+    // These routes are redundant if updateUser handles everything, or need to be specific
+    // If updateUser handles all updates (role and club), you can remove these:
+    // Route::patch('/settings/users/{user}/update-role', [UserManagementController::class, 'updateRole'])->name('settings.update-role');
+    // Route::delete('/settings/users/{user}/delete', [UserManagementController::class, 'destroyUser'])->name('settings.destroy-user'); // This is already defined below
+
+    // Keep the delete route, ensure it points to destroyUser
     Route::delete('/settings/{user}/delete-user', [UserManagementController::class, 'destroyUser'])->name('settings.destroy-user');
-
-    // Route to update a user's role
-    Route::patch('/settings/users/{user}/update-role', [UserManagementController::class, 'updateRole'])
-        ->name('settings.update-role');
-
-    // Route to delete a user
-    Route::delete('/settings/users/{user}/delete', [UserManagementController::class, 'destroyUser'])
-        ->name('settings.destroy-user');
-
-
 
     // Route to reset a user's password via POST request (AJAX)
     Route::post('/settings/users/{user}/reset-password', [UserManagementController::class, 'resetPassword'])->name('settings.reset-password');
 
-
-
-    Route::get('/competition-settings', function () {
-        return view('competition_settings');
-    })->name('competition_settings');
-    // Route to display the competition settings page
+    // Competition Settings Routes
     Route::get('/competition-settings', [CompetitionSettingController::class, 'index'])->name('competition_settings');
-    // Route to handle AJAX request for updating competition type
     Route::post('/competition-settings/update-type', [CompetitionSettingController::class, 'updateCompetitionType'])->name('competition_settings.update_type');
-
-
-
-    // Route for updating Wajib Nias setting
     Route::post('/competition-settings/update-wajib-nias', [CompetitionSettingController::class, 'updateWajibNias'])->name('competition_settings.update_wajib_nias');
-
 });
 
 Route::get('/dashboard', function () {
@@ -98,6 +50,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/form-a1/kontingen', [FormA1Controller::class, 'kontingen'])->name('form_a1.kontingen');
+
+    // Route for saving the kontingen data
+    Route::post('/form-a1/kontingen/save', [FormA1Controller::class, 'saveKontingen'])->name('form_a1.saveKontingen');
 });
 
 require __DIR__ . '/auth.php';
