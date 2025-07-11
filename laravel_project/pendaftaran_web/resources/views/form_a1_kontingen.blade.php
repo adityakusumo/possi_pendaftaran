@@ -11,7 +11,36 @@
                 <div class="max-w-full">
                     <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">{{ __('Form Entri Kontingen') }}</h3>
 
-                    <form>
+                    <form action="{{ route('form_a1.saveKontingen') }}" method="POST">
+                        @csrf
+                        {{-- NEW: Hidden input to pass jnsKompetisi to the controller --}}
+                        <input type="hidden" name="jnsKompetisi" value="{{ $jnsKompetisi }}">
+
+                        {{-- NEW: Area for displaying general errors and the specific nama_kontingen error --}}
+                        @if ($errors->any())
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <strong class="font-bold">Oops!</strong>
+                            <span class="block sm:inline">Ada masalah dengan data yang Anda masukkan.</span>
+                            <ul class="mt-3 list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        @endif
+
+                        {{-- Specific error message for 'nama_kontingen' --}}
+                        @error('nama_kontingen_error')
+                        <p class="text-red-500 text-sm mb-2">{{ $message }}</p>
+                        @enderror
+
+                        {{-- Success Message --}}
+                        @if (session('success'))
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <span class="block sm:inline">{{ session('success') }}</span>
+                        </div>
+                        @endif
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label for="jenis_kompetisi" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Jenis Kompetisi') }}</label>
