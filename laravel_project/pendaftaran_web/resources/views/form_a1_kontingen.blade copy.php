@@ -11,11 +11,42 @@
                 <div class="max-w-full">
                     <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">{{ __('Form Entri Kontingen') }}</h3>
 
-                    <form>
+                    <form action="{{ route('form_a1.saveKontingen') }}" method="POST">
+                        @csrf
+                        {{-- NEW: Hidden input to pass jnsKompetisi to the controller --}}
+                        <input type="hidden" name="jnsKompetisi" value="{{ $jnsKompetisi }}">
+
+                        {{-- NEW: Area for displaying general errors and the specific nama_kontingen error --}}
+                        @if ($errors->any())
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <strong class="font-bold">Oops!</strong>
+                            <span class="block sm:inline">Ada masalah dengan data yang Anda masukkan.</span>
+                            <ul class="mt-3 list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        @endif
+
+                        {{-- Specific error message for 'nama_kontingen' --}}
+                        @error('nama_kontingen_error')
+                        <p class="text-red-500 text-sm mb-2">{{ $message }}</p>
+                        @enderror
+
+                        {{-- Success Message --}}
+                        @if (session('success'))
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <span class="block sm:inline">{{ session('success') }}</span>
+                        </div>
+                        @endif
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label for="jenis_kompetisi" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Jenis Kompetisi') }}</label>
-                                <select id="jenis_kompetisi" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" disabled>
+                                <select id="jenis_kompetisi" name="jenis_kompetisi_display"
+                                    class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" disabled>
+
                                     @foreach($jenisKompetisiOptions as $code => $description)
                                     <option value="{{ $code }}"
                                         {{ (isset($currentKompetisiSetting) && $currentKompetisiSetting->JNSKOMPETISI === $code) ? 'selected' : '' }}>
@@ -29,10 +60,12 @@
                             {{-- KONDISI UNTUK NAMA KONTINGEN (disembunyikan jika JNSKOMPETISI = P) --}}
                             <div id="div_nama_kontingen" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 <label for="nama_kontingen" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Kontingen') }}</label>
-                                <select id="nama_kontingen" name="nama_kontingen"
+                                <select id="nama_kontingen" name="nama_kontingen_display"
                                     class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 select2-writable"
                                     data-placeholder="{{ __('Pilih atau ketik nama kontingen') }}">
                                 </select>
+                                {{-- NEW HIDDEN INPUT FOR SUBMISSION --}}
+                                <input type="hidden" id="nama_kontingen_hidden" name="nama_kontingen" value="{{ old('nama_kontingen') }}">
                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('*Bisa dipilih dari dropdown menu & bisa diketik juga') }}</p>
                             </div>
 
@@ -61,19 +94,19 @@
                             </div>
                             <div class="mt-4">
                                 <label for="negara" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Negara') }}</label>
-                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" id="negara" name="negara" value="INDONESIA" readonly>
+                                <input type="text" id="negara_input" name="negara_input" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" id="negara" name="negara" value="INDONESIA" readonly>
                             </div>
                             <div>
                                 <label for="contact_person" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Contact Person (CP)') }}</label>
-                                <input type="text" id="contact_person" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <input type="text" id="contact_person_input" name="contact_person_input" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                             <div>
                                 <label for="telepon" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Telepon') }}</label>
-                                <input type="tel" id="telepon" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <input type="tel" id="telepon_input" name="telepon_input" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                             <div>
                                 <label for="jumlah_official" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Jumlah Official') }}</label>
-                                <input type="number" id="jumlah_official" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <input type="number" id="jumlah_official_input" name="jumlah_official_input" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                         </div>
 
@@ -129,24 +162,24 @@
             var jnsKompetisi = '{{ $jnsKompetisi }}';
             console.log('Current Jenis Kompetisi (from Blade):', jnsKompetisi);
 
-            // New variables from Controller
             var appliedMode = @json($appliedMode); // 1 for enabled, 2 for disabled
             var autoSelectedClubValue = @json($autoSelectedClubValue);
             var autoFillDetails = @json($autoFillDetails);
+            var userRole = @json($userRoleString ?? 'user');
 
-            // --- START NEW DEBUG CONSOLE LOGS ---
             console.log('DEBUG: Value of $appliedMode from Blade:', appliedMode);
             console.log('DEBUG: Value of $autoSelectedClubValue from Blade:', autoSelectedClubValue);
             console.log('DEBUG: Value of $autoFillDetails from Blade:', autoFillDetails);
-            // --- END NEW DEBUG CONSOLE LOGS ---
+            console.log('DEBUG: Value of $userRoleString from Blade:', userRole);
 
-            // Your existing console.log lines that are currently showing null
-            console.log('User Club Name:', autoSelectedClubValue); // This is what you were seeing before
-            console.log('User Role: user'); // Role is hardcoded here, but was fine
-            console.log('User Club Details:', autoFillDetails); // This is what you were seeing before
+            console.log('User Club Name:', autoSelectedClubValue);
+            console.log('User Role:', userRole);
+            console.log('User Club Details:', autoFillDetails);
 
 
             var namaKontingenElement = $('#nama_kontingen');
+            var namaKontingenHiddenInput = $('#nama_kontingen_hidden');
+
             var namaKotaKabElement = $('#nama_kota_kab');
             var provinsiInputElement = $('#provinsi_input');
             var jenisKotaKabElement = $('#jenis_kota_kab');
@@ -160,12 +193,18 @@
             var namaPropinsiPilihanPesertaData = @json($namaPropinsiPilihanPeserta ?? []);
             var pilihanPesertaKotaKabDetails = @json($pilihanPesertaKotaKabDetails ?? []);
 
+            // DEBUG CONSOLE LOGS FOR SELECT2 DATA SOURCES (keep these for now)
+            console.log('DEBUG: namaClubsMstClubData for Select2:', namaClubsMstClubData);
+            console.log('DEBUG: namaClubsPilihanPesertaData for Select2:', namaClubsPilihanPesertaData);
+            console.log('DEBUG: namaPropinsiPilihanPesertaData for Select2:', namaPropinsiPilihanPesertaData);
+
             var isSettingNamaKontingenValue = false;
 
             // Helper function to initialize Select2
-            function initSelect2(element, data, placeholder, allowTags = true, isMultiple = false, isDisabled = false) {
+            // We will add a 'clear' argument here
+            function initSelect2(element, data, placeholder, allowTags = true, isMultiple = false, isDisabled = false, clearPrevious = true) {
                 if (element.length) {
-                    if (element.data('select2')) {
+                    if (element.data('select2') && clearPrevious) { // Only destroy if we want to clear previous state
                         element.select2('destroy');
                         console.log('Destroyed existing Select2 for:', element.attr('id'));
                     }
@@ -175,7 +214,7 @@
                         allowClear: true,
                         data: data,
                         multiple: isMultiple,
-                        disabled: isDisabled, // Pass disabled state
+                        disabled: isDisabled,
                         createTag: function(params) {
                             var term = $.trim(params.term);
                             if (term === '') {
@@ -207,10 +246,53 @@
                 }
             }
 
-            // --- Initial UI State Setup ---
-            $('#div_nama_kontingen').show();
-            // Disabled state will be managed by initSelect2 and logic below
+            // Centralized function to handle selection and detail update
+            function handleNamaKontingenSelection(selectedIdValue, detailsSource, jenisPropName, kotaPropName, propinsiPropName) {
+                if (isSettingNamaKontingenValue) {
+                    return;
+                }
+                isSettingNamaKontingenValue = true;
 
+                var normalizedSelectedId = (selectedIdValue || '').toUpperCase();
+                var detail = detailsSource[normalizedSelectedId];
+
+                // Ensure the selected option is actually in the Select2 data
+                var optionExists = namaKontingenElement.find("option[value='" + normalizedSelectedId + "']").length > 0;
+                if (!optionExists && normalizedSelectedId) {
+                    // If it doesn't exist, add it. This is more for tag creation, but safe here.
+                    var newOption = new Option(normalizedSelectedId, normalizedSelectedId, true, true);
+                    namaKontingenElement.append(newOption);
+                }
+
+                // This is the key line to update Select2's visual display
+                namaKontingenElement.val(normalizedSelectedId).trigger('change');
+                namaKontingenElement.trigger('select2:close'); // Close dropdown after selection
+
+                console.log('Nama Kontingen (after forceful set) val():', namaKontingenElement.val());
+                console.log('Nama Kontingen (after forceful set) data():', namaKontingenElement.select2('data'));
+
+                // **********************************************
+                // IMPORTANT: Set the value of the HIDDEN INPUT
+                // **********************************************
+                namaKontingenHiddenInput.val(normalizedSelectedId);
+                console.log('Hidden nama_kontingen_hidden value set to:', namaKontingenHiddenInput.val());
+
+                if (detail) {
+                    console.log('Details found:', detail);
+                    showAndEnableDetailFields();
+
+                    jenisKotaKabElement.val((detail[jenisPropName] || '').toUpperCase());
+                    namaKotaKabElement.val((detail[kotaPropName] || '').toUpperCase());
+                    provinsiInputElement.val((detail[propinsiPropName] || '').toUpperCase());
+                } else {
+                    console.warn('Details not found for:', normalizedSelectedId);
+                    hideAndClearDetailFields();
+                }
+
+                isSettingNamaKontingenValue = false;
+            }
+
+            // Helper functions for UI state
             function hideAndClearDetailFields() {
                 $('#div_jenis_kota_kab').hide();
                 $('#div_nama_kota_kab').hide();
@@ -229,59 +311,26 @@
                 provinsiInputElement.prop('disabled', false);
             }
 
-            // Centralized function to handle selection and detail update
-            function handleNamaKontingenSelection(selectedIdValue, detailsSource, jenisPropName, kotaPropName, propinsiPropName) {
-                if (isSettingNamaKontingenValue) {
-                    return;
-                }
-                isSettingNamaKontingenValue = true;
+            // --- Initial UI State Setup ---
+            $('#div_nama_kontingen').show(); // Ensure kontingen field is shown
 
-                var normalizedSelectedId = (selectedIdValue || '').toUpperCase(); // No trim here as per new instruction
-                var detail = detailsSource[normalizedSelectedId];
-
-                // Ensure the option exists in the underlying <select> for visual update
-                var optionExists = namaKontingenElement.find("option[value='" + normalizedSelectedId + "']").length > 0;
-                if (!optionExists && normalizedSelectedId) { // If it's a new tag or non-existent, add it
-                    var newOption = new Option(normalizedSelectedId, normalizedSelectedId, true, true);
-                    namaKontingenElement.append(newOption);
-                }
-
-                namaKontingenElement.val(normalizedSelectedId).trigger('change');
-                namaKontingenElement.trigger('select2:close');
-
-                console.log('Nama Kontingen (after forceful set) val():', namaKontingenElement.val());
-                console.log('Nama Kontingen (after forceful set) data():', namaKontingenElement.select2('data'));
-
-                if (detail) {
-                    console.log('Details found:', detail);
-                    showAndEnableDetailFields();
-
-                    jenisKotaKabElement.val((detail[jenisPropName] || '').toUpperCase()); // No trim
-                    namaKotaKabElement.val((detail[kotaPropName] || '').toUpperCase()); // No trim
-                    provinsiInputElement.val((detail[propinsiPropName] || '').toUpperCase()); // No trim
-                } else {
-                    console.warn('Details not found for:', normalizedSelectedId);
-                    hideAndClearDetailFields();
-                }
-
-                isSettingNamaKontingenValue = false;
-            }
-
-            // --- Main Logic based on appliedMode ---
+            // Main Logic based on appliedMode
             if (appliedMode === 1) { // Mode 1: Enabled (Admin, Operator, Special User)
                 console.log('Applied Mode 1: Nama Kontingen combo box enabled.');
 
-                // Initialize Select2 based on jnsKompetisi, enabled
+                // Ensure previous event handlers are removed before adding new ones for Mode 1
+                namaKontingenElement.off('change');
+
                 if (jnsKompetisi === 'C') {
-                    initSelect2(namaKontingenElement, namaClubsMstClubData, namaKontingenElement.data('placeholder'), true, false, false);
+                    initSelect2(namaKontingenElement, namaClubsMstClubData, 'Pilih Nama Club', true, false, false);
                 } else if (jnsKompetisi === 'K') {
-                    initSelect2(namaKontingenElement, namaClubsPilihanPesertaData, 'Pilih Nama Kontingen', true, false, false);
+                    initSelect2(namaKontingenElement, namaClubsPilihanPesertaData, 'Pilih Nama Kota/Kab', true, false, false);
                 } else if (jnsKompetisi === 'P') {
-                    initSelect2(namaKontingenElement, namaPropinsiPilihanPesertaData, 'Pilih Provinsi', true, false, false);
+                    initSelect2(namaKontingenElement, namaPropinsiPilihanPesertaData, 'Pilih Nama Provinsi', true, false, false);
                 }
 
-                // Attach the event listener for user interaction
-                namaKontingenElement.off('change').on('change', function(e) {
+                // Attach the change handler *after* initialization and off()
+                namaKontingenElement.on('change', function(e) {
                     if (isSettingNamaKontingenValue) {
                         return;
                     }
@@ -289,21 +338,34 @@
                     var selectedData = namaKontingenElement.select2('data')[0];
                     var selectedId = selectedData ? selectedData.id : '';
 
+                    // **********************************************
+                    // IMPORTANT: Set the value of the HIDDEN INPUT on change
+                    // **********************************************
+                    namaKontingenHiddenInput.val(selectedId);
+                    console.log('Hidden nama_kontingen_hidden value set to:', namaKontingenHiddenInput.val());
+
                     if (jnsKompetisi === 'C') {
                         handleNamaKontingenSelection(selectedId, mstClubDetails, 'JENIS', 'NAMAKOTA', 'NAMAPROP');
                     } else if (jnsKompetisi === 'K') {
                         handleNamaKontingenSelection(selectedId, pilihanPesertaKotaKabDetails, 'JENIS', 'NAMAKOTA', 'NAMAPROPINSI');
                     } else if (jnsKompetisi === 'P') {
-                        handleNamaKontingenSelection(selectedId, {}, '', '', ''); // Pass empty details
-                        hideAndClearDetailFields();
+                        // For 'P', no details, just select the province name
+                        handleNamaKontingenSelection(selectedId, {}, '', '', ''); // Pass empty details for 'P'
+                        hideAndClearDetailFields(); // And hide fields
                     }
                 });
-                namaKontingenElement.val(null).trigger('change'); // Ensure it starts cleared for user choice
+
+                // Clear any pre-selected value from previous loads for Admin mode
+                namaKontingenElement.val(null).trigger('change');
+                hideAndClearDetailFields(); // Initially hide details for Admin until selection
 
             } else { // Mode 2: Disabled (Regular User)
                 console.log('Applied Mode 2: Nama Kontingen combo box disabled and auto-selected.');
 
-                // Always hide and clear detail fields initially for Mode 2
+
+                // Ensure previous event handlers are removed for Mode 2
+                namaKontingenElement.off('change'); // Ensure no lingering change handlers
+
                 hideAndClearDetailFields();
 
                 var autoSelectData = [];
@@ -314,32 +376,36 @@
                     }];
                 }
 
-                // Initialize Select2 with only the auto-selected value, disabled
-                initSelect2(namaKontingenElement, autoSelectData, autoSelectedClubValue || 'N/A', false, false, true); // disabled: true
+                // For Mode 2, we don't want to clear data because we're force-setting it
+                initSelect2(namaKontingenElement, autoSelectData, autoSelectedClubValue || 'N/A', false, false, false, false); // clearPrevious = false
 
-                // Set the value directly and update details if available
                 if (autoSelectedClubValue) {
-                    namaKontingenElement.val(autoSelectedClubValue).trigger('change'); // Trigger change for visual update and auto-fill
+                    namaKontingenElement.val(autoSelectedClubValue).trigger('change');
+                    // **********************************************
+                    // IMPORTANT: Set the value of the HIDDEN INPUT for submission in Mode 2
+                    // This is the main point of failure based on your payload.
+                    // **********************************************
+                    namaKontingenHiddenInput.val(autoSelectedClubValue); // <--- This line must execute and set a value!
+                    console.log('Hidden nama_kontingen_hidden value (Mode 2 initial) set to:', namaKontingenHiddenInput.val());
 
-                    // Manually auto-fill based on autoFillDetails provided by controller
+
                     if (autoFillDetails) {
                         showAndEnableDetailFields();
                         jenisKotaKabElement.val(autoFillDetails.JENIS || '');
                         namaKotaKabElement.val(autoFillDetails.NAMAKOTA || '');
-                        provinsiInputElement.val(autoFillDetails.NAMAPROP || autoFillDetails.NAMAPROPINSI || ''); // Handle both NAMAPROP and NAMAPROPINSI
+                        provinsiInputElement.val(autoFillDetails.NAMAPROP || autoFillDetails.NAMAPROPINSI || '');
                     } else {
-                        hideAndClearDetailFields(); // If no autofill details, hide fields
+                        hideAndClearDetailFields();
                     }
                 } else {
-                    // If no autoSelectedClubValue, ensure fields are cleared and hidden
                     namaKontingenElement.val(null).trigger('change');
                     hideAndClearDetailFields();
                 }
-
-                namaKontingenElement.off('change'); // Ensure no user interaction can change it
+                console.log('Nama Kontingen mode 2 val():', namaKontingenElement.val());
             }
 
             // For JNSKOMPETISI P, ensure detail fields are always hidden regardless of mode
+            // This is a final override for 'P' type
             if (jnsKompetisi === 'P') {
                 hideAndClearDetailFields();
             }

@@ -11,6 +11,12 @@
                 <div class="max-w-full">
                     <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">{{ __('Form Entri Kontingen') }}</h3>
 
+                    {{-- NEW: Hidden form for delete action --}}
+                    <form id="delete-kontingen-form" method="POST" action="{{ route('kontingen.destroy') }}" style="display: none;">
+                        @csrf
+                        @method('DELETE')
+                    </form>
+
                     <form action="{{ route('form_a1.saveKontingen') }}" method="POST">
                         @csrf
                         {{-- NEW: Hidden input to pass jnsKompetisi to the controller --}}
@@ -44,7 +50,9 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label for="jenis_kompetisi" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Jenis Kompetisi') }}</label>
-                                <select id="jenis_kompetisi" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" disabled>
+                                <select id="jenis_kompetisi" name="jenis_kompetisi_display"
+                                    class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" disabled>
+
                                     @foreach($jenisKompetisiOptions as $code => $description)
                                     <option value="{{ $code }}"
                                         {{ (isset($currentKompetisiSetting) && $currentKompetisiSetting->JNSKOMPETISI === $code) ? 'selected' : '' }}>
@@ -58,10 +66,12 @@
                             {{-- KONDISI UNTUK NAMA KONTINGEN (disembunyikan jika JNSKOMPETISI = P) --}}
                             <div id="div_nama_kontingen" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 <label for="nama_kontingen" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Kontingen') }}</label>
-                                <select id="nama_kontingen" name="nama_kontingen"
+                                <select id="nama_kontingen" name="nama_kontingen_display"
                                     class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 select2-writable"
                                     data-placeholder="{{ __('Pilih atau ketik nama kontingen') }}">
                                 </select>
+                                {{-- NEW HIDDEN INPUT FOR SUBMISSION --}}
+                                <input type="hidden" id="nama_kontingen_hidden" name="nama_kontingen" value="{{ old('nama_kontingen') }}">
                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('*Bisa dipilih dari dropdown menu & bisa diketik juga') }}</p>
                             </div>
 
@@ -70,7 +80,8 @@
                                 <label for="jenis_kota_kab" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Jenis Kota/Kab') }}</label>
                                 <input type="text" id="jenis_kota_kab" name="jenis_kota_kab"
                                     class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    readonly>
+                                    readonly
+                                    maxlength="4">
                             </div>
 
                             {{-- KONDISI UNTUK NAMA KOTA/KAB (disembunyikan jika JNSKOMPETISI = P) --}}
@@ -78,7 +89,8 @@
                                 <label for="nama_kota_kab" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Kota/Kab') }}</label>
                                 <input type="text" id="nama_kota_kab" name="nama_kota_kab"
                                     class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    readonly>
+                                    readonly
+                                    maxlength="50">
                             </div>
 
                             {{-- PROVINSI --}}
@@ -86,23 +98,35 @@
                                 <label for="provinsi_input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Provinsi') }}</label>
                                 <input type="text" id="provinsi_input" name="provinsi_input"
                                     class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    readonly>
+                                    readonly
+                                    maxlength="30">
                             </div>
                             <div class="mt-4">
                                 <label for="negara" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Negara') }}</label>
-                                <input type="text" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" id="negara" name="negara" value="INDONESIA" readonly>
+                                <input type="text" id="negara_input" name="negara_input" maxlength="30" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" id="negara" name="negara" value="INDONESIA" readonly>
                             </div>
                             <div>
                                 <label for="contact_person" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Contact Person (CP)') }}</label>
-                                <input type="text" id="contact_person" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <input type="text" id="contact_person_input" name="contact_person_input"
+                                    class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    value="{{ old('contact_person_input', $autoFillDetails['CONTACTPERSON'] ?? '') }}"
+                                    pattern="[^0-9]*"
+                                    maxlength="50">
                             </div>
                             <div>
                                 <label for="telepon" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Telepon') }}</label>
-                                <input type="tel" id="telepon" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <input type="tel" id="telepon_input" name="telepon_input"
+                                    class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    value="{{ old('telepon_input', $autoFillDetails['TELPON'] ?? '') }}"
+                                    maxlength="20">
+                                {{-- inputmode="numeric"  Hints mobile devices to show numeric keyboard --}}
                             </div>
                             <div>
                                 <label for="jumlah_official" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Jumlah Official') }}</label>
-                                <input type="number" id="jumlah_official" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <input type="number" id="jumlah_official_input" name="jumlah_official_input"
+                                    class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    value="{{ old('jumlah_official_input', $autoFillDetails['OFFICIAL'] ?? 1) }}"
+                                    maxlength="50">
                             </div>
                         </div>
 
@@ -113,36 +137,55 @@
                                     <thead class="bg-gray-50 dark:bg-gray-700">
                                         <tr>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Nama Kontingen') }}</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Propinsi') }}</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Kota/Kab') }}</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Jenis Kota/Kab') }}</th>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Nama Kota/Kab') }}</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Propinsi') }}</th>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Negara') }}</th>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Contact Person(CP)') }}</th>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Telepon') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                                        @forelse($mstPesertaList as $peserta)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"></td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"></td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"></td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"></td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">Indonesia</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"></td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $peserta->NAMACLUB ?? $peserta->ASAL }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $peserta->JENISDOM }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $peserta->NAMAKOTADOM }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $peserta->NAMAPROPDOM }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $peserta->NAMANEGDOM }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $peserta->CONTACTPERSON }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $peserta->TELPON }}</td>
                                         </tr>
+                                        @empty
+                                        <tr>
+                                            <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">
+                                                {{ __('Belum ada data kontingen yang tersimpan.') }}
+                                            </td>
+                                        </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
                         </div>
 
                         <div class="mt-6 flex items-center justify-end gap-x-4">
-                            <button type="button" class="rounded-md bg-gray-200 dark:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-800 dark:text-gray-300 shadow-sm hover:bg-gray-300 dark:hover:bg-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">{{ __('Keluar') }}</button>
-                            <button type="button" class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">{{ __('Hapus') }}</button>
-                            <button type="button" class="rounded-md bg-yellow-400 px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm hover:bg-yellow-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">{{ __('Batal') }}</button>
-                            <button type="button" class="rounded-md bg-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">{{ __('Ubah') }}</button>
+                            <a href="{{ route('dashboard') }}"
+                                class="rounded-md bg-gray-200 dark:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-800 dark:text-gray-300 shadow-sm hover:bg-gray-300 dark:hover:bg-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                                {{ __('Kembali ke Dashboard') }} {{-- Changed text for clarity --}}
+                            </a>
+
+
+                            {{-- NEW: Modified Hapus button with onclick event --}}
+                            <button type="button"
+                                class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                                onclick="confirmDeleteKontingen()">
+                                {{ __('Hapus') }}
+                            </button>
+
+                            <!-- <button type="button" class="rounded-md bg-yellow-400 px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm hover:bg-yellow-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">{{ __('Batal') }}</button> -->
+                            <!-- <button type="button" class="rounded-md bg-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">{{ __('Ubah') }}</button> -->
                             <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">{{ __('Simpan') }}</button>
-                            <button type="button" class="rounded-md bg-green-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500">{{ __('Tambah') }}</button>
+                            <!-- <button type="button" class="rounded-md bg-green-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500">{{ __('Tambah') }}</button> -->
                         </div>
                     </form>
                 </div>
@@ -152,6 +195,24 @@
 
     @push('scripts')
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const teleponInput = document.getElementById('telepon_input');
+            if (teleponInput) {
+                teleponInput.addEventListener('input', function(event) {
+                    // Keep digits, plus signs, hyphens, and parentheses. Remove anything else.
+                    this.value = this.value.replace(/[^0-9+\-()]/g, '');
+                });
+            }
+
+            const contactPersonInput = document.getElementById('contact_person_input');
+            if (contactPersonInput) {
+                contactPersonInput.addEventListener('input', function(event) {
+                    // Remove any digit characters
+                    this.value = this.value.replace(/[0-9]/g, '');
+                });
+            }
+        });
+
         $(document).ready(function() {
             console.log('Document ready. Initializing Form A1 Kontingen scripts.');
 
@@ -174,6 +235,8 @@
 
 
             var namaKontingenElement = $('#nama_kontingen');
+            var namaKontingenHiddenInput = $('#nama_kontingen_hidden');
+
             var namaKotaKabElement = $('#nama_kota_kab');
             var provinsiInputElement = $('#provinsi_input');
             var jenisKotaKabElement = $('#jenis_kota_kab');
@@ -265,6 +328,12 @@
                 console.log('Nama Kontingen (after forceful set) val():', namaKontingenElement.val());
                 console.log('Nama Kontingen (after forceful set) data():', namaKontingenElement.select2('data'));
 
+                // **********************************************
+                // IMPORTANT: Set the value of the HIDDEN INPUT
+                // **********************************************
+                namaKontingenHiddenInput.val(normalizedSelectedId);
+                console.log('Hidden nama_kontingen_hidden value set to:', namaKontingenHiddenInput.val());
+
                 if (detail) {
                     console.log('Details found:', detail);
                     showAndEnableDetailFields();
@@ -326,6 +395,12 @@
                     var selectedData = namaKontingenElement.select2('data')[0];
                     var selectedId = selectedData ? selectedData.id : '';
 
+                    // **********************************************
+                    // IMPORTANT: Set the value of the HIDDEN INPUT on change
+                    // **********************************************
+                    namaKontingenHiddenInput.val(selectedId);
+                    console.log('Hidden nama_kontingen_hidden value set to:', namaKontingenHiddenInput.val());
+
                     if (jnsKompetisi === 'C') {
                         handleNamaKontingenSelection(selectedId, mstClubDetails, 'JENIS', 'NAMAKOTA', 'NAMAPROP');
                     } else if (jnsKompetisi === 'K') {
@@ -344,6 +419,7 @@
             } else { // Mode 2: Disabled (Regular User)
                 console.log('Applied Mode 2: Nama Kontingen combo box disabled and auto-selected.');
 
+
                 // Ensure previous event handlers are removed for Mode 2
                 namaKontingenElement.off('change'); // Ensure no lingering change handlers
 
@@ -358,10 +434,17 @@
                 }
 
                 // For Mode 2, we don't want to clear data because we're force-setting it
-                initSelect2(namaKontingenElement, autoSelectData, autoSelectedClubValue || 'N/A', false, false, true, false); // clearPrevious = false
+                initSelect2(namaKontingenElement, autoSelectData, autoSelectedClubValue || 'N/A', false, false, false, false); // clearPrevious = false
 
                 if (autoSelectedClubValue) {
                     namaKontingenElement.val(autoSelectedClubValue).trigger('change');
+                    // **********************************************
+                    // IMPORTANT: Set the value of the HIDDEN INPUT for submission in Mode 2
+                    // This is the main point of failure based on your payload.
+                    // **********************************************
+                    namaKontingenHiddenInput.val(autoSelectedClubValue); // <--- This line must execute and set a value!
+                    console.log('Hidden nama_kontingen_hidden value (Mode 2 initial) set to:', namaKontingenHiddenInput.val());
+
 
                     if (autoFillDetails) {
                         showAndEnableDetailFields();
@@ -375,6 +458,7 @@
                     namaKontingenElement.val(null).trigger('change');
                     hideAndClearDetailFields();
                 }
+                console.log('Nama Kontingen mode 2 val():', namaKontingenElement.val());
             }
 
             // For JNSKOMPETISI P, ensure detail fields are always hidden regardless of mode
@@ -383,6 +467,12 @@
                 hideAndClearDetailFields();
             }
         });
+
+        function confirmDeleteKontingen() {
+            if (confirm('Apakah Anda yakin ingin menghapus data kontingen Anda? Ini akan menghapus semua data kontingen Anda yang tersimpan.')) {
+                document.getElementById('delete-kontingen-form').submit();
+            }
+        }
     </script>
     @endpush
 </x-app-layout>

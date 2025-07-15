@@ -53,6 +53,9 @@ Route::middleware('auth')->group(function () {
 
     // Route for saving the kontingen data
     Route::post('/form-a1/kontingen/save', [FormA1Controller::class, 'saveKontingen'])->name('form_a1.saveKontingen');
+
+    Route::delete('/kontingen', [FormA1Controller::class, 'destroyKontingen'])->name('kontingen.destroy');
+
 });
 
 require __DIR__ . '/auth.php';
