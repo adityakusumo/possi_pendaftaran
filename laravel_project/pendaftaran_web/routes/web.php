@@ -56,6 +56,8 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/kontingen', [FormA1Controller::class, 'destroyKontingen'])->name('kontingen.destroy');
 
+    Route::get('/form-a1/daftar-atlet', [FormA1Controller::class, 'daftarAtlet'])->name('form_a1.daftarAtlet');
+
 });
 
 require __DIR__ . '/auth.php';

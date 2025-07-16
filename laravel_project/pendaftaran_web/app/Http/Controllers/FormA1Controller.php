@@ -4,14 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log; // For debugging
+use Illuminate\Support\Facades\Validator; // For custom validation
 use App\Models\Kompetisi;
 use App\Models\PilihanPesertaKotaKab;
 use App\Models\MstClub;
 use App\Models\SpecialUser; // Keep this for SpecialUser table check
 use App\Models\MstPeserta;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log; // For debugging
-use Illuminate\Support\Facades\Validator; // For custom validation
+use App\Models\NIAS;
 use Carbon\Carbon; // Keep this for expiry date check
 
 class FormA1Controller extends Controller
@@ -399,5 +400,60 @@ class FormA1Controller extends Controller
         } else {
             return back()->withErrors(['error' => 'Data masih kosong!']); // Corrected to use 'error' key
         }
+    }
+
+    public function daftarAtlet(): View
+    {
+        // You would fetch data here if needed, e.g.,
+        // $existingParticipants = YourModel::all();
+        // return view('form_a1_namaatlet', compact('existingParticipants'));
+
+        $user = Auth::user(); // Get the currently authenticated user
+        // if (!$user) {
+        //     // Handle unauthenticated user - perhaps redirect to login
+        //     return redirect()->route('login')->withErrors('Silakan masuk untuk melanjutkan.');
+        // }
+
+        $userEmail = $user->email; // Get the user's email
+
+        // --- Fetch MstPeserta data for table display and auto-fill ---
+        $niasList = NIAS::where('email', $userEmail)->get(); // For table display
+        $niasToAutofill = $niasList->first(); // The specific record to use for form auto-fill
+
+        $formatDetailValue = function ($value) {
+            return ($value !== null) ? mb_strtoupper($value, 'UTF-8') : null;
+        };
+
+        // --- Initialize auto-fill details (these will be passed to the view) ---
+        $autoNamaKontingenValue = null; // Value for nama_kontingen select
+        $autoFillDetails = [
+            'JENIS'         => '',
+            'NAMAKOTA'      => '',
+            'NAMAPROP'      => '',
+            'NAMAPROPINSI'  => '',
+            'NAMANEGARA'    => '',
+            'CONTACTPERSON' => '',
+            'TELPON'        => '',
+            'OFFICIAL'      => 1, // Default for number input often starts at 1
+            'NAMACLUB'      => '', // Used for the concatenated name in Mode 2
+            'ASAL'          => ''  // Original name for ASAL column
+        ];
+
+        // --- Populate autoFillDetails from MstPeserta (PRIORITY 1: Existing User Data) ---
+        if ($niasToAutofill) {
+            // These fields directly come from MstPeserta
+            $autoFillDetails['CONTACTPERSON'] = $formatDetailValue($niasToAutofill->CONTACTPERSON);
+            $autoFillDetails['TELPON']        = $formatDetailValue($niasToAutofill->TELPON);
+            $autoFillDetails['OFFICIAL']      = $niasToAutofill->OFFICIAL !== null ? $niasToAutofill->OFFICIAL : 1; // Keep as number
+            $autoFillDetails['NAMAPROP']      = $formatDetailValue($niasToAutofill->NAMAPROPDOM);
+            $autoFillDetails['NAMAPROPINSI']  = $formatDetailValue($niasToAutofill->NAMAPROPDOM); // For compatibility
+            $autoFillDetails['NAMANEGARA']    = $formatDetailValue($niasToAutofill->NAMANEGDOM);
+            $autoFillDetails['JENIS']         = $formatDetailValue($niasToAutofill->JENISDOM);
+            $autoFillDetails['NAMAKOTA']      = $formatDetailValue($niasToAutofill->NAMAKOTADOM);
+            $autoFillDetails['NAMACLUB']      = $formatDetailValue($niasToAutofill->NAMACLUB); // The (potentially concatenated) kontingen name
+            $autoFillDetails['ASAL']          = $formatDetailValue($niasToAutofill->ASAL);   // The original kontingen name
+        }
+
+        return view('form_a1_namaatlet', compact('niasList'));
     }
 }
