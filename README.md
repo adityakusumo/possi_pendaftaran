@@ -8,3 +8,9 @@ Pilot project for web-based Finswimming Competition Registration
 - PHP v8.4.7
 - Composer v2.8.9
 - Mariadb v11.7.2
+
+## Command for local testing
+
+- cd (project directory)
+- npm run dev
+- php artisan serve
