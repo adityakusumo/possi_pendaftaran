@@ -7,6 +7,7 @@ use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log; // For debugging
 use Illuminate\Support\Facades\Validator; // For custom validation
+use Illuminate\Support\Facades\DB;
 use App\Models\Kompetisi;
 use App\Models\PilihanPesertaKotaKab;
 use App\Models\MstClub;
@@ -407,19 +408,106 @@ class FormA1Controller extends Controller
         // You would fetch data here if needed, e.g.,
         // $existingParticipants = YourModel::all();
         // return view('form_a1_namaatlet', compact('existingParticipants'));
+        $user = Auth::user();
 
-        $user = Auth::user(); // Get the currently authenticated user
-        // if (!$user) {
-        //     // Handle unauthenticated user - perhaps redirect to login
-        //     return redirect()->route('login')->withErrors('Silakan masuk untuk melanjutkan.');
+        // If user is not authenticated, redirect to login
+        if (!$user) {
+            return redirect()->route('login')->withErrors('Silakan masuk untuk melanjutkan.');
+        }
+
+        // --- NEW: Fetch JNSKOMPETISI from the Kompetisi table ---
+        $kompetisi = Kompetisi::first(); // !!! IMPORTANT: Adjust this query !!!
+        // This line currently fetches the first competition record.
+        // You might need:
+        // - Kompetisi::where('status', 'active')->first();
+        // - Kompetisi::find($user->kompetisi_id); // If user is linked to a competition
+        // - Or any other logic to determine the current competition
+
+        $userJnsKompetisi = null;
+        if ($kompetisi && $kompetisi->JNSKOMPETISI) {
+            $userJnsKompetisi = mb_strtoupper($kompetisi->JNSKOMPETISI, 'UTF-8');
+        } else {
+            // Handle case where no competition or JNSKOMPETISI is found
+            // For safety, we can default to a state that shows no data,
+            // or redirect, or provide a message.
+            return redirect()->back()->withErrors('Tidak dapat menentukan jenis kompetisi saat ini.');
+        }
+        // --- END NEW ---
+
+        // dd($userJnsKompetisi);
+
+        $query = NIAS::query(); // Start building the query for the NIAS table
+
+        switch ($userJnsKompetisi) {
+            case 'K': // JNS & NAMAKOTA in users table is equal to JENIS & NAMAKOTA in NIAS table
+                // Assuming user->jenis maps to NIAS.KDJENIS
+                // Assuming user->namakota maps to NIAS.NAMAKOTA
+                if ($user->JENIS) {
+                    $query->whereRaw('UPPER(JENIS) = ?', [mb_strtoupper($user->JENIS, 'UTF-8')]);
+                }
+                if ($user->NAMAKOTA) {
+                    $query->whereRaw('UPPER(NAMAKOTA) = ?', [mb_strtoupper($user->NAMAKOTA, 'UTF-8')]);
+                }
+                break;
+
+            case 'C': // NAMACLUB in users table is equal to NAMACLUB in NIAS table
+                // Assuming user->namaclub maps to NIAS.NAMACLUB
+                if ($user->NAMACLUB) {
+                    $userClubName = mb_strtoupper($user->NAMACLUB, 'UTF-8');
+                    // $userClubName = "AMARTA";
+
+                    // --- Direct SQL Execution for Debugging ---
+                    // $rawSqlResult = DB::select("SELECT * FROM NIAS WHERE UPPER(NAMACLUB) = ?", [$userClubName]);
+                    // $rawSqlResult = DB::select("SELECT * FROM NIAS WHERE NAMACLUB = 'JOYOBOYO'");
+                    // dd($rawSqlResult); // This will dump the result of the raw SQL query
+                    // --- End Direct SQL Debugging ---
+
+                    $query->whereRaw('UPPER(NAMACLUB) = ?', [$userClubName]);
+                }
+
+                break;
+
+            case 'P': // NAMAPROP in users table is equal to NAMAPROP in NIAS table
+                // Assuming user->namaprop maps to NIAS.NAMAPROP
+                if ($user->NAMAPROP) {
+                    $query->whereRaw('UPPER(NAMAPROP) = ?', [mb_strtoupper($user->NAMAPROP, 'UTF-8')]);
+                }
+                break;
+
+            default:
+                // If jnskompetisi doesn't match any specific case,
+                // Ensures no records are returned
+                $query->whereRaw('1 = 0');
+                break;
+        }
+
+        // dd($query->toSql(), $query->getBindings());
+
+        $niasList = $query->get(); // Execute the query and get the results
+        // dd($niasList);
+
+        // $searchName = 'PENGUIN DC';
+        // dump("Literal search string hex: " . bin2hex($searchName));
+        // // You can then compare this hex to hex_db from your DBeaver query.
+        // 50454e4755494e204443
+        // 50454e4755494e204443
+
+        // $rawSqlResultLimited = DB::select("SELECT * FROM NIAS WHERE UPPER(NAMACLUB) = 'PENGUIN DC' LIMIT 10");
+        // dd(count($rawSqlResultLimited)); // What does this return?
+        // $rawSqlResult = DB::select("SELECT * FROM NIAS WHERE UPPER(GENDER) = 'PI'");
+        // dd(count($rawSqlResult)); // Does this show the correct total count (e.g., 50 from DBeaver)?
+        // $rawSqlResult = DB::select("SELECT * FROM NIAS WHERE UPPER(NAMACLUB) = 'PENGUIN DC'");
+        // dd($rawSqlResult); // This will dump the result of the raw SQL query
+
+        // try {
+        //     $niasList = $query->get();
+        //     dd($niasList); // Still dd it here
+        // } catch (\Exception $e) {
+        //     dd($e->getMessage()); // If there's an error during fetch, it will show here
         // }
 
-        $userEmail = $user->email; // Get the user's email
-
-        // --- Fetch MstPeserta data for table display and auto-fill ---
-        $niasList = NIAS::where('email', $userEmail)->get(); // For table display
-        $niasToAutofill = $niasList->first(); // The specific record to use for form auto-fill
-
+        // --- Fetch NIAS data for table display and auto-fill ---
+        $niasToAutofill = $niasList->first();
         $formatDetailValue = function ($value) {
             return ($value !== null) ? mb_strtoupper($value, 'UTF-8') : null;
         };
@@ -427,33 +515,23 @@ class FormA1Controller extends Controller
         // --- Initialize auto-fill details (these will be passed to the view) ---
         $autoNamaKontingenValue = null; // Value for nama_kontingen select
         $autoFillDetails = [
-            'JENIS'         => '',
+            'NAMACLUB'      => '',
+            'JENIS'      => '',
             'NAMAKOTA'      => '',
-            'NAMAPROP'      => '',
-            'NAMAPROPINSI'  => '',
-            'NAMANEGARA'    => '',
-            'CONTACTPERSON' => '',
-            'TELPON'        => '',
-            'OFFICIAL'      => 1, // Default for number input often starts at 1
-            'NAMACLUB'      => '', // Used for the concatenated name in Mode 2
-            'ASAL'          => ''  // Original name for ASAL column
+            'NAMAPROP'  => '',
+            'NAMA'    => ''
         ];
 
         // --- Populate autoFillDetails from MstPeserta (PRIORITY 1: Existing User Data) ---
         if ($niasToAutofill) {
             // These fields directly come from MstPeserta
-            $autoFillDetails['CONTACTPERSON'] = $formatDetailValue($niasToAutofill->CONTACTPERSON);
-            $autoFillDetails['TELPON']        = $formatDetailValue($niasToAutofill->TELPON);
-            $autoFillDetails['OFFICIAL']      = $niasToAutofill->OFFICIAL !== null ? $niasToAutofill->OFFICIAL : 1; // Keep as number
-            $autoFillDetails['NAMAPROP']      = $formatDetailValue($niasToAutofill->NAMAPROPDOM);
-            $autoFillDetails['NAMAPROPINSI']  = $formatDetailValue($niasToAutofill->NAMAPROPDOM); // For compatibility
-            $autoFillDetails['NAMANEGARA']    = $formatDetailValue($niasToAutofill->NAMANEGDOM);
-            $autoFillDetails['JENIS']         = $formatDetailValue($niasToAutofill->JENISDOM);
-            $autoFillDetails['NAMAKOTA']      = $formatDetailValue($niasToAutofill->NAMAKOTADOM);
-            $autoFillDetails['NAMACLUB']      = $formatDetailValue($niasToAutofill->NAMACLUB); // The (potentially concatenated) kontingen name
-            $autoFillDetails['ASAL']          = $formatDetailValue($niasToAutofill->ASAL);   // The original kontingen name
+            $autoFillDetails['NAMACLUB'] = $formatDetailValue($niasToAutofill->NAMACLUB);
+            $autoFillDetails['JENIS']    = $formatDetailValue($niasToAutofill->JENIS);
+            $autoFillDetails['NAMAKOTA'] = $formatDetailValue($niasToAutofill->NAMAKOTA);
+            $autoFillDetails['NAMAPROP'] = $formatDetailValue($niasToAutofill->NAMAPROP);
+            $autoFillDetails['NAMA']    = $formatDetailValue($niasToAutofill->NAMA);
         }
 
-        return view('form_a1_namaatlet', compact('niasList'));
+        return view('form_a1_namaatlet', compact('niasList', 'autoFillDetails'));
     }
 }
