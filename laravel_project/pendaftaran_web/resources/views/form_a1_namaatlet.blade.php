@@ -35,9 +35,9 @@
     </pre>
                             </div>
 
-                            <div class="overflow-x-auto shadow-md sm:rounded-lg"> {{-- Added a wrapper for overflow control --}}
+                            <div class="overflow-x-auto shadow-md sm:rounded-lg">
                                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                                    <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10"> {{-- Sticky header for scrollable table --}}
+                                    <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10">
                                         <tr>
                                             <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('NO') }}</th>
                                             <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('NAMA CLUB') }}</th>
@@ -50,11 +50,15 @@
                                     <tbody id="nias-table-body" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
                                         @forelse($niasList as $niaspeserta)
                                         <tr class="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-blue-100 dark:active:bg-blue-900 selectable-row"
-                                            data-athlete-id="{{ $niaspeserta->ID ?? $loop->iteration }}" {{-- Use ID if available, fallback to iteration --}}
-                                            data-athlete-details="{{ json_encode($niaspeserta) }}"> {{-- Store full details as JSON --}}
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $loop->iteration }}</td>
+                                            data-athlete-id="{{ $niaspeserta->ID ?? $loop->iteration }}"
+                                            data-athlete-details="{{ json_encode($niaspeserta) }}">
+                                            {{-- THIS IS THE LINE YOU NEED TO CHANGE/CONFIRM --}}
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">
+                                                {{ ($niasList->currentPage() - 1) * $niasList->perPage() + $loop->iteration }}
+                                            </td>
+                                            {{-- END OF CHANGE --}}
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $niaspeserta->NAMACLUB }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $niaspeserta->KDJENIS ?? $niaspeserta->JENIS }}</td> {{-- Assuming KDJENIS or JENIS --}}
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $niaspeserta->KDJENIS ?? $niaspeserta->JENIS }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $niaspeserta->NAMAKOTA }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $niaspeserta->NAMAPROP }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $niaspeserta->NAMA }}</td>
@@ -70,6 +74,11 @@
                                 </table>
                             </div>
 
+                            {{-- Pagination Links --}}
+                            <div class="mt-4">
+                                {{ $niasList->links() }}
+                            </div>
+
                             {{-- Right Section: JIKA BELUM PUNYA NIAS / PESERTA LUAR JATIM --}}
                             <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm">
                                 <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('JIKA BELUM PUNYA NIAS / PESERTA LUAR JATIM') }}</h2>
@@ -77,31 +86,27 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label for="nama_club_new" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Club') }}</label>
-                                        <input type="text" id="nama_club_new" name="nama_club_new" value="PENGUIN DC" readonly
+                                        <input type="text" id="nama_club_new" name="nama_club_new"
+                                            value="{{ old('nama_club_new', $autoFillDetails['NAMACLUB'] ?? '') }}" readonly {{-- Conditional value --}}
                                             class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                     <div>
                                         <label for="kota_kab_new" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Kota / Kab') }}</label>
-                                        <select id="kota_kab_new" name="kota_kab_new"
+                                        <input type="text" id="kota_kab_new" name="kota_kab_new"
+                                            value="{{ old('kota_kab_new', $autoFillDetails['JENIS'] ?? '') }}" {{-- Conditional value --}}
                                             class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                            <option value="">Pilih Kota/Kab</option>
-                                            <option value="SURABAYA">SURABAYA</option>
-                                            {{-- Add more options dynamically --}}
-                                        </select>
                                     </div>
                                     <div class="col-span-2"> {{-- Spans full width --}}
                                         <label for="nama_kota_kab_new" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Kota / Kab') }}</label>
-                                        <input type="text" id="nama_kota_kab_new" name="nama_kota_kab_new" value="SURABAYA" readonly
+                                        <input type="text" id="nama_kota_kab_new" name="nama_kota_kab_new"
+                                            value="{{ old('nama_kota_kab_new', $autoFillDetails['NAMAKOTA'] ?? '') }}" {{-- Conditional value --}}
                                             class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                     <div>
                                         <label for="propinsi_new" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Propinsi') }}</label>
-                                        <select id="propinsi_new" name="propinsi_new"
+                                        <input type="text" id="propinsi_new" name="propinsi_new"
+                                            value="{{ old('propinsi_new', $autoFillDetails['NAMAPROP'] ?? '') }}" {{-- Conditional value --}}
                                             class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                            <option value="">Pilih Propinsi</option>
-                                            <option value="JAWA TIMUR">JAWA TIMUR</option>
-                                            {{-- Add more options dynamically --}}
-                                        </select>
                                     </div>
                                     <div>
                                         <label for="negara_new" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Negara') }}</label>
@@ -111,6 +116,7 @@
                                     <div class="col-span-2"> {{-- Spans full width --}}
                                         <label for="nama_atlet_new" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Atlet') }}</label>
                                         <input type="text" id="nama_atlet_new" name="nama_atlet_new"
+                                            value="{{ old('nama_atlet_new', $autoFillDetails['NAMA'] ?? '') }}" {{-- Conditional value --}}
                                             class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
 
@@ -138,8 +144,11 @@
                                             </select>
                                             <select name="ku_d" id="ku_d" class="rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                                 <option value="">Pilih KU</option>
-                                                <option value="KU D">KU D</option>
-                                                {{-- Add more KU options --}}
+                                                @foreach($mstKuOptions as $kuValue)
+                                                <option value="{{ $kuValue }}" {{ old('ku_d') == $kuValue ? 'selected' : '' }}>
+                                                    {{ $kuValue }}
+                                                </option>
+                                                @endforeach
                                             </select>
                                         </div>
                                     </div>
@@ -171,7 +180,7 @@
                                                 <input type="radio" name="sparing_partner" value="BUKAN_SP" id="sparing_partner_no" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600" checked>
                                                 <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Bukan SP') }}</span>
                                             </label>
-                                            <input type="text" name="sparing_partner_number" id="sparing_partner_number" value="05035785071066"
+                                            <input type="text" name="nias_number" id="nias_number" value="" readonly
                                                 class="flex-1 rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         </div>
                                     </div>
@@ -180,11 +189,18 @@
 
                             {{-- Action Buttons above lower table --}}
                             <div class="mt-8 flex flex-wrap justify-center sm:justify-start gap-3 mb-6">
-                                <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-sm">{{ __('Antar Club') }}</button>
-                                <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-sm">{{ __('Antar Kota/Kab') }}</button>
-                                <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-sm">{{ __('Antar Propinsi') }}</button>
-                                <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-sm">{{ __('SP JIKA Tanpa NIAS') }}</button>
-                                <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-sm">{{ __('Bebas') }}</button>
+                                {{-- Replaced buttons with a single read-only input field --}}
+                                <input type="text"
+                                    id="wajib_nias_status_display"
+                                    name="wajib_nias_status_display"
+                                    value="{{ $wajibNiasStatusText }}"
+                                    readonly
+                                    class="px-4 py-2
+                                              {{ $wajibNiasStatusText === 'Bebas' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white' }}
+                                              rounded-md shadow
+                                              dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600
+                                              text-sm font-semibold text-center cursor-default
+                                              focus:outline-none focus:ring-0">
                             </div>
 
                             {{-- Lower Table --}}
@@ -297,8 +313,12 @@
 
                     const sparingPartnerYesRadio = form.querySelector('#sparing_partner_yes');
                     const sparingPartnerNoRadio = form.querySelector('#sparing_partner_no');
-                    const sparingPartnerNumber = form.querySelector('#sparing_partner_number');
+                    // const sparingPartnerNumber = form.querySelector('#sparing_partner_number');
+                    const niasNumber = form.querySelector('#nias_number'); // UPDATED: Renamed variable
 
+
+                    const mstKuData = @json($mstKuData);
+                    console.log("MstKU Data for comparison:", mstKuData);
 
                     tableBody.addEventListener('click', function(event) {
                         const clickedRow = event.target.closest('.selectable-row');
@@ -320,23 +340,27 @@
                                 console.log('Parsed athlete details object:', athleteDetails); // For debugging
 
                                 // --- Populate Form Fields ---
-                                namaClubNew.value = athleteDetails.NAMACLUB || ''; // Using || '' for null/undefined check
-                                kotaKabNew.value = athleteDetails.NAMAKOTA || ''; // Assuming NAMAKOTA in NIAS
-                                namaKotaKabNew.value = athleteDetails.NAMAKOTA || ''; // Assuming NAMAKOTA in NIAS
-                                propinsiNew.value = athleteDetails.NAMAPROP || ''; // Assuming NAMAPROP in NIAS
-                                negaraNew.value = athleteDetails.NEGARA || 'INDONESIA'; // Assuming NEGARA in NIAS, or default
+                                namaClubNew.value = athleteDetails.NAMACLUB || '';
+                                kotaKabNew.value = athleteDetails.JENIS || ''; // Assuming 'NAMAKOTA' from NIAS is used for 'Kota / Kab'
+                                namaKotaKabNew.value = athleteDetails.NAMAKOTA || '';
+                                propinsiNew.value = athleteDetails.NAMAPROP || '';
+                                negaraNew.value = athleteDetails.NEGARA || 'INDONESIA';
                                 namaAtletNew.value = athleteDetails.NAMA || '';
 
-                                // Handle Date of Birth (TGLLAHIR)
+                                // Handle Date of Birth (TGLLAHIR) - populate selects and for KU calculation
+                                let athleteBirthDate = null;
                                 if (athleteDetails.TGLLAHIR) {
                                     try {
                                         const dob = new Date(athleteDetails.TGLLAHIR);
-                                        birthDaySelect.value = dob.getDate();
-                                        birthMonthSelect.value = dob.getMonth() + 1; // Month is 0-indexed
-                                        birthYearSelect.value = dob.getFullYear();
+                                        // Set hour to 00:00:00 for accurate date comparison later
+                                        dob.setHours(0, 0, 0, 0);
+                                        athleteBirthDate = dob; // Assign to variable for KU comparison
+
+                                        if (!isNaN(dob.getDate())) birthDaySelect.value = dob.getDate();
+                                        if (!isNaN(dob.getMonth())) birthMonthSelect.value = dob.getMonth() + 1;
+                                        if (!isNaN(dob.getFullYear())) birthYearSelect.value = dob.getFullYear();
                                     } catch (e) {
                                         console.error('Error parsing TGLLAHIR:', e);
-                                        // Optionally reset date fields or show an error
                                         birthDaySelect.value = '';
                                         birthMonthSelect.value = '';
                                         birthYearSelect.value = '';
@@ -347,22 +371,63 @@
                                     birthYearSelect.value = '';
                                 }
 
-                                // Handle KU (Kompetisi Usia / Age Group)
-                                // You need to confirm the exact column name for KU in your NIAS table (e.g., KUD, KELOMPOKUSIA)
-                                // For now, assuming `athleteDetails.KUD` or `athleteDetails.KU`
-                                kuDSelect.value = athleteDetails.KUD || athleteDetails.KU || ''; // Adjust 'KUD' or 'KU' based on your actual column name
+                                // --- NEW: Handle KU (Kompetisi Usia / Age Group) based on birth date ---
+                                if (athleteBirthDate && !isNaN(athleteBirthDate.getTime()) && mstKuData.length > 0) {
+                                    let kuFound = false;
+                                    kuDSelect.value = ''; // Clear previous KU selection
 
-                                // Handle Gender
-                                if (athleteDetails.GENDER) { // Assuming GENDER column 'P' or 'W'
-                                    if (athleteDetails.GENDER.toUpperCase() === 'P') {
-                                        genderPriaRadio.checked = true;
-                                    } else if (athleteDetails.GENDER.toUpperCase() === 'W') {
-                                        genderWanitaRadio.checked = true;
+                                    for (let i = 0; i < mstKuData.length; i++) {
+                                        const kuEntry = mstKuData[i];
+
+                                        // Convert string dates from database (e.g., '2005-01-01') to Date objects
+                                        // Laravel's date casting often sends 'YYYY-MM-DD' which Date() can parse.
+                                        const lahirMulai = new Date(kuEntry.LAHIRMULAI);
+                                        const lahirSampai = new Date(kuEntry.LAHIRSAMPAI);
+
+                                        // Ensure comparison dates are valid
+                                        if (!isNaN(lahirMulai.getTime()) && !isNaN(lahirSampai.getTime())) {
+                                            // Normalize KU range dates: start of 'LAHIRMULAI' to end of 'LAHIRSAMPAI'
+                                            lahirMulai.setHours(0, 0, 0, 0); // Start of day
+                                            lahirSampai.setHours(23, 59, 59, 999); // End of day
+
+                                            // Compare athlete's birth date within the KU range
+                                            if (athleteBirthDate >= lahirMulai && athleteBirthDate <= lahirSampai) {
+                                                kuDSelect.value = kuEntry.KU; // Set the KU dropdown value
+                                                kuFound = true;
+                                                break; // Found a match, no need to check further KUs
+                                            }
+                                        } else {
+                                            console.warn('Invalid LAHIRMULAI or LAHIRSAMPAI date for KU:', kuEntry.KU);
+                                        }
+                                    }
+
+                                    if (!kuFound) {
+                                        console.log("No matching KU found for athlete's birth date:", athleteDetails.TGLLAHIR);
+                                        kuDSelect.value = ''; // Ensure no KU is selected if no match
                                     }
                                 } else {
-                                    // Default to Wanita if not specified, or uncheck both
-                                    genderPriaRadio.checked = false;
-                                    genderWanitaRadio.checked = false; // Or default to one
+                                    // If athlete has no birth date or no MstKU data, ensure KU is cleared
+                                    kuDSelect.value = '';
+                                }
+                                // --- END NEW KU LOGIC ---
+
+                                // --- Handle Gender (UPDATED LOGIC) ---
+                                // First, uncheck both to ensure a clean state
+                                if (genderPriaRadio) genderPriaRadio.checked = false;
+                                if (genderWanitaRadio) genderWanitaRadio.checked = false;
+
+                                if (athleteDetails.GENDER) {
+                                    const genderValue = athleteDetails.GENDER.toUpperCase(); // Convert to uppercase
+
+                                    if (genderValue === 'PA') { // Check for 'PA'
+                                        if (genderPriaRadio) genderPriaRadio.checked = true;
+                                    } else if (genderValue === 'PI') { // Check for 'PI'
+                                        if (genderWanitaRadio) genderWanitaRadio.checked = true;
+                                    }
+                                    // If it's neither 'PA' nor 'PI', both remain unchecked or you can set a default
+                                } else {
+                                    // If GENDER is null/empty, default to Wanita (or leave both unchecked)
+                                    if (genderWanitaRadio) genderWanitaRadio.checked = true;
                                 }
 
                                 // Handle Sparing Partner
@@ -375,7 +440,12 @@
                                     sparingPartnerYesRadio.checked = false;
                                     sparingPartnerNoRadio.checked = true; // Default to 'Bukan SP'
                                 }
-                                sparingPartnerNumber.value = athleteDetails.SPARING_NUMBER || ''; // Adjust column name
+
+                                // UPDATED: Populate nias_number with NONIAS column
+                                if (niasNumber) {
+                                    niasNumber.value = athleteDetails.NONIAS || ''; // Set value from NONIAS column
+                                }
+                                // sparingPartnerNumber.value = athleteDetails.SPARING_NUMBER || ''; // Adjust column name
 
                                 // --- End Populate Form Fields ---
 

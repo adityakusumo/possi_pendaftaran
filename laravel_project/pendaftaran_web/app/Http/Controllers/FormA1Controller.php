@@ -13,6 +13,7 @@ use App\Models\PilihanPesertaKotaKab;
 use App\Models\MstClub;
 use App\Models\SpecialUser; // Keep this for SpecialUser table check
 use App\Models\MstPeserta;
+use App\Models\MstKU;
 use App\Models\NIAS;
 use Carbon\Carbon; // Keep this for expiry date check
 
@@ -415,21 +416,27 @@ class FormA1Controller extends Controller
             return redirect()->route('login')->withErrors('Silakan masuk untuk melanjutkan.');
         }
 
-        // --- NEW: Fetch JNSKOMPETISI from the Kompetisi table ---
-        $kompetisi = Kompetisi::first(); // !!! IMPORTANT: Adjust this query !!!
-        // This line currently fetches the first competition record.
-        // You might need:
-        // - Kompetisi::where('status', 'active')->first();
-        // - Kompetisi::find($user->kompetisi_id); // If user is linked to a competition
-        // - Or any other logic to determine the current competition
-
+        $kompetisi = Kompetisi::first(); // Fetch the relevant competition record
         $userJnsKompetisi = null;
-        if ($kompetisi && $kompetisi->JNSKOMPETISI) {
-            $userJnsKompetisi = mb_strtoupper($kompetisi->JNSKOMPETISI, 'UTF-8');
+        $wajibNiasStatusText = ''; // Initialize the variable to hold the status text
+
+        if ($kompetisi) {
+            if ($kompetisi->JNSKOMPETISI) {
+                $userJnsKompetisi = mb_strtoupper($kompetisi->JNSKOMPETISI, 'UTF-8');
+            }
+
+            // Determine the text based on the WAJIBNIAS column
+            // Assuming WAJIBNIAS is an integer column (0 or 1)
+            if (isset($kompetisi->WAJIBNIAS)) {
+                if ($kompetisi->WAJIBNIAS == 0) {
+                    $wajibNiasStatusText = 'Bebas';
+                } elseif ($kompetisi->WAJIBNIAS == 1) {
+                    $wajibNiasStatusText = 'SP Jika tanpa NIAS';
+                }
+            } else {
+                $wajibNiasStatusText = 'Status tidak tersedia'; // Fallback if WAJIBNIAS is null/not set
+            }
         } else {
-            // Handle case where no competition or JNSKOMPETISI is found
-            // For safety, we can default to a state that shows no data,
-            // or redirect, or provide a message.
             return redirect()->back()->withErrors('Tidak dapat menentukan jenis kompetisi saat ini.');
         }
         // --- END NEW ---
@@ -444,9 +451,15 @@ class FormA1Controller extends Controller
                 // Assuming user->namakota maps to NIAS.NAMAKOTA
                 if ($user->JENIS) {
                     $query->whereRaw('UPPER(JENIS) = ?', [mb_strtoupper($user->JENIS, 'UTF-8')]);
+                } else {
+                    // If NAMACLUB is not set for user in 'C' case, ensure no results
+                    $query->whereRaw('1 = 0');
                 }
                 if ($user->NAMAKOTA) {
                     $query->whereRaw('UPPER(NAMAKOTA) = ?', [mb_strtoupper($user->NAMAKOTA, 'UTF-8')]);
+                } else {
+                    // If NAMACLUB is not set for user in 'C' case, ensure no results
+                    $query->whereRaw('1 = 0');
                 }
                 break;
 
@@ -463,6 +476,9 @@ class FormA1Controller extends Controller
                     // --- End Direct SQL Debugging ---
 
                     $query->whereRaw('UPPER(NAMACLUB) = ?', [$userClubName]);
+                } else {
+                    // If NAMACLUB is not set for user in 'C' case, ensure no results
+                    $query->whereRaw('1 = 0');
                 }
 
                 break;
@@ -471,6 +487,9 @@ class FormA1Controller extends Controller
                 // Assuming user->namaprop maps to NIAS.NAMAPROP
                 if ($user->NAMAPROP) {
                     $query->whereRaw('UPPER(NAMAPROP) = ?', [mb_strtoupper($user->NAMAPROP, 'UTF-8')]);
+                } else {
+                    // If NAMACLUB is not set for user in 'C' case, ensure no results
+                    $query->whereRaw('1 = 0');
                 }
                 break;
 
@@ -481,30 +500,28 @@ class FormA1Controller extends Controller
                 break;
         }
 
+        // --- DEBUGGING (Optional) ---
+        // You can uncomment these lines to see the generated SQL query and its bindings
         // dd($query->toSql(), $query->getBindings());
+        // --- END DEBUGGING ---
 
-        $niasList = $query->get(); // Execute the query and get the results
-        // dd($niasList);
+        // --- Sort data by NAMA ATLET (assuming column is 'NAMA') in ascending order ---
+        $query->orderBy('NAMA', 'asc');
 
-        // $searchName = 'PENGUIN DC';
-        // dump("Literal search string hex: " . bin2hex($searchName));
-        // // You can then compare this hex to hex_db from your DBeaver query.
-        // 50454e4755494e204443
-        // 50454e4755494e204443
+        // --- Pagination Implementation ---
+        $perPage = 20; // Define how many items you want per page
+        $niasList = $query->paginate($perPage); // Execute the query and paginate the results
 
-        // $rawSqlResultLimited = DB::select("SELECT * FROM NIAS WHERE UPPER(NAMACLUB) = 'PENGUIN DC' LIMIT 10");
-        // dd(count($rawSqlResultLimited)); // What does this return?
-        // $rawSqlResult = DB::select("SELECT * FROM NIAS WHERE UPPER(GENDER) = 'PI'");
-        // dd(count($rawSqlResult)); // Does this show the correct total count (e.g., 50 from DBeaver)?
-        // $rawSqlResult = DB::select("SELECT * FROM NIAS WHERE UPPER(NAMACLUB) = 'PENGUIN DC'");
-        // dd($rawSqlResult); // This will dump the result of the raw SQL query
+        // // --- Fetch KU options from MstKU table ---
+        // $mstKuOptions = MstKU::pluck('KU', 'KU')->toArray(); // Fetches 'KU' column as both key and value
+        // // If you need to sort them:
+        // $mstKuOptions = MstKU::orderBy('KU', 'asc')->pluck('KU', 'KU')->toArray();
 
-        // try {
-        //     $niasList = $query->get();
-        //     dd($niasList); // Still dd it here
-        // } catch (\Exception $e) {
-        //     dd($e->getMessage()); // If there's an error during fetch, it will show here
-        // }
+        // --- UPDATED: Fetch all relevant MstKU data ---
+        // We get all columns and order by KU for consistent display/looping
+        $mstKuData = MstKU::orderBy('KU', 'asc')->get()->toArray();
+        // For the dropdown options, we still just need the KU values
+        $mstKuOptions = array_column($mstKuData, 'KU', 'KU');
 
         // --- Fetch NIAS data for table display and auto-fill ---
         $niasToAutofill = $niasList->first();
@@ -515,11 +532,11 @@ class FormA1Controller extends Controller
         // --- Initialize auto-fill details (these will be passed to the view) ---
         $autoNamaKontingenValue = null; // Value for nama_kontingen select
         $autoFillDetails = [
-            'NAMACLUB'      => '',
-            'JENIS'      => '',
-            'NAMAKOTA'      => '',
-            'NAMAPROP'  => '',
-            'NAMA'    => ''
+            'NAMACLUB' => $user->NAMACLUB ?? '', // User's club name
+            'JENIS' => $user->JENIS ?? '',       // User's JENIS (e.g., KAB/KOTA code)
+            'NAMAKOTA' => $user->NAMAKOTA ?? '', // User's city/kabupaten name
+            'NAMAPROP' => $user->NAMAPROP ?? '', // User's province name
+            'NAMA' => '',                        // Nama Atlet should be empty initially
         ];
 
         // --- Populate autoFillDetails from MstPeserta (PRIORITY 1: Existing User Data) ---
@@ -532,6 +549,6 @@ class FormA1Controller extends Controller
             $autoFillDetails['NAMA']    = $formatDetailValue($niasToAutofill->NAMA);
         }
 
-        return view('form_a1_namaatlet', compact('niasList', 'autoFillDetails'));
+        return view('form_a1_namaatlet', compact('niasList', 'autoFillDetails', 'mstKuOptions', 'mstKuData', 'wajibNiasStatusText'));
     }
 }
