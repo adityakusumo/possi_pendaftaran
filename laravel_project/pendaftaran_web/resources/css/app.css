@@ -5,3 +5,35 @@
 
 /* Import your custom styles AFTER Tailwind */
 /* @import 'style.css'; */
+
+/* In your main CSS file (e.g., resources/css/app.css) */
+
+/* Style for the text inside disabled Select2 dropdowns (light mode) */
+.select2-container--disabled .select2-selection__rendered {
+    color: #4a5568 !important; /* Tailwind's gray-700 - darker text */
+    /* You can adjust this color to be even darker if needed, e.g., #2d3748 for gray-800 */
+}
+
+/* Style for the text inside disabled Select2 dropdowns (dark mode) */
+/* Assuming you have a 'dark' class on your body or html element for dark mode */
+.dark .select2-container--disabled .select2-selection__rendered {
+    color: #cbd5e0 !important; /* Tailwind's gray-400 - darker text for dark background */
+    /* You can adjust this color, e.g., #e2e8f0 for gray-200 */
+}
+
+
+/* Optional: Also adjust the color of the dropdown arrow if it's too light */
+.select2-container--disabled .select2-selection__arrow b {
+    border-top-color: #4a5568 !important; /* gray-700 for light mode */
+}
+.dark .select2-container--disabled .select2-selection__arrow b {
+    border-top-color: #cbd5e0 !important; /* gray-400 for dark mode */
+}
+
+/* Optional: Adjust placeholder text color if using allowClear and no selection is made */
+.select2-container--disabled .select2-selection__placeholder {
+    color: #a0aec0 !important; /* Tailwind's gray-500, adjust as needed */
+}
+.dark .select2-container--disabled .select2-selection__placeholder {
+    color: #94a3b8 !important; /* Tailwind's gray-400, adjust as needed */
+}

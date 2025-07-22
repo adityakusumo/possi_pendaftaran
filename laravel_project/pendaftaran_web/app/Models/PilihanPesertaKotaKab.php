@@ -14,6 +14,7 @@ class PilihanPesertaKotaKab extends Model
 
     // Tentukan primary key jika tidak 'id'
     protected $primaryKey = 'IDPILIHAN';
+    public $incrementing = true;
 
     // Tentukan kolom yang dapat diisi secara massal (mass assignable)
     protected $fillable = [

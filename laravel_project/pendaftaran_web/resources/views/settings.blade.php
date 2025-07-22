@@ -56,6 +56,10 @@
                                     </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                        Domisili
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Role
                                     </th>
                                     <th scope="col"
@@ -97,6 +101,25 @@
                                         </select>
                                     </td>
                                     {{-- END CLUB DROPDOWN --}}
+
+                                    {{-- NEW CELL: Domisili Dropdown --}}
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                        <select name="domisili_select" {{-- This is the name for the form submission --}}
+                                            class="form-select domisili-select p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                                                bg-white dark:bg-gray-700 disabled:bg-gray-200 disabled:dark:bg-gray-600
+                                                dark:text-gray-200 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                            disabled>
+                                            <option value="">Select Domisili</option>
+                                            @foreach ($domisiliOptions as $option)
+                                            <option value="{{ $option['value'] }}"
+                                                {{ ($user->JENISDOM && $user->NAMAKOTADOM && ($user->JENISDOM . ' ' . $user->NAMAKOTADOM) === $option['value']) ? 'selected' : '' }}>
+                                                {{ $option['display'] }}
+                                            </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    {{-- END NEW CELL: Domisili Dropdown --}}
+
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                         {{-- Use a form for updates --}}
                                         <form id="user-update-form-{{ $user->id }}"
@@ -216,6 +239,11 @@
                 select.classList.remove('bg-white', 'dark:bg-gray-700');
                 select.classList.add('disabled:bg-gray-200', 'disabled:dark:bg-gray-600');
             });
+            document.querySelectorAll('.domisili-select').forEach(select => {
+                select.disabled = true;
+                select.classList.remove('bg-white', 'dark:bg-gray-700');
+                select.classList.add('disabled:bg-gray-200', 'disabled:dark:bg-gray-600');
+            });
             document.querySelectorAll('.edit-button').forEach(button => {
                 button.textContent = 'Edit'; // Ensure button text is "Edit"
                 // Reset button colors to default "Edit" state colors
@@ -301,6 +329,21 @@
                 return password.substring(0, length);
             }
 
+            // Initialize Select2 on page load
+            $('.club-select').select2({
+                placeholder: "Select Club",
+                allowClear: true
+            });
+            // NEW: Initialize Select2 for domisili dropdowns
+            $('.domisili-select').select2({
+                placeholder: "Select Domisili",
+                allowClear: true
+            });
+            $('.role-select').select2({
+                placeholder: "Select Role",
+                minimumResultsForSearch: Infinity // Often good for roles as it's a small fixed list
+            });
+
             editButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const row = this.closest('tr');
@@ -308,10 +351,11 @@
 
                     const roleSelectElement = row.querySelector('.role-select');
                     const clubSelectElement = row.querySelector('.club-select');
+                    const domisiliSelectElement = row.querySelector('.domisili-select'); // NEW: Get domisili select
                     const submitButton = row.querySelector('.update-role-submit-btn');
                     const form = row.querySelector(`#user-update-form-${userId}`); // Get the specific form for this user
 
-                    if (!roleSelectElement || !clubSelectElement || !form) {
+                    if (!roleSelectElement || !clubSelectElement || !domisiliSelectElement || !form) {
                         console.error('Error: Could not find required elements for this row.');
                         return;
                     }
@@ -321,17 +365,48 @@
                         // Action: Enable dropdowns, change button to "Save".
                         roleSelectElement.disabled = false;
                         clubSelectElement.disabled = false;
+                        domisiliSelectElement.disabled = false;
+
                         this.textContent = 'Save';
                         this.classList.remove('text-indigo-600', 'hover:text-indigo-900', 'dark:text-indigo-400', 'dark:hover:text-indigo-600');
                         this.classList.add('text-green-600', 'hover:text-green-900', 'dark:text-green-400', 'dark:hover:text-green-600');
                         row.classList.add('editing-row');
-                        console.log('Role and Club dropdowns enabled for editing.');
+
+                        // Re-initialize Select2 on the now enabled dropdowns
+                        // Destroying and re-initializing is needed when disabled state changes
+                        if ($(clubSelectElement).data('select2')) {
+                            $(clubSelectElement).select2('destroy');
+                        }
+                        $(clubSelectElement).select2({
+                            placeholder: "Select Club",
+                            allowClear: true
+                        });
+
+                        if ($(domisiliSelectElement).data('select2')) {
+                            $(domisiliSelectElement).select2('destroy');
+                        }
+                        $(domisiliSelectElement).select2({
+                            placeholder: "Select Domisili",
+                            allowClear: true
+                        }); // NEW: Re-init domisili
+
+                        if ($(roleSelectElement).data('select2')) {
+                            $(roleSelectElement).select2('destroy'); // Destroy if already initialized
+                        }
+                        $(roleSelectElement).select2({
+                            placeholder: "Select Role",
+                            minimumResultsForSearch: Infinity
+                        });
+
+
+                        console.log('Dropdowns enabled for editing.');
                     } else {
                         // Current state: "Save" button, dropdowns are enabled.
                         // Action: Capture values and submit form, then disable dropdowns.
 
                         // 1. Get the selected club value
                         const selectedClubId = clubSelectElement.value;
+                        const selectedDomisiliValue = domisiliSelectElement.value; // NEW: Get domisili value
 
                         // *** NEW VALIDATION LOGIC HERE ***
                         if (selectedClubId === '') { // Check if the "Select Club" option (value="") is chosen
@@ -364,12 +439,24 @@
                         // No longer need to move the select element, as the hidden input carries the data
                         // clubSelectElement is just for display now, its value is sent via hidden input.
 
-                        submitButton.click(); // This submits the form
+                        // 2. NEW: Create/Update hidden input for Domisili
+                        let hiddenDomisiliInput = form.querySelector('input[name="domisili_select"]');
+                        if (!hiddenDomisiliInput) {
+                            hiddenDomisiliInput = document.createElement('input');
+                            hiddenDomisiliInput.type = 'hidden';
+                            hiddenDomisiliInput.name = 'domisili_select';
+                            form.appendChild(hiddenDomisiliInput);
+                        }
+                        hiddenDomisiliInput.value = selectedDomisiliValue; // Set domisili value
+
+
+                        form.querySelector('.update-role-submit-btn').click(); // Submit the form
                         console.log('Form submission initiated with hidden club input.');
 
                         // Revert UI state *after* submission is triggered
                         roleSelectElement.disabled = true;
                         clubSelectElement.disabled = true;
+                        domisiliSelectElement.disabled = true;
                         this.textContent = 'Edit';
                         this.classList.remove('text-green-600', 'hover:text-green-900', 'dark:text-green-400', 'dark:hover:text-green-600');
                         this.classList.add('text-indigo-600', 'hover:text-indigo-900', 'dark:text-indigo-400', 'dark:hover:text-indigo-600');

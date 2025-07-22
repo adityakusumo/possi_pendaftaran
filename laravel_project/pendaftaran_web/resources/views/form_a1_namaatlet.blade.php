@@ -180,6 +180,7 @@
                                                 <input type="radio" name="sparing_partner" value="BUKAN_SP" id="sparing_partner_no" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600" checked>
                                                 <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Bukan SP') }}</span>
                                             </label>
+
                                             <input type="text" name="nias_number" id="nias_number" value="" readonly
                                                 class="flex-1 rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         </div>

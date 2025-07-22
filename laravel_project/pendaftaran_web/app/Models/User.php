@@ -32,6 +32,12 @@ class User extends Authenticatable
         'KDCLUB',
         'IDCLUB', // Ensure this is fillable
         'NAMACLUB', // Ensure this is fillable
+        'KDPROPDOM',
+        'NAMAPROPDOM',
+        'KDJENISDOM',
+        'JENISDOM',
+        'KDKOTADOM',
+        'NAMAKOTADOM',
     ];
 
     /**

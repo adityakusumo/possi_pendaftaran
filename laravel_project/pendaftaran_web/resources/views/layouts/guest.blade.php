@@ -7,12 +7,16 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        {{-- Vite-compiled CSS (e.g., resources/css/app.css) --}}
+        @vite(['resources/css/app.css'])
+
+        {{-- Select2 CSS --}}
+        {{-- Place after your app.css so you can easily override Select2 styles with Tailwind if needed --}}
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     </head>
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-white dark:bg-white">
@@ -26,5 +30,17 @@
                 {{ $slot }}
             </div>
         </div>
+
+        {{-- jQuery (Select2's dependency) --}}
+        {{-- It's best to place scripts just before the closing </body> tag for performance --}}
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+        {{-- Select2 JS --}}
+        {{-- Must be loaded after jQuery --}}
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+        {{-- Vite-compiled JS (e.g., resources/js/app.js) --}}
+        {{-- Place after other libraries if your app.js depends on them, or contains Select2 initializations --}}
+        @vite(['resources/js/app.js'])
     </body>
 </html>
