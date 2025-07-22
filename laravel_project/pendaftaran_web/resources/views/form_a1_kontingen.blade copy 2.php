@@ -246,17 +246,14 @@
             var mstClubDetails = @json($mstClubDetails ?? []);
 
             // Data from PilihanPesertaKotaKab (for jnsKompetisi 'K' and 'P' and general lookups)
-            // NEW: Use this for 'K' type
-            var namaKotaKabPilihanPesertaData = @json($namaKotaKabPilihanPeserta ?? []); // <--- NEW VAR HERE
-            // The old namaClubsPilihanPesertaData is not directly used for the primary Select2 anymore
-            // var namaClubsPilihanPesertaData = @json($namaClubsPilihanPeserta ?? []);
+            var namaClubsPilihanPesertaData = @json($namaClubsPilihanPeserta ?? []);
             var namaPropinsiPilihanPesertaData = @json($namaPropinsiPilihanPeserta ?? []);
             var pilihanPesertaKotaKabDetails = @json($pilihanPesertaKotaKabDetails ?? []);
 
             // DEBUG CONSOLE LOGS FOR SELECT2 DATA SOURCES (keep these for now)
-            console.log('DEBUG: namaClubsMstClubData for Select2 (C):', namaClubsMstClubData);
-            console.log('DEBUG: namaKotaKabPilihanPesertaData for Select2 (K):', namaKotaKabPilihanPesertaData); // <--- NEW LOG
-            console.log('DEBUG: namaPropinsiPilihanPesertaData for Select2 (P):', namaPropinsiPilihanPesertaData);
+            console.log('DEBUG: namaClubsMstClubData for Select2:', namaClubsMstClubData);
+            console.log('DEBUG: namaClubsPilihanPesertaData for Select2:', namaClubsPilihanPesertaData);
+            console.log('DEBUG: namaPropinsiPilihanPesertaData for Select2:', namaPropinsiPilihanPesertaData);
 
             var isSettingNamaKontingenValue = false;
 
@@ -293,9 +290,8 @@
                             if (typeof data.text === 'undefined') {
                                 return null;
                             }
-                            // The matcher should check both 'text' and 'id' as 'id' is what the select2 option actually holds
                             if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1 ||
-                                (data.id && data.id.toLowerCase().indexOf(params.term.toLowerCase()) > -1)) {
+                                data.id.toLowerCase().indexOf(params.term.toLowerCase()) > -1) {
                                 return data;
                             }
                             return null;
@@ -385,8 +381,7 @@
                 if (jnsKompetisi === 'C') {
                     initSelect2(namaKontingenElement, namaClubsMstClubData, 'Pilih Nama Club', true, false, false);
                 } else if (jnsKompetisi === 'K') {
-                    // *** IMPORTANT CHANGE HERE ***
-                    initSelect2(namaKontingenElement, namaKotaKabPilihanPesertaData, 'Pilih Nama Kota/Kab', true, false, false); // Use the new data source
+                    initSelect2(namaKontingenElement, namaClubsPilihanPesertaData, 'Pilih Nama Kota/Kab', true, false, false);
                 } else if (jnsKompetisi === 'P') {
                     initSelect2(namaKontingenElement, namaPropinsiPilihanPesertaData, 'Pilih Nama Provinsi', true, false, false);
                 }
@@ -409,7 +404,6 @@
                     if (jnsKompetisi === 'C') {
                         handleNamaKontingenSelection(selectedId, mstClubDetails, 'JENIS', 'NAMAKOTA', 'NAMAPROP');
                     } else if (jnsKompetisi === 'K') {
-                        // For 'K', the key in pilihanPesertaKotaKabDetails needs to match the selected ID (JENIS NAMAKOTA)
                         handleNamaKontingenSelection(selectedId, pilihanPesertaKotaKabDetails, 'JENIS', 'NAMAKOTA', 'NAMAPROPINSI');
                     } else if (jnsKompetisi === 'P') {
                         // For 'P', no details, just select the province name

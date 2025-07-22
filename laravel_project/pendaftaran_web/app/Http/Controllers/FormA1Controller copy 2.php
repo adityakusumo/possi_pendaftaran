@@ -21,11 +21,17 @@ class FormA1Controller extends Controller
 {
     public function kontingen(): View
     {
-        $user = Auth::user();
-        $userEmail = $user->email;
+        $user = Auth::user(); // Get the currently authenticated user
+        // if (!$user) {
+        //     // Handle unauthenticated user - perhaps redirect to login
+        //     return redirect()->route('login')->withErrors('Silakan masuk untuk melanjutkan.');
+        // }
+
+        $userEmail = $user->email; // Get the user's email
 
         $currentKompetisiSetting = Kompetisi::find(1);
         $jnsKompetisi = $currentKompetisiSetting ? mb_strtoupper(trim($currentKompetisiSetting->JNSKOMPETISI), 'UTF-8') : null;
+
 
         $jenisKompetisiOptions = [
             'K' => 'Antar Kota/Kab',
@@ -33,6 +39,7 @@ class FormA1Controller extends Controller
             'P' => 'Antar Provinsi',
         ];
 
+        // --- Data for Select2 and other dropdowns (usually fetched regardless of mode) ---
         $formatSelect2Data = function ($name) {
             if ($name === null) return null;
             return ['id' => mb_strtoupper($name, 'UTF-8'), 'text' => mb_strtoupper($name, 'UTF-8')];
@@ -64,12 +71,11 @@ class FormA1Controller extends Controller
         $pilihanPesertaKotaKabRawData = PilihanPesertaKotaKab::select('NAMACLUB', 'JENIS', 'NAMAKOTA', 'NAMAPROPINSI')
             ->get();
 
-        $namaKotaKabPilihanPeserta = PilihanPesertaKotaKab::select(DB::raw("CONCAT(JENIS, ' ', NAMAKOTA) AS full_name"))
+        $namaClubsPilihanPeserta = PilihanPesertaKotaKab::select('NAMACLUB')
             ->distinct()
-            ->whereNotNull('JENIS')
-            ->whereNotNull('NAMAKOTA')
-            ->orderBy('full_name', 'asc')
-            ->pluck('full_name')
+            ->whereNotNull('NAMACLUB')
+            ->orderBy('NAMACLUB', 'asc')
+            ->pluck('NAMACLUB')
             ->map($formatSelect2Data)
             ->toArray();
 
@@ -81,35 +87,17 @@ class FormA1Controller extends Controller
             ->map($formatSelect2Data)
             ->toArray();
 
-        // Re-key pilihanPesertaKotaKabDetails to allow lookup by JENIS NAMAKOTA and NAMAPROPINSI
-        $pilihanPesertaKotaKabDetails = [];
-        foreach ($pilihanPesertaKotaKabRawData as $item) {
-            $jenisKotaKey = null;
-            $propinsiKey = null;
-
-            if ($item['JENIS'] && $item['NAMAKOTA']) {
-                $jenisKotaKey = mb_strtoupper($item['JENIS'] . ' ' . $item['NAMAKOTA'], 'UTF-8');
-            }
-            if ($item['NAMAPROPINSI']) {
-                $propinsiKey = mb_strtoupper($item['NAMAPROPINSI'], 'UTF-8');
-            }
-
-            $detail = [
-                'NAMACLUB' => $formatDetailValue($item['NAMACLUB']),
-                'JENIS' => $formatDetailValue($item['JENIS']),
-                'NAMAKOTA' => $formatDetailValue($item['NAMAKOTA']),
-                'NAMAPROPINSI' => $formatDetailValue($item['NAMAPROPINSI']),
+        $pilihanPesertaKotaKabDetails = $pilihanPesertaKotaKabRawData->mapWithKeys(function ($item) use ($formatDetailValue) {
+            $key = $item['NAMACLUB'] ? mb_strtoupper($item['NAMACLUB'], 'UTF-8') : mb_strtoupper($item['NAMAKOTA'], 'UTF-8');
+            return [
+                $key => [
+                    'NAMACLUB' => $formatDetailValue($item['NAMACLUB']),
+                    'JENIS' => $formatDetailValue($item['JENIS']),
+                    'NAMAKOTA' => $formatDetailValue($item['NAMAKOTA']),
+                    'NAMAPROPINSI' => $formatDetailValue($item['NAMAPROPINSI']),
+                ]
             ];
-
-            if ($jenisKotaKey) {
-                $pilihanPesertaKotaKabDetails[$jenisKotaKey] = $detail;
-            }
-            if ($propinsiKey) {
-                // This key is less specific and might overwrite if multiple cities/clubs share a province name.
-                // For 'P' type, this is the primary lookup for details if they exist beyond just the name.
-                $pilihanPesertaKotaKabDetails[$propinsiKey] = $detail;
-            }
-        }
+        })->toArray();
 
 
         // --- Determine appliedMode (based on user roles and SpecialUser table) ---
@@ -120,9 +108,9 @@ class FormA1Controller extends Controller
         $isUserOperatorViaSpatie = $user->hasRole('operator');
         $isUserSpecialViaTable = false;
 
-        if ($userEmail) {
+        if ($userEmail) { // Only check SpecialUser table if user has an email
             $specialUser = SpecialUser::where('email', $userEmail)
-                ->where('expired_at', '>', Carbon::now())
+                ->where('expired_at', '>', Carbon::now()) // Check if not expired
                 ->first();
             if ($specialUser) {
                 $isUserSpecialViaTable = true;
@@ -140,8 +128,13 @@ class FormA1Controller extends Controller
         }
 
 
+        // --- Fetch MstPeserta data for table display and auto-fill ---
+        $mstPesertaList = MstPeserta::where('email', $userEmail)->get(); // For table display
+        $mstPesertaToAutofill = $mstPesertaList->first(); // The specific record to use for form auto-fill
+
+
         // --- Initialize auto-fill details (these will be passed to the view) ---
-        $autoSelectedClubValue = null;
+        $autoSelectedClubValue = null; // Value for nama_kontingen select
         $autoFillDetails = [
             'JENIS'         => '',
             'NAMAKOTA'      => '',
@@ -152,79 +145,70 @@ class FormA1Controller extends Controller
             'TELPON'        => '',
             'OFFICIAL'      => 1, // Default for number input often starts at 1
             'NAMACLUB'      => '', // Used for the concatenated name in Mode 2
-            'ASAL'          => ''  // Original name for ASAL column (will be derived)
+            'ASAL'          => ''  // Original name for ASAL column
         ];
 
-        // --- Logic for autoSelectedClubValue and autoFillDetails in Mode 2 (ONLY from users table) ---
-        if ($appliedMode === 2) {
-            // Populate contact person, phone, and nation directly from Auth::user()
-            $autoFillDetails['CONTACTPERSON'] = $formatDetailValue($user->name); // Assuming 'name' is contact person
-            $autoFillDetails['TELPON']        = $formatDetailValue($user->phone); // Assuming 'phone' exists
-            $autoFillDetails['OFFICIAL']      = 1; // Default
-            $autoFillDetails['NAMANEGARA']    = $formatDetailValue($user->NAMANEGDOM); // Assuming user has NAMANEGDOM
+        // --- Populate autoFillDetails from MstPeserta (PRIORITY 1: Existing User Data) ---
+        if ($mstPesertaToAutofill) {
+            // These fields directly come from MstPeserta
+            $autoFillDetails['CONTACTPERSON'] = $formatDetailValue($mstPesertaToAutofill->CONTACTPERSON);
+            $autoFillDetails['TELPON']        = $formatDetailValue($mstPesertaToAutofill->TELPON);
+            $autoFillDetails['OFFICIAL']      = $mstPesertaToAutofill->OFFICIAL !== null ? $mstPesertaToAutofill->OFFICIAL : 1; // Keep as number
+            $autoFillDetails['NAMAPROP']      = $formatDetailValue($mstPesertaToAutofill->NAMAPROPDOM);
+            $autoFillDetails['NAMAPROPINSI']  = $formatDetailValue($mstPesertaToAutofill->NAMAPROPDOM); // For compatibility
+            $autoFillDetails['NAMANEGARA']    = $formatDetailValue($mstPesertaToAutofill->NAMANEGDOM);
+            $autoFillDetails['JENIS']         = $formatDetailValue($mstPesertaToAutofill->JENISDOM);
+            $autoFillDetails['NAMAKOTA']      = $formatDetailValue($mstPesertaToAutofill->NAMAKOTADOM);
+            $autoFillDetails['NAMACLUB']      = $formatDetailValue($mstPesertaToAutofill->NAMACLUB); // The (potentially concatenated) kontingen name
+            $autoFillDetails['ASAL']          = $formatDetailValue($mstPesertaToAutofill->ASAL);   // The original kontingen name
+        }
+
+
+        // --- Further populate autoFillDetails based on Kompetisi Type and MstClub/PilihanPeserta (PRIORITY 2: If no MstPeserta data, or for other auto-selection) ---
+        // This logic fills in if no MstPeserta data exists OR if MstPeserta doesn't have a specific field.
+        // If $mstPesertaToAutofill is NOT present, then the original logic of deriving from user's club name applies.
+        // Otherwise, if $mstPesertaToAutofill IS present, we just use its values.
+
+        // This section is mainly for determining `autoSelectedClubValue` for the `nama_kontingen` dropdown
+        // and potentially setting default `JENIS`, `NAMAKOTA`, `NAMAPROP` if MstPeserta didn't have them.
+        // However, if MstPeserta is the source of truth, this complex logic for autoFillDetails might be redundant
+        // if `autoFillDetails` is already fully populated by MstPeserta.
+        // Let's simplify this. If `mstPesertaToAutofill` exists, its data overrides others.
+
+        // Determine `autoSelectedClubValue` (for the main 'Nama Kontingen' field in Mode 2)
+        // If MstPeserta exists, use its NAMACLUB or ASAL. Otherwise, try to derive from user's club.
+        if ($mstPesertaToAutofill) {
+            // For autoSelectedClubValue, prioritize the actual NAMACLUB from MstPeserta
+            $autoSelectedClubValue = $autoFillDetails['NAMACLUB'] ?: $autoFillDetails['ASAL'];
+        } elseif ($user && $user->NAMACLUB) {
+            // Fallback: If no MstPeserta for user, try to derive from User->NAMACLUB
+            $normalizedUserClubFromUsersTable = mb_strtoupper($user->NAMACLUB, 'UTF-8');
+            $userMstClubDetails = MstClub::whereRaw('UPPER(NAMACLUB) = ?', [$normalizedUserClubFromUsersTable])->first();
 
             if ($jnsKompetisi === 'C') {
-                if ($user->NAMACLUB) {
-                    $normalizedUserClub = $formatDetailValue($user->NAMACLUB);
-                    $autoSelectedClubValue = $normalizedUserClub;
-
-                    // Try to find full details from MstClub based on user's NAMACLUB
-                    $clubDetails = MstClub::whereRaw('UPPER(NAMACLUB) = ?', [$normalizedUserClub])->first();
-                    if ($clubDetails) {
-                        $autoFillDetails['JENIS']    = $formatDetailValue($clubDetails->JENIS);
-                        $autoFillDetails['NAMAKOTA'] = $formatDetailValue($clubDetails->NAMAKOTA);
-                        $autoFillDetails['NAMAPROP'] = $formatDetailValue($clubDetails->NAMAPROP);
-                        $autoFillDetails['NAMACLUB'] = $formatDetailValue($clubDetails->NAMACLUB);
-                        $autoFillDetails['ASAL']     = $formatDetailValue($clubDetails->NAMACLUB); // ASAL defaults to NAMACLUB
-                    } else {
-                        // If no MstClub entry, default to user's raw NAMACLUB for other details
-                        $autoFillDetails['NAMACLUB'] = $normalizedUserClub;
-                        $autoFillDetails['ASAL'] = $normalizedUserClub;
-                        // JENIS, NAMAKOTA, NAMAPROP might remain empty if not found from MstClub
-                    }
+                $autoSelectedClubValue = $formatDetailValue($user->NAMACLUB);
+                if ($userMstClubDetails) {
+                    $autoFillDetails['JENIS'] = $formatDetailValue($userMstClubDetails->JENIS);
+                    $autoFillDetails['NAMAKOTA'] = $formatDetailValue($userMstClubDetails->NAMAKOTA);
+                    $autoFillDetails['NAMAPROP'] = $formatDetailValue($userMstClubDetails->NAMAPROP);
                 }
             } elseif ($jnsKompetisi === 'K') {
-                if ($user->NAMAKOTADOM) {
-                    $normalizedUserKota = $formatDetailValue($user->NAMAKOTADOM);
-                    // Find JENIS from PilihanPesertaKotaKab for concatenation
-                    $pkkEntry = PilihanPesertaKotaKab::whereRaw('UPPER(NAMAKOTA) = ?', [$normalizedUserKota])->first();
-                    if ($pkkEntry) {
-                        $autoSelectedClubValue = $formatDetailValue($pkkEntry->JENIS . ' ' . $pkkEntry->NAMAKOTA);
-                        $autoFillDetails['JENIS']        = $formatDetailValue($pkkEntry->JENIS);
-                        $autoFillDetails['NAMAKOTA']     = $formatDetailValue($pkkEntry->NAMAKOTA);
-                        $autoFillDetails['NAMAPROPINSI'] = $formatDetailValue($pkkEntry->NAMAPROPINSI);
-                        $autoFillDetails['NAMAPROP']     = $formatDetailValue($pkkEntry->NAMAPROPINSI); // For compatibility
-                        $autoFillDetails['ASAL']         = $autoSelectedClubValue; // ASAL for 'K' becomes the concatenated name
-                    } else {
-                        // If no matching JENIS is found, just use the city name for autoSelectedClubValue
-                        $autoSelectedClubValue = $normalizedUserKota;
-                        $autoFillDetails['NAMAKOTA']     = $normalizedUserKota;
-                        $autoFillDetails['NAMAPROPINSI'] = $formatDetailValue($user->NAMAPROPDOM);
-                        $autoFillDetails['NAMAPROP']     = $formatDetailValue($user->NAMAPROPDOM);
-                        $autoFillDetails['ASAL']         = $normalizedUserKota;
+                if ($userMstClubDetails && $userMstClubDetails->NAMAKOTA) {
+                    $autoSelectedClubValue = $formatDetailValue($userMstClubDetails->NAMAKOTA);
+                    $relatedPilihanPeserta = PilihanPesertaKotaKab::whereRaw('UPPER(NAMAKOTA) = ?', [$autoSelectedClubValue])->first();
+                    if ($relatedPilihanPeserta) {
+                        $autoFillDetails['JENIS'] = $formatDetailValue($relatedPilihanPeserta->JENIS);
+                        $autoFillDetails['NAMAKOTA'] = $formatDetailValue($relatedPilihanPeserta->NAMAKOTA);
+                        $autoFillDetails['NAMAPROP'] = $formatDetailValue($relatedPilihanPeserta->NAMAPROPINSI);
                     }
                 }
             } elseif ($jnsKompetisi === 'P') {
-                if ($user->NAMAPROPDOM) {
-                    $normalizedUserProp = $formatDetailValue($user->NAMAPROPDOM);
-                    $autoSelectedClubValue = $normalizedUserProp;
-                    $autoFillDetails['NAMAPROP']     = $normalizedUserProp;
-                    $autoFillDetails['NAMAPROPINSI'] = $normalizedUserProp;
-                    $autoFillDetails['ASAL']         = $normalizedUserProp; // ASAL for 'P' becomes the province name
-
-                    // If you need more details for a province (e.g., from PilihanPesertaKotaKab), you'd fetch them here
-                    $pkkEntry = PilihanPesertaKotaKab::whereRaw('UPPER(NAMAPROPINSI) = ?', [$normalizedUserProp])->first();
-                    if ($pkkEntry) {
-                        $autoFillDetails['NAMACLUB'] = $formatDetailValue($pkkEntry->NAMACLUB); // Example if relevant
-                        $autoFillDetails['JENIS'] = $formatDetailValue($pkkEntry->JENIS);
-                        $autoFillDetails['NAMAKOTA'] = $formatDetailValue($pkkEntry->NAMAKOTA);
-                    }
+                if ($userMstClubDetails && $userMstClubDetails->NAMAPROP) {
+                    $autoSelectedClubValue = $formatDetailValue($userMstClubDetails->NAMAPROP);
+                    // For P, no additional autoFillDetails from here, as NAMAPROP is the primary.
                 }
             }
         }
-        // $mstPesertaList remains only for table display, not for autofill logic here.
-        $mstPesertaList = \App\Models\MstPeserta::where('email', $userEmail)->get();
-
 
         return view('form_a1_kontingen', compact(
             'currentKompetisiSetting',
@@ -232,12 +216,12 @@ class FormA1Controller extends Controller
             'jnsKompetisi',
             'namaClubsMstClub',
             'mstClubDetails',
-            'namaKotaKabPilihanPeserta',
+            'namaClubsPilihanPeserta',
             'namaPropinsiPilihanPeserta',
             'pilihanPesertaKotaKabDetails',
             'appliedMode',
-            'autoSelectedClubValue', // This is what Mode 2 will use for the dropdown
-            'autoFillDetails', // This populates the other detail fields
+            'autoSelectedClubValue',
+            'autoFillDetails',
             'userRoleString',
             'mstPesertaList'
         ));
