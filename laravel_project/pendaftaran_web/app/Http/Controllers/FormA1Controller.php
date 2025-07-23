@@ -465,14 +465,14 @@ class FormA1Controller extends Controller
             case 'K': // JNS & NAMAKOTA in users table is equal to JENIS & NAMAKOTA in NIAS table
                 // Assuming user->jenis maps to NIAS.KDJENIS
                 // Assuming user->namakota maps to NIAS.NAMAKOTA
-                if ($user->JENIS) {
-                    $query->whereRaw('UPPER(JENIS) = ?', [mb_strtoupper($user->JENIS, 'UTF-8')]);
+                if ($user->JENISDOM) {
+                    $query->whereRaw('UPPER(JENISDOM) = ?', [mb_strtoupper($user->JENISDOM, 'UTF-8')]);
                 } else {
                     // If NAMACLUB is not set for user in 'C' case, ensure no results
                     $query->whereRaw('1 = 0');
                 }
-                if ($user->NAMAKOTA) {
-                    $query->whereRaw('UPPER(NAMAKOTA) = ?', [mb_strtoupper($user->NAMAKOTA, 'UTF-8')]);
+                if ($user->NAMAKOTADOM) {
+                    $query->whereRaw('UPPER(NAMAKOTADOM) = ?', [mb_strtoupper($user->NAMAKOTADOM, 'UTF-8')]);
                 } else {
                     // If NAMACLUB is not set for user in 'C' case, ensure no results
                     $query->whereRaw('1 = 0');
@@ -527,7 +527,7 @@ class FormA1Controller extends Controller
         // --- Pagination Implementation ---
         $perPage = 20; // Define how many items you want per page
         $niasList = $query->paginate($perPage); // Execute the query and paginate the results
-
+// dd($query->toSql(), $query->getBindings());
         // // --- Fetch KU options from MstKU table ---
         // $mstKuOptions = MstKU::pluck('KU', 'KU')->toArray(); // Fetches 'KU' column as both key and value
         // // If you need to sort them:

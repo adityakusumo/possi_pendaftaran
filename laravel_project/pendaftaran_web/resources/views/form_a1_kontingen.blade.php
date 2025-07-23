@@ -17,7 +17,7 @@
                         @method('DELETE')
                     </form>
 
-                    <form action="{{ route('form_a1.saveKontingen') }}" method="POST">
+                    <form id="save-kontingen-form" action="{{ route('form_a1.saveKontingen') }}" method="POST">
                         @csrf
                         {{-- NEW: Hidden input to pass jnsKompetisi to the controller --}}
                         <input type="hidden" name="jnsKompetisi" value="{{ $jnsKompetisi }}">
@@ -211,6 +211,25 @@
                     this.value = this.value.replace(/[0-9]/g, '');
                 });
             }
+
+            // --- NEW: Add event listener for the form submission ---
+            const form = document.getElementById('save-kontingen-form');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    // Prevent the default form submission immediately
+                    event.preventDefault();
+
+                    // Show the confirmation dialog
+                    if (confirm('Anda yakin ingin menyimpan data?')) {
+                        // If user clicks OK, proceed with the form submission
+                        event.target.submit(); // Submit the form programmatically
+                    } else {
+                        // If user clicks Cancel, do nothing (form submission is already prevented)
+                        console.log('Data saving cancelled by user.');
+                    }
+                });
+            }
+            // --- END NEW ---
         });
 
         $(document).ready(function() {
@@ -246,25 +265,21 @@
             var mstClubDetails = @json($mstClubDetails ?? []);
 
             // Data from PilihanPesertaKotaKab (for jnsKompetisi 'K' and 'P' and general lookups)
-            // NEW: Use this for 'K' type
-            var namaKotaKabPilihanPesertaData = @json($namaKotaKabPilihanPeserta ?? []); // <--- NEW VAR HERE
-            // The old namaClubsPilihanPesertaData is not directly used for the primary Select2 anymore
-            // var namaClubsPilihanPesertaData = @json($namaClubsPilihanPeserta ?? []);
+            var namaKotaKabPilihanPesertaData = @json($namaKotaKabPilihanPeserta ?? []);
             var namaPropinsiPilihanPesertaData = @json($namaPropinsiPilihanPeserta ?? []);
             var pilihanPesertaKotaKabDetails = @json($pilihanPesertaKotaKabDetails ?? []);
 
             // DEBUG CONSOLE LOGS FOR SELECT2 DATA SOURCES (keep these for now)
             console.log('DEBUG: namaClubsMstClubData for Select2 (C):', namaClubsMstClubData);
-            console.log('DEBUG: namaKotaKabPilihanPesertaData for Select2 (K):', namaKotaKabPilihanPesertaData); // <--- NEW LOG
+            console.log('DEBUG: namaKotaKabPilihanPesertaData for Select2 (K):', namaKotaKabPilihanPesertaData);
             console.log('DEBUG: namaPropinsiPilihanPesertaData for Select2 (P):', namaPropinsiPilihanPesertaData);
 
             var isSettingNamaKontingenValue = false;
 
             // Helper function to initialize Select2
-            // We will add a 'clear' argument here
             function initSelect2(element, data, placeholder, allowTags = true, isMultiple = false, isDisabled = false, clearPrevious = true) {
                 if (element.length) {
-                    if (element.data('select2') && clearPrevious) { // Only destroy if we want to clear previous state
+                    if (element.data('select2') && clearPrevious) {
                         element.select2('destroy');
                         console.log('Destroyed existing Select2 for:', element.attr('id'));
                     }
@@ -293,7 +308,6 @@
                             if (typeof data.text === 'undefined') {
                                 return null;
                             }
-                            // The matcher should check both 'text' and 'id' as 'id' is what the select2 option actually holds
                             if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1 ||
                                 (data.id && data.id.toLowerCase().indexOf(params.term.toLowerCase()) > -1)) {
                                 return data;
@@ -317,24 +331,18 @@
                 var normalizedSelectedId = (selectedIdValue || '').toUpperCase();
                 var detail = detailsSource[normalizedSelectedId];
 
-                // Ensure the selected option is actually in the Select2 data
                 var optionExists = namaKontingenElement.find("option[value='" + normalizedSelectedId + "']").length > 0;
                 if (!optionExists && normalizedSelectedId) {
-                    // If it doesn't exist, add it. This is more for tag creation, but safe here.
                     var newOption = new Option(normalizedSelectedId, normalizedSelectedId, true, true);
                     namaKontingenElement.append(newOption);
                 }
 
-                // This is the key line to update Select2's visual display
                 namaKontingenElement.val(normalizedSelectedId).trigger('change');
-                namaKontingenElement.trigger('select2:close'); // Close dropdown after selection
+                namaKontingenElement.trigger('select2:close');
 
                 console.log('Nama Kontingen (after forceful set) val():', namaKontingenElement.val());
                 console.log('Nama Kontingen (after forceful set) data():', namaKontingenElement.select2('data'));
 
-                // **********************************************
-                // IMPORTANT: Set the value of the HIDDEN INPUT
-                // **********************************************
                 namaKontingenHiddenInput.val(normalizedSelectedId);
                 console.log('Hidden nama_kontingen_hidden value set to:', namaKontingenHiddenInput.val());
 
@@ -373,25 +381,22 @@
             }
 
             // --- Initial UI State Setup ---
-            $('#div_nama_kontingen').show(); // Ensure kontingen field is shown
+            $('#div_nama_kontingen').show();
 
             // Main Logic based on appliedMode
             if (appliedMode === 1) { // Mode 1: Enabled (Admin, Operator, Special User)
                 console.log('Applied Mode 1: Nama Kontingen combo box enabled.');
 
-                // Ensure previous event handlers are removed before adding new ones for Mode 1
                 namaKontingenElement.off('change');
 
                 if (jnsKompetisi === 'C') {
                     initSelect2(namaKontingenElement, namaClubsMstClubData, 'Pilih Nama Club', true, false, false);
                 } else if (jnsKompetisi === 'K') {
-                    // *** IMPORTANT CHANGE HERE ***
-                    initSelect2(namaKontingenElement, namaKotaKabPilihanPesertaData, 'Pilih Nama Kota/Kab', true, false, false); // Use the new data source
+                    initSelect2(namaKontingenElement, namaKotaKabPilihanPesertaData, 'Pilih Nama Kota/Kab', true, false, false);
                 } else if (jnsKompetisi === 'P') {
                     initSelect2(namaKontingenElement, namaPropinsiPilihanPesertaData, 'Pilih Nama Provinsi', true, false, false);
                 }
 
-                // Attach the change handler *after* initialization and off()
                 namaKontingenElement.on('change', function(e) {
                     if (isSettingNamaKontingenValue) {
                         return;
@@ -400,34 +405,26 @@
                     var selectedData = namaKontingenElement.select2('data')[0];
                     var selectedId = selectedData ? selectedData.id : '';
 
-                    // **********************************************
-                    // IMPORTANT: Set the value of the HIDDEN INPUT on change
-                    // **********************************************
                     namaKontingenHiddenInput.val(selectedId);
                     console.log('Hidden nama_kontingen_hidden value set to:', namaKontingenHiddenInput.val());
 
                     if (jnsKompetisi === 'C') {
                         handleNamaKontingenSelection(selectedId, mstClubDetails, 'JENIS', 'NAMAKOTA', 'NAMAPROP');
                     } else if (jnsKompetisi === 'K') {
-                        // For 'K', the key in pilihanPesertaKotaKabDetails needs to match the selected ID (JENIS NAMAKOTA)
                         handleNamaKontingenSelection(selectedId, pilihanPesertaKotaKabDetails, 'JENIS', 'NAMAKOTA', 'NAMAPROPINSI');
                     } else if (jnsKompetisi === 'P') {
-                        // For 'P', no details, just select the province name
-                        handleNamaKontingenSelection(selectedId, {}, '', '', ''); // Pass empty details for 'P'
-                        hideAndClearDetailFields(); // And hide fields
+                        handleNamaKontingenSelection(selectedId, {}, '', '', '');
+                        hideAndClearDetailFields();
                     }
                 });
 
-                // Clear any pre-selected value from previous loads for Admin mode
                 namaKontingenElement.val(null).trigger('change');
-                hideAndClearDetailFields(); // Initially hide details for Admin until selection
+                hideAndClearDetailFields();
 
             } else { // Mode 2: Disabled (Regular User)
                 console.log('Applied Mode 2: Nama Kontingen combo box disabled and auto-selected.');
 
-
-                // Ensure previous event handlers are removed for Mode 2
-                namaKontingenElement.off('change'); // Ensure no lingering change handlers
+                namaKontingenElement.off('change');
 
                 hideAndClearDetailFields();
 
@@ -439,16 +436,11 @@
                     }];
                 }
 
-                // For Mode 2, we don't want to clear data because we're force-setting it
-                initSelect2(namaKontingenElement, autoSelectData, autoSelectedClubValue || 'N/A', false, false, false, false); // clearPrevious = false
+                initSelect2(namaKontingenElement, autoSelectData, autoSelectedClubValue || 'N/A', false, false, false, false);
 
                 if (autoSelectedClubValue) {
                     namaKontingenElement.val(autoSelectedClubValue).trigger('change');
-                    // **********************************************
-                    // IMPORTANT: Set the value of the HIDDEN INPUT for submission in Mode 2
-                    // This is the main point of failure based on your payload.
-                    // **********************************************
-                    namaKontingenHiddenInput.val(autoSelectedClubValue); // <--- This line must execute and set a value!
+                    namaKontingenHiddenInput.val(autoSelectedClubValue);
                     console.log('Hidden nama_kontingen_hidden value (Mode 2 initial) set to:', namaKontingenHiddenInput.val());
 
 
@@ -467,8 +459,6 @@
                 console.log('Nama Kontingen mode 2 val():', namaKontingenElement.val());
             }
 
-            // For JNSKOMPETISI P, ensure detail fields are always hidden regardless of mode
-            // This is a final override for 'P' type
             if (jnsKompetisi === 'P') {
                 hideAndClearDetailFields();
             }
