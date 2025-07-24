@@ -57,6 +57,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/kontingen', [FormA1Controller::class, 'destroyKontingen'])->name('kontingen.destroy');
 
     Route::get('/form-a1/daftar-atlet', [FormA1Controller::class, 'daftarAtlet'])->name('form_a1.daftarAtlet');
+    Route::post('/form-a1/daftar-atlet', [FormA1Controller::class, 'saveAtlet'])->name('atlet.saveAtlet');
+    Route::delete('/form-a1/daftar-atlet', [FormA1Controller::class, 'destroyAtlet'])->name('atlet.destroyAtlet'); // Route for deletion
+
 
 });
 

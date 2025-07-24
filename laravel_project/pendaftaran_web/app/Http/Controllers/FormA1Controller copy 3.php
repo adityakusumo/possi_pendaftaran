@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log; // For debugging
 use Illuminate\Support\Facades\Validator; // For custom validation
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 use App\Models\Kompetisi;
 use App\Models\PilihanPesertaKotaKab;
 use App\Models\MstClub;
@@ -16,7 +15,6 @@ use App\Models\SpecialUser; // Keep this for SpecialUser table check
 use App\Models\MstPeserta;
 use App\Models\MstKU;
 use App\Models\NIAS;
-use App\Models\Atlet;
 use Carbon\Carbon; // Keep this for expiry date check
 
 class FormA1Controller extends Controller
@@ -529,7 +527,7 @@ class FormA1Controller extends Controller
         // --- Pagination Implementation ---
         $perPage = 20; // Define how many items you want per page
         $niasList = $query->paginate($perPage); // Execute the query and paginate the results
-        // dd($query->toSql(), $query->getBindings());
+// dd($query->toSql(), $query->getBindings());
         // // --- Fetch KU options from MstKU table ---
         // $mstKuOptions = MstKU::pluck('KU', 'KU')->toArray(); // Fetches 'KU' column as both key and value
         // // If you need to sort them:
@@ -568,99 +566,5 @@ class FormA1Controller extends Controller
         }
 
         return view('form_a1_namaatlet', compact('niasList', 'autoFillDetails', 'mstKuOptions', 'mstKuData', 'wajibNiasStatusText'));
-    }
-
-    public function saveAtlet(Request $request)
-    {
-        try {
-            // 1. Validation
-            $validatedData = $request->validate([
-                // Hidden inputs from selected NIAS row
-                'selected_nias_nonias' => 'required|string|max:50', // This is for NONIAS
-                'selected_nias_exp1009' => 'nullable|string|max:50', // This is for EXP1009
-
-                // Form fields from "DATA ATLET" section (mapped to original HTML names)
-                'nama_club' => 'required|string|max:255', // Maps to NAMACLUB
-                'jenis_kota_kab' => 'nullable|string|max:4', // Will map to JENISI
-                'nama_kota_kab' => 'nullable|string|max:50', // Will map to ASAL and NAMAKOTADOM
-                'propinsi' => 'nullable|string|max:30', // Will map to NAMAPROPDOM
-                'negara' => 'nullable|string|max:30', // Not explicitly requested for Atlet table, but can be saved
-                'nama_atlet' => 'required|string|max:255', // Maps to NAMAATLET
-                'birth_day' => 'required|numeric|between:1,31',
-                'birth_month' => 'required|numeric|between:1,12',
-                'birth_year' => 'required|numeric|digits:4',
-                'ku' => 'nullable|string|max:10', // Maps to KU
-                'gender' => 'required|in:PA,PI', // Maps to GENDER
-                'sparing_partner' => 'required|in:SP,BUKAN_SP', // Will be hardcoded to '0'
-            ]);
-
-            // Combine date components into a single TGLLAHIR field
-            $tglLahir = null;
-            if ($validatedData['birth_year'] && $validatedData['birth_month'] && $validatedData['birth_day']) {
-                try {
-                    $tglLahir = Carbon::create(
-                        $validatedData['birth_year'],
-                        $validatedData['birth_month'],
-                        $validatedData['birth_day']
-                    )->format('Y-m-d');
-                } catch (\Exception $e) {
-                    throw ValidationException::withMessages(['tgl_lahir' => 'Tanggal lahir tidak valid.']);
-                }
-            }
-
-            // Prepare data for saving/updating in Atlet table
-            // IMPORTANT: Map your form input names to your Atlet table column names
-            $atletData = [
-                'NAMACLUB' => $validatedData['nama_club'],               // From form: nama_club
-                'JENISDOM' => $validatedData['jenis_kota_kab'],           // From form: jenis_kota_kab
-                'NAMAKOTADOM' => $validatedData['nama_kota_kab'],      // From form: nama_kota_kab
-                'NAMAPROPDOM' => $validatedData['propinsi'],             // From form: propinsi
-                'NAMAATLET' => $validatedData['nama_atlet'],           // From form: nama_atlet
-                'GENDER' => $validatedData['gender'],                   // From form: gender
-                'KU' => $validatedData['ku'],                           // From form: ku
-                'NONIAS' => $validatedData['selected_nias_nonias'],     // From hidden input
-                'TGLLAHIR' => $tglLahir,                                 // Calculated TGLLAHIR
-                // 'EXP1009' => $validatedData['selected_nias_exp1009'],    // From hidden input (if you want to save this)
-
-                // NEW MAPPINGS BASED ON YOUR REQUEST:
-                'ASAL' => $validatedData['nama_kota_kab'],             // 'nama_kota_kab' from form -> ASAL column
-                'SP' => '0',                                             // Hardcode '0' into SP column as requested
-                // 'updated_by' => Auth::id(),
-                // Note: 'NEGARA' is not explicitly requested for Atlet table, but you have it in validation if needed
-                // 'NEGARA' => $validatedData['negara'],
-            ];
-
-            // 2. Find or Create the Atlet record based on NONIAS
-            // Assumes NONIAS is your unique identifier for updateOrCreate
-            $atlet = Atlet::updateOrCreate(
-                ['NONIAS' => $validatedData['selected_nias_nonias']], // Key to find by
-                $atletData // Data to update/create
-            );
-
-            // // If a new record was created, set created_by
-            // if ($atlet->wasRecentlyCreated) {
-            //     $atlet->created_by = Auth::id();
-            //     $atlet->save(); // Save again to update created_by
-            //     $message = 'Data atlet baru berhasil ditambahkan!';
-            // } else {
-            //     // If it was updated, ensure updated_by is set (it's in $atletData)
-            //     // You might want to update it specifically for 'updated_by' if it wasn't in $atletData by default
-            //     // $atlet->updated_by = Auth::id(); // Already included in $atletData
-            //     $message = 'Data atlet berhasil diperbarui!';
-            // }
-            $message = $atlet->wasRecentlyCreated ? 'Data atlet baru berhasil ditambahkan!' : 'Data atlet berhasil diperbarui!';
-
-            // Redirect back with a success message
-            return redirect()->back()->with('success', $message);
-        } catch (ValidationException $e) {
-            // Log validation errors for debugging
-            Log::error('Validation Error saving Atlet data: ' . json_encode($e->errors()), ['request' => $request->all()]);
-            // Redirect back with validation errors and old input
-            return redirect()->back()->withErrors($e->errors())->withInput()->with('error', 'Terdapat kesalahan validasi. Mohon periksa input Anda.');
-        } catch (\Exception $e) {
-            // Handle other potential errors (database, etc.)
-            Log::error('Error saving Atlet data: ' . $e->getMessage(), ['request' => $request->all()]);
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data atlet: ' . $e->getMessage())->withInput();
-        }
     }
 }
