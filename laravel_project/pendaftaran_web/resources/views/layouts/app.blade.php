@@ -15,7 +15,8 @@
 
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- Keep CSS in head --}}
+    @vite(['resources/css/app.css'])
 
     {{-- If your custom script is NOT managed by Vite, but a static file in public/js --}}
     {{--

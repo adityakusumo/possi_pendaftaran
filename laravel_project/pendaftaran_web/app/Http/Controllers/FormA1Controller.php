@@ -567,7 +567,10 @@ class FormA1Controller extends Controller
             $autoFillDetails['NAMA']    = $formatDetailValue($niasToAutofill->NAMA);
         }
 
-        return view('form_a1_namaatlet', compact('niasList', 'autoFillDetails', 'mstKuOptions', 'mstKuData', 'wajibNiasStatusText'));
+        $userID = $user->id;
+        $atletList = \App\Models\Atlet::where('updated_by', $userID)->get();
+
+        return view('form_a1_namaatlet', compact('niasList', 'autoFillDetails', 'mstKuOptions', 'mstKuData', 'wajibNiasStatusText', 'atletList'));
     }
 
     public function saveAtlet(Request $request)
@@ -577,7 +580,8 @@ class FormA1Controller extends Controller
             $validatedData = $request->validate([
                 // Hidden inputs from selected NIAS row
                 'selected_nias_nonias' => 'required|string|max:50', // This is for NONIAS
-                'selected_nias_exp1009' => 'nullable|string|max:50', // This is for EXP1009
+                // 'selected_nias_exp1009' => 'nullable|string|max:50', // This is for EXP1009
+                'selected_nias_expired' => 'nullable|string|max:50',
 
                 // Form fields from "DATA ATLET" section (mapped to original HTML names)
                 'nama_club' => 'required|string|max:255', // Maps to NAMACLUB
@@ -592,6 +596,7 @@ class FormA1Controller extends Controller
                 'ku' => 'nullable|string|max:10', // Maps to KU
                 'gender' => 'required|in:PA,PI', // Maps to GENDER
                 'sparing_partner' => 'required|in:SP,BUKAN_SP', // Will be hardcoded to '0'
+
             ]);
 
             //// Combine date components into a single TGLLAHIR field
@@ -605,6 +610,19 @@ class FormA1Controller extends Controller
                     )->format('Y-m-d');
                 } catch (\Exception $e) {
                     throw ValidationException::withMessages(['tgl_lahir' => 'Tanggal lahir tidak valid.']);
+                }
+            }
+
+            // NEW: Convert EXPIRED string to a date format
+            $expiredDate = null;
+            if (!empty($validatedData['selected_nias_expired'])) {
+                try {
+                    // Assuming the format from NIAS is 'YYYY-MM-DDTHH:MM:SS.000000Z' (ISO 8601)
+                    $expiredDate = Carbon::parse($validatedData['selected_nias_expired'])->format('Y-m-d');
+                } catch (\Exception $e) {
+                    Log::warning('Could not parse EXPIRED date: ' . $validatedData['selected_nias_expired'], ['error' => $e->getMessage()]);
+                    // If parsing fails, you might want to throw a validation exception or just leave it null
+                    // throw ValidationException::withMessages(['expired' => 'Format tanggal expired tidak valid.']);
                 }
             }
 
@@ -625,6 +643,7 @@ class FormA1Controller extends Controller
                 // NEW MAPPINGS BASED ON YOUR REQUEST:
                 'ASAL' => $validatedData['nama_kota_kab'],             // 'nama_kota_kab' from form -> ASAL column
                 'SP' => '0',                                             // Hardcode '0' into SP column as requested
+                'EXPIRED' => $expiredDate,
                 // 'updated_by' => Auth::id(),
                 // Note: 'NEGARA' is not explicitly requested for Atlet table, but you have it in validation if needed
                 // 'NEGARA' => $validatedData['negara'],
@@ -661,6 +680,35 @@ class FormA1Controller extends Controller
             // Handle other potential errors (database, etc.)
             Log::error('Error saving Atlet data: ' . $e->getMessage(), ['request' => $request->all()]);
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data atlet: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    public function destroyAtlet(Request $request)
+    {
+        try {
+            $request->validate([
+                'nonias_to_delete' => 'required|string|max:50', // Validate the NONIAS
+            ]);
+
+            $nonias = $request->input('nonias_to_delete');
+            Log::info('Attempting to delete Atlet with NONIAS:', ['nonias' => $nonias]);
+
+            // Find the atlet by NONIAS and delete it
+            $deletedCount = Atlet::where('NONIAS', $nonias)->delete();
+
+            if ($deletedCount > 0) {
+                Log::info('Successfully deleted Atlet with NONIAS:', ['nonias' => $nonias]);
+                return redirect()->back()->with('success', "Atlet dengan NONIAS {$nonias} berhasil dihapus.");
+            } else {
+                Log::warning('Atlet with NONIAS not found or not deleted:', ['nonias' => $nonias]);
+                return redirect()->back()->with('error', "Atlet dengan NONIAS {$nonias} tidak ditemukan atau tidak dapat dihapus.");
+            }
+        } catch (ValidationException $e) {
+            Log::error('Validation Error deleting Atlet data: ' . json_encode($e->errors()), ['request' => $request->all()]);
+            return redirect()->back()->withErrors($e->errors())->with('error', 'Gagal menghapus atlet: ID Atlet tidak valid.');
+        } catch (\Exception $e) {
+            Log::error('Error deleting Atlet data: ' . $e->getMessage(), ['request' => $request->all()]);
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menghapus data atlet: ' . $e->getMessage());
         }
     }
 }

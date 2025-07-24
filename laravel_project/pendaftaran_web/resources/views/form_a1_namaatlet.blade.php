@@ -6,8 +6,8 @@
     window.mstKuData = @json($mstKuData ?? []);
 </script>
 
-{{-- Finally, load your Vite-managed JavaScript files (which may depend on jQuery and window.mstKuData) --}}
-@vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/form_a1_namaatlet.js'])
+<!-- {{-- Finally, load your Vite-managed JavaScript files (which may depend on jQuery and window.mstKuData) --}}
+@vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/form_a1_namaatlet.js']) -->
 
 <x-app-layout>
     <x-slot name="title">{{ __('Entri Form A1 - Daftar Atlet') }}</x-slot>
@@ -22,12 +22,17 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-full">
-                    {{-- Hidden form for delete action --}}
+                    <!-- {{-- Hidden form for delete action --}}
                     {{-- This form should be outside the main form for clarity, or handle deletion via AJAX --}}
                     <form id="delete-atlet-form" method="POST" action="{{ route('atlet.destroyAtlet') }}" style="display: none;">
                         @csrf
                         @method('DELETE')
                         <input type="hidden" name="nonias_to_delete" id="nonias_to_deletenias">
+                    </form> -->
+                    <form id="delete-atlet-form" method="POST" action="{{ route('atlet.destroyAtlet') }}" class="hidden">
+                        @csrf
+                        @method('DELETE') {{-- This tells Laravel it's a DELETE request --}}
+                        <input type="hidden" name="nonias_to_delete" id="nonias_to_delete_hidden">
                     </form>
 
                     {{-- MAIN FORM STARTS HERE: This form will encompass all data to be submitted for an Atlet --}}
@@ -36,7 +41,8 @@
 
                         {{-- Hidden inputs for the selected NIAS athlete's primary key and EXP1009 --}}
                         <input type="hidden" name="selected_nias_nonias" id="selected_nias_nonias">
-                        <input type="hidden" name="selected_nias_exp1009" id="selected_nias_exp1009">
+                        <!-- <input type="hidden" name="selected_nias_exp1009" id="selected_nias_exp1009"> -->
+                        <input type="hidden" name="selected_nias_expired" id="selected_nias_expired">
 
                         <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm">
                             {{-- Left Section: JIKA SUDAH PUNYA NIAS (PESERTA DARI JATIM) --}}
@@ -251,29 +257,30 @@
                                     <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10">
                                         <tr>
                                             <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('NAMACLUB') }}</th>
-                                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('JENISI') }}</th>
+                                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('JENISDOM') }}</th>
                                             <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('NAMAKOTADOM') }}</th>
                                             <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('NAMAPROPDOM') }}</th>
                                             <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('GENDER') }}</th>
                                             <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('NAMAATLET') }}</th>
                                             <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('SP') }}</th>
-                                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('NISNDA') }}</th>
-                                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('EXP1009') }}</th>
+                                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('NONIAS') }}</th>
+                                            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('EXPIRED') }}</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600 text-sm">
+                                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600 text-sm" id="atlet-list-table-body">
                                         {{-- Use $atletList from controller to populate this table --}}
-                                        @forelse($atletList ?? [] as $atlet)
-                                        <tr>
-                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->NAMACLUB ?? '' }}</td>
-                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->JENISI ?? '' }}</td>
-                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->NAMAKOTADOM ?? '' }}</td>
-                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->NAMAPROPDOM ?? '' }}</td>
-                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->GENDER ?? '' }}</td>
-                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->NAMAATLET ?? '' }}</td>
-                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->SP ?? '' }}</td>
-                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->NONIAS ?? '' }}</td>
-                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->EXP1009 ? \Carbon\Carbon::parse($atlet->EXP1009)->format('d/m/Y') : '' }}</td>
+                                        @forelse($atletList as $atlet)
+                                        {{-- Add data-nonias attribute and a class for JS selection --}}
+                                        <tr class="atlet-row-selectable cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" data-nonias="{{ $atlet->NONIAS }}">
+                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->NAMACLUB }}</td>
+                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->JENISDOM }}</td>
+                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->NAMAKOTADOM }}</td>
+                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->NAMAPROPDOM }}</td>
+                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->GENDER }}</td>
+                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->NAMAATLET }}</td>
+                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->SP }}</td>
+                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->NONIAS }}</td>
+                                            <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $atlet->EXPIRED }}</td>
                                         </tr>
                                         @empty
                                         <tr>
@@ -302,11 +309,16 @@
                             {{-- Global Action Buttons --}}
                             <div class="mt-6 flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
                                 <button type="button" class="rounded-md bg-gray-200 dark:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-800 dark:text-gray-300 shadow-sm hover:bg-gray-300 dark:hover:bg-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">{{ __('Keluar') }}</button>
-                                <button type="button" class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600" onclick="confirmDeleteAtlet()">{{ __('Hapus') }}</button>
-                                <button type="button" class="rounded-md bg-yellow-400 px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm hover:bg-yellow-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">{{ __('Batal') }}</button>
-                                <button type="button" class="rounded-md bg-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">{{ __('Ubah') }}</button>
+                                <!-- <button type="button" class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600" onclick="confirmDeleteAtlet()">{{ __('Hapus') }}</button> -->
+                                <!-- <button type="button" class="rounded-md bg-yellow-400 px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm hover:bg-yellow-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">{{ __('Batal') }}</button> -->
+                                <!-- <button type="button" class="rounded-md bg-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">{{ __('Ubah') }}</button> -->
+                                <!-- <button type="button" class="rounded-md bg-green-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500">{{ __('Tambah') }}</button> -->
+                                {{-- Ensure you have a button to trigger the delete --}}
+                                <button type="button" onclick="confirmDeleteAtlet()"
+                                    class="rounded-md bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">
+                                    Hapus Atlet
+                                </button>
                                 <button type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">{{ __('Simpan') }}</button>
-                                <button type="button" class="rounded-md bg-green-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500">{{ __('Tambah') }}</button>
                             </div>
                         </div>
                     </form>

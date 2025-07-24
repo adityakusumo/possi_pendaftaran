@@ -39,6 +39,7 @@ class Atlet extends Model
         'ASAL',
         'TGLLAHIR',
         'KU',
+        'EXPIRED',
         // 'created_by',
         // 'updated_by',
     ];
@@ -50,6 +51,7 @@ class Atlet extends Model
      */
     protected $casts = [
         'TGLLAHIR' => 'date', // Cast TGLLAHIR to a Carbon instance
+        'EXPIRED' => 'date',
     ];
 
     protected static function booted()

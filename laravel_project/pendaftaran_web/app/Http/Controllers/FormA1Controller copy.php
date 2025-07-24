@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log; // For debugging
 use Illuminate\Support\Facades\Validator; // For custom validation
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use App\Models\Kompetisi;
 use App\Models\PilihanPesertaKotaKab;
 use App\Models\MstClub;
@@ -15,23 +16,18 @@ use App\Models\SpecialUser; // Keep this for SpecialUser table check
 use App\Models\MstPeserta;
 use App\Models\MstKU;
 use App\Models\NIAS;
+use App\Models\Atlet;
 use Carbon\Carbon; // Keep this for expiry date check
 
 class FormA1Controller extends Controller
 {
     public function kontingen(): View
     {
-        $user = Auth::user(); // Get the currently authenticated user
-        // if (!$user) {
-        //     // Handle unauthenticated user - perhaps redirect to login
-        //     return redirect()->route('login')->withErrors('Silakan masuk untuk melanjutkan.');
-        // }
-
-        $userEmail = $user->email; // Get the user's email
+        $user = Auth::user();
+        $userEmail = $user->email;
 
         $currentKompetisiSetting = Kompetisi::find(1);
         $jnsKompetisi = $currentKompetisiSetting ? mb_strtoupper(trim($currentKompetisiSetting->JNSKOMPETISI), 'UTF-8') : null;
-
 
         $jenisKompetisiOptions = [
             'K' => 'Antar Kota/Kab',
@@ -39,7 +35,6 @@ class FormA1Controller extends Controller
             'P' => 'Antar Provinsi',
         ];
 
-        // --- Data for Select2 and other dropdowns (usually fetched regardless of mode) ---
         $formatSelect2Data = function ($name) {
             if ($name === null) return null;
             return ['id' => mb_strtoupper($name, 'UTF-8'), 'text' => mb_strtoupper($name, 'UTF-8')];
@@ -71,11 +66,12 @@ class FormA1Controller extends Controller
         $pilihanPesertaKotaKabRawData = PilihanPesertaKotaKab::select('NAMACLUB', 'JENIS', 'NAMAKOTA', 'NAMAPROPINSI')
             ->get();
 
-        $namaClubsPilihanPeserta = PilihanPesertaKotaKab::select('NAMACLUB')
+        $namaKotaKabPilihanPeserta = PilihanPesertaKotaKab::select(DB::raw("CONCAT(JENIS, ' ', NAMAKOTA) AS full_name"))
             ->distinct()
-            ->whereNotNull('NAMACLUB')
-            ->orderBy('NAMACLUB', 'asc')
-            ->pluck('NAMACLUB')
+            ->whereNotNull('JENIS')
+            ->whereNotNull('NAMAKOTA')
+            ->orderBy('full_name', 'asc')
+            ->pluck('full_name')
             ->map($formatSelect2Data)
             ->toArray();
 
@@ -87,17 +83,35 @@ class FormA1Controller extends Controller
             ->map($formatSelect2Data)
             ->toArray();
 
-        $pilihanPesertaKotaKabDetails = $pilihanPesertaKotaKabRawData->mapWithKeys(function ($item) use ($formatDetailValue) {
-            $key = $item['NAMACLUB'] ? mb_strtoupper($item['NAMACLUB'], 'UTF-8') : mb_strtoupper($item['NAMAKOTA'], 'UTF-8');
-            return [
-                $key => [
-                    'NAMACLUB' => $formatDetailValue($item['NAMACLUB']),
-                    'JENIS' => $formatDetailValue($item['JENIS']),
-                    'NAMAKOTA' => $formatDetailValue($item['NAMAKOTA']),
-                    'NAMAPROPINSI' => $formatDetailValue($item['NAMAPROPINSI']),
-                ]
+        // Re-key pilihanPesertaKotaKabDetails to allow lookup by JENIS NAMAKOTA and NAMAPROPINSI
+        $pilihanPesertaKotaKabDetails = [];
+        foreach ($pilihanPesertaKotaKabRawData as $item) {
+            $jenisKotaKey = null;
+            $propinsiKey = null;
+
+            if ($item['JENIS'] && $item['NAMAKOTA']) {
+                $jenisKotaKey = mb_strtoupper($item['JENIS'] . ' ' . $item['NAMAKOTA'], 'UTF-8');
+            }
+            if ($item['NAMAPROPINSI']) {
+                $propinsiKey = mb_strtoupper($item['NAMAPROPINSI'], 'UTF-8');
+            }
+
+            $detail = [
+                'NAMACLUB' => $formatDetailValue($item['NAMACLUB']),
+                'JENIS' => $formatDetailValue($item['JENIS']),
+                'NAMAKOTA' => $formatDetailValue($item['NAMAKOTA']),
+                'NAMAPROPINSI' => $formatDetailValue($item['NAMAPROPINSI']),
             ];
-        })->toArray();
+
+            if ($jenisKotaKey) {
+                $pilihanPesertaKotaKabDetails[$jenisKotaKey] = $detail;
+            }
+            if ($propinsiKey) {
+                // This key is less specific and might overwrite if multiple cities/clubs share a province name.
+                // For 'P' type, this is the primary lookup for details if they exist beyond just the name.
+                $pilihanPesertaKotaKabDetails[$propinsiKey] = $detail;
+            }
+        }
 
 
         // --- Determine appliedMode (based on user roles and SpecialUser table) ---
@@ -108,9 +122,9 @@ class FormA1Controller extends Controller
         $isUserOperatorViaSpatie = $user->hasRole('operator');
         $isUserSpecialViaTable = false;
 
-        if ($userEmail) { // Only check SpecialUser table if user has an email
+        if ($userEmail) {
             $specialUser = SpecialUser::where('email', $userEmail)
-                ->where('expired_at', '>', Carbon::now()) // Check if not expired
+                ->where('expired_at', '>', Carbon::now())
                 ->first();
             if ($specialUser) {
                 $isUserSpecialViaTable = true;
@@ -128,13 +142,8 @@ class FormA1Controller extends Controller
         }
 
 
-        // --- Fetch MstPeserta data for table display and auto-fill ---
-        $mstPesertaList = MstPeserta::where('email', $userEmail)->get(); // For table display
-        $mstPesertaToAutofill = $mstPesertaList->first(); // The specific record to use for form auto-fill
-
-
         // --- Initialize auto-fill details (these will be passed to the view) ---
-        $autoSelectedClubValue = null; // Value for nama_kontingen select
+        $autoSelectedClubValue = null;
         $autoFillDetails = [
             'JENIS'         => '',
             'NAMAKOTA'      => '',
@@ -145,70 +154,79 @@ class FormA1Controller extends Controller
             'TELPON'        => '',
             'OFFICIAL'      => 1, // Default for number input often starts at 1
             'NAMACLUB'      => '', // Used for the concatenated name in Mode 2
-            'ASAL'          => ''  // Original name for ASAL column
+            'ASAL'          => ''  // Original name for ASAL column (will be derived)
         ];
 
-        // --- Populate autoFillDetails from MstPeserta (PRIORITY 1: Existing User Data) ---
-        if ($mstPesertaToAutofill) {
-            // These fields directly come from MstPeserta
-            $autoFillDetails['CONTACTPERSON'] = $formatDetailValue($mstPesertaToAutofill->CONTACTPERSON);
-            $autoFillDetails['TELPON']        = $formatDetailValue($mstPesertaToAutofill->TELPON);
-            $autoFillDetails['OFFICIAL']      = $mstPesertaToAutofill->OFFICIAL !== null ? $mstPesertaToAutofill->OFFICIAL : 1; // Keep as number
-            $autoFillDetails['NAMAPROP']      = $formatDetailValue($mstPesertaToAutofill->NAMAPROPDOM);
-            $autoFillDetails['NAMAPROPINSI']  = $formatDetailValue($mstPesertaToAutofill->NAMAPROPDOM); // For compatibility
-            $autoFillDetails['NAMANEGARA']    = $formatDetailValue($mstPesertaToAutofill->NAMANEGDOM);
-            $autoFillDetails['JENIS']         = $formatDetailValue($mstPesertaToAutofill->JENISDOM);
-            $autoFillDetails['NAMAKOTA']      = $formatDetailValue($mstPesertaToAutofill->NAMAKOTADOM);
-            $autoFillDetails['NAMACLUB']      = $formatDetailValue($mstPesertaToAutofill->NAMACLUB); // The (potentially concatenated) kontingen name
-            $autoFillDetails['ASAL']          = $formatDetailValue($mstPesertaToAutofill->ASAL);   // The original kontingen name
-        }
-
-
-        // --- Further populate autoFillDetails based on Kompetisi Type and MstClub/PilihanPeserta (PRIORITY 2: If no MstPeserta data, or for other auto-selection) ---
-        // This logic fills in if no MstPeserta data exists OR if MstPeserta doesn't have a specific field.
-        // If $mstPesertaToAutofill is NOT present, then the original logic of deriving from user's club name applies.
-        // Otherwise, if $mstPesertaToAutofill IS present, we just use its values.
-
-        // This section is mainly for determining `autoSelectedClubValue` for the `nama_kontingen` dropdown
-        // and potentially setting default `JENIS`, `NAMAKOTA`, `NAMAPROP` if MstPeserta didn't have them.
-        // However, if MstPeserta is the source of truth, this complex logic for autoFillDetails might be redundant
-        // if `autoFillDetails` is already fully populated by MstPeserta.
-        // Let's simplify this. If `mstPesertaToAutofill` exists, its data overrides others.
-
-        // Determine `autoSelectedClubValue` (for the main 'Nama Kontingen' field in Mode 2)
-        // If MstPeserta exists, use its NAMACLUB or ASAL. Otherwise, try to derive from user's club.
-        if ($mstPesertaToAutofill) {
-            // For autoSelectedClubValue, prioritize the actual NAMACLUB from MstPeserta
-            $autoSelectedClubValue = $autoFillDetails['NAMACLUB'] ?: $autoFillDetails['ASAL'];
-        } elseif ($user && $user->NAMACLUB) {
-            // Fallback: If no MstPeserta for user, try to derive from User->NAMACLUB
-            $normalizedUserClubFromUsersTable = mb_strtoupper($user->NAMACLUB, 'UTF-8');
-            $userMstClubDetails = MstClub::whereRaw('UPPER(NAMACLUB) = ?', [$normalizedUserClubFromUsersTable])->first();
+        // --- Logic for autoSelectedClubValue and autoFillDetails in Mode 2 (ONLY from users table) ---
+        if ($appliedMode === 2) {
+            // Populate contact person, phone, and nation directly from Auth::user()
+            $autoFillDetails['CONTACTPERSON'] = $formatDetailValue($user->name); // Assuming 'name' is contact person
+            $autoFillDetails['TELPON']        = $formatDetailValue($user->phone); // Assuming 'phone' exists
+            $autoFillDetails['OFFICIAL']      = 1; // Default
+            $autoFillDetails['NAMANEGARA']    = $formatDetailValue($user->NAMANEGDOM); // Assuming user has NAMANEGDOM
 
             if ($jnsKompetisi === 'C') {
-                $autoSelectedClubValue = $formatDetailValue($user->NAMACLUB);
-                if ($userMstClubDetails) {
-                    $autoFillDetails['JENIS'] = $formatDetailValue($userMstClubDetails->JENIS);
-                    $autoFillDetails['NAMAKOTA'] = $formatDetailValue($userMstClubDetails->NAMAKOTA);
-                    $autoFillDetails['NAMAPROP'] = $formatDetailValue($userMstClubDetails->NAMAPROP);
+                if ($user->NAMACLUB) {
+                    $normalizedUserClub = $formatDetailValue($user->NAMACLUB);
+                    $autoSelectedClubValue = $normalizedUserClub;
+
+                    // Try to find full details from MstClub based on user's NAMACLUB
+                    $clubDetails = MstClub::whereRaw('UPPER(NAMACLUB) = ?', [$normalizedUserClub])->first();
+                    if ($clubDetails) {
+                        $autoFillDetails['JENIS']    = $formatDetailValue($clubDetails->JENIS);
+                        $autoFillDetails['NAMAKOTA'] = $formatDetailValue($clubDetails->NAMAKOTA);
+                        $autoFillDetails['NAMAPROP'] = $formatDetailValue($clubDetails->NAMAPROP);
+                        $autoFillDetails['NAMACLUB'] = $formatDetailValue($clubDetails->NAMACLUB);
+                        $autoFillDetails['ASAL']     = $formatDetailValue($clubDetails->NAMACLUB); // ASAL defaults to NAMACLUB
+                    } else {
+                        // If no MstClub entry, default to user's raw NAMACLUB for other details
+                        $autoFillDetails['NAMACLUB'] = $normalizedUserClub;
+                        $autoFillDetails['ASAL'] = $normalizedUserClub;
+                        // JENIS, NAMAKOTA, NAMAPROP might remain empty if not found from MstClub
+                    }
                 }
             } elseif ($jnsKompetisi === 'K') {
-                if ($userMstClubDetails && $userMstClubDetails->NAMAKOTA) {
-                    $autoSelectedClubValue = $formatDetailValue($userMstClubDetails->NAMAKOTA);
-                    $relatedPilihanPeserta = PilihanPesertaKotaKab::whereRaw('UPPER(NAMAKOTA) = ?', [$autoSelectedClubValue])->first();
-                    if ($relatedPilihanPeserta) {
-                        $autoFillDetails['JENIS'] = $formatDetailValue($relatedPilihanPeserta->JENIS);
-                        $autoFillDetails['NAMAKOTA'] = $formatDetailValue($relatedPilihanPeserta->NAMAKOTA);
-                        $autoFillDetails['NAMAPROP'] = $formatDetailValue($relatedPilihanPeserta->NAMAPROPINSI);
+                if ($user->NAMAKOTADOM) {
+                    $normalizedUserKota = $formatDetailValue($user->NAMAKOTADOM);
+                    // Find JENIS from PilihanPesertaKotaKab for concatenation
+                    $pkkEntry = PilihanPesertaKotaKab::whereRaw('UPPER(NAMAKOTA) = ?', [$normalizedUserKota])->first();
+                    if ($pkkEntry) {
+                        $autoSelectedClubValue = $formatDetailValue($pkkEntry->JENIS . ' ' . $pkkEntry->NAMAKOTA);
+                        $autoFillDetails['JENIS']        = $formatDetailValue($pkkEntry->JENIS);
+                        $autoFillDetails['NAMAKOTA']     = $formatDetailValue($pkkEntry->NAMAKOTA);
+                        $autoFillDetails['NAMAPROPINSI'] = $formatDetailValue($pkkEntry->NAMAPROPINSI);
+                        $autoFillDetails['NAMAPROP']     = $formatDetailValue($pkkEntry->NAMAPROPINSI); // For compatibility
+                        $autoFillDetails['ASAL']         = $autoSelectedClubValue; // ASAL for 'K' becomes the concatenated name
+                    } else {
+                        // If no matching JENIS is found, just use the city name for autoSelectedClubValue
+                        $autoSelectedClubValue = $normalizedUserKota;
+                        $autoFillDetails['NAMAKOTA']     = $normalizedUserKota;
+                        $autoFillDetails['NAMAPROPINSI'] = $formatDetailValue($user->NAMAPROPDOM);
+                        $autoFillDetails['NAMAPROP']     = $formatDetailValue($user->NAMAPROPDOM);
+                        $autoFillDetails['ASAL']         = $normalizedUserKota;
                     }
                 }
             } elseif ($jnsKompetisi === 'P') {
-                if ($userMstClubDetails && $userMstClubDetails->NAMAPROP) {
-                    $autoSelectedClubValue = $formatDetailValue($userMstClubDetails->NAMAPROP);
-                    // For P, no additional autoFillDetails from here, as NAMAPROP is the primary.
+                if ($user->NAMAPROPDOM) {
+                    $normalizedUserProp = $formatDetailValue($user->NAMAPROPDOM);
+                    $autoSelectedClubValue = $normalizedUserProp;
+                    $autoFillDetails['NAMAPROP']     = $normalizedUserProp;
+                    $autoFillDetails['NAMAPROPINSI'] = $normalizedUserProp;
+                    $autoFillDetails['ASAL']         = $normalizedUserProp; // ASAL for 'P' becomes the province name
+
+                    // If you need more details for a province (e.g., from PilihanPesertaKotaKab), you'd fetch them here
+                    $pkkEntry = PilihanPesertaKotaKab::whereRaw('UPPER(NAMAPROPINSI) = ?', [$normalizedUserProp])->first();
+                    if ($pkkEntry) {
+                        $autoFillDetails['NAMACLUB'] = $formatDetailValue($pkkEntry->NAMACLUB); // Example if relevant
+                        $autoFillDetails['JENIS'] = $formatDetailValue($pkkEntry->JENIS);
+                        $autoFillDetails['NAMAKOTA'] = $formatDetailValue($pkkEntry->NAMAKOTA);
+                    }
                 }
             }
         }
+        // $mstPesertaList remains only for table display, not for autofill logic here.
+        $mstPesertaList = \App\Models\MstPeserta::where('email', $userEmail)->get();
+
 
         return view('form_a1_kontingen', compact(
             'currentKompetisiSetting',
@@ -216,12 +234,12 @@ class FormA1Controller extends Controller
             'jnsKompetisi',
             'namaClubsMstClub',
             'mstClubDetails',
-            'namaClubsPilihanPeserta',
+            'namaKotaKabPilihanPeserta',
             'namaPropinsiPilihanPeserta',
             'pilihanPesertaKotaKabDetails',
             'appliedMode',
-            'autoSelectedClubValue',
-            'autoFillDetails',
+            'autoSelectedClubValue', // This is what Mode 2 will use for the dropdown
+            'autoFillDetails', // This populates the other detail fields
             'userRoleString',
             'mstPesertaList'
         ));
@@ -416,21 +434,27 @@ class FormA1Controller extends Controller
             return redirect()->route('login')->withErrors('Silakan masuk untuk melanjutkan.');
         }
 
-        // --- NEW: Fetch JNSKOMPETISI from the Kompetisi table ---
-        $kompetisi = Kompetisi::first(); // !!! IMPORTANT: Adjust this query !!!
-        // This line currently fetches the first competition record.
-        // You might need:
-        // - Kompetisi::where('status', 'active')->first();
-        // - Kompetisi::find($user->kompetisi_id); // If user is linked to a competition
-        // - Or any other logic to determine the current competition
-
+        $kompetisi = Kompetisi::first(); // Fetch the relevant competition record
         $userJnsKompetisi = null;
-        if ($kompetisi && $kompetisi->JNSKOMPETISI) {
-            $userJnsKompetisi = mb_strtoupper($kompetisi->JNSKOMPETISI, 'UTF-8');
+        $wajibNiasStatusText = ''; // Initialize the variable to hold the status text
+
+        if ($kompetisi) {
+            if ($kompetisi->JNSKOMPETISI) {
+                $userJnsKompetisi = mb_strtoupper($kompetisi->JNSKOMPETISI, 'UTF-8');
+            }
+
+            // Determine the text based on the WAJIBNIAS column
+            // Assuming WAJIBNIAS is an integer column (0 or 1)
+            if (isset($kompetisi->WAJIBNIAS)) {
+                if ($kompetisi->WAJIBNIAS == 0) {
+                    $wajibNiasStatusText = 'Bebas';
+                } elseif ($kompetisi->WAJIBNIAS == 1) {
+                    $wajibNiasStatusText = 'SP Jika tanpa NIAS';
+                }
+            } else {
+                $wajibNiasStatusText = 'Status tidak tersedia'; // Fallback if WAJIBNIAS is null/not set
+            }
         } else {
-            // Handle case where no competition or JNSKOMPETISI is found
-            // For safety, we can default to a state that shows no data,
-            // or redirect, or provide a message.
             return redirect()->back()->withErrors('Tidak dapat menentukan jenis kompetisi saat ini.');
         }
         // --- END NEW ---
@@ -443,14 +467,14 @@ class FormA1Controller extends Controller
             case 'K': // JNS & NAMAKOTA in users table is equal to JENIS & NAMAKOTA in NIAS table
                 // Assuming user->jenis maps to NIAS.KDJENIS
                 // Assuming user->namakota maps to NIAS.NAMAKOTA
-                if ($user->JENIS) {
-                    $query->whereRaw('UPPER(JENIS) = ?', [mb_strtoupper($user->JENIS, 'UTF-8')]);
+                if ($user->JENISDOM) {
+                    $query->whereRaw('UPPER(JENISDOM) = ?', [mb_strtoupper($user->JENISDOM, 'UTF-8')]);
                 } else {
                     // If NAMACLUB is not set for user in 'C' case, ensure no results
                     $query->whereRaw('1 = 0');
                 }
-                if ($user->NAMAKOTA) {
-                    $query->whereRaw('UPPER(NAMAKOTA) = ?', [mb_strtoupper($user->NAMAKOTA, 'UTF-8')]);
+                if ($user->NAMAKOTADOM) {
+                    $query->whereRaw('UPPER(NAMAKOTADOM) = ?', [mb_strtoupper($user->NAMAKOTADOM, 'UTF-8')]);
                 } else {
                     // If NAMACLUB is not set for user in 'C' case, ensure no results
                     $query->whereRaw('1 = 0');
@@ -505,7 +529,7 @@ class FormA1Controller extends Controller
         // --- Pagination Implementation ---
         $perPage = 20; // Define how many items you want per page
         $niasList = $query->paginate($perPage); // Execute the query and paginate the results
-
+        // dd($query->toSql(), $query->getBindings());
         // // --- Fetch KU options from MstKU table ---
         // $mstKuOptions = MstKU::pluck('KU', 'KU')->toArray(); // Fetches 'KU' column as both key and value
         // // If you need to sort them:
@@ -543,6 +567,145 @@ class FormA1Controller extends Controller
             $autoFillDetails['NAMA']    = $formatDetailValue($niasToAutofill->NAMA);
         }
 
-        return view('form_a1_namaatlet', compact('niasList', 'autoFillDetails', 'mstKuOptions', 'mstKuData'));
+        $userID = $user->id;
+        $atletList = \App\Models\Atlet::where('updated_by', $userID)->get();
+
+        return view('form_a1_namaatlet', compact('niasList', 'autoFillDetails', 'mstKuOptions', 'mstKuData', 'wajibNiasStatusText', 'atletList'));
+    }
+
+    public function saveAtlet(Request $request)
+    {
+        try {
+            // 1. Validation
+            $validatedData = $request->validate([
+                // Hidden inputs from selected NIAS row
+                'selected_nias_nonias' => 'required|string|max:50', // This is for NONIAS
+                // 'selected_nias_exp1009' => 'nullable|string|max:50', // This is for EXP1009
+                'selected_nias_expired' => 'nullable|string|max:50',
+
+                // Form fields from "DATA ATLET" section (mapped to original HTML names)
+                'nama_club' => 'required|string|max:255', // Maps to NAMACLUB
+                'jenis_kota_kab' => 'nullable|string|max:4', // Will map to JENISI
+                'nama_kota_kab' => 'nullable|string|max:50', // Will map to ASAL and NAMAKOTADOM
+                'propinsi' => 'nullable|string|max:30', // Will map to NAMAPROPDOM
+                'negara' => 'nullable|string|max:30', // Not explicitly requested for Atlet table, but can be saved
+                'nama_atlet' => 'required|string|max:255', // Maps to NAMAATLET
+                'birth_day' => 'required|numeric|between:1,31',
+                'birth_month' => 'required|numeric|between:1,12',
+                'birth_year' => 'required|numeric|digits:4',
+                'ku' => 'nullable|string|max:10', // Maps to KU
+                'gender' => 'required|in:PA,PI', // Maps to GENDER
+                'sparing_partner' => 'required|in:SP,BUKAN_SP', // Will be hardcoded to '0'
+
+            ]);
+
+            //// Combine date components into a single TGLLAHIR field
+            $tglLahir = null;
+            if ($validatedData['birth_year'] && $validatedData['birth_month'] && $validatedData['birth_day']) {
+                try {
+                    $tglLahir = Carbon::create(
+                        $validatedData['birth_year'],
+                        $validatedData['birth_month'],
+                        $validatedData['birth_day']
+                    )->format('Y-m-d');
+                } catch (\Exception $e) {
+                    throw ValidationException::withMessages(['tgl_lahir' => 'Tanggal lahir tidak valid.']);
+                }
+            }
+
+            // NEW: Convert EXPIRED string to a date format
+            $expiredDate = null;
+            if (!empty($validatedData['selected_nias_expired'])) {
+                try {
+                    // Assuming the format from NIAS is 'YYYY-MM-DDTHH:MM:SS.000000Z' (ISO 8601)
+                    $expiredDate = Carbon::parse($validatedData['selected_nias_expired'])->format('Y-m-d');
+                } catch (\Exception $e) {
+                    Log::warning('Could not parse EXPIRED date: ' . $validatedData['selected_nias_expired'], ['error' => $e->getMessage()]);
+                    // If parsing fails, you might want to throw a validation exception or just leave it null
+                    // throw ValidationException::withMessages(['expired' => 'Format tanggal expired tidak valid.']);
+                }
+            }
+
+            // Prepare data for saving/updating in Atlet table
+            // IMPORTANT: Map your form input names to your Atlet table column names
+            $atletData = [
+                'NAMACLUB' => $validatedData['nama_club'],               // From form: nama_club
+                'JENISDOM' => $validatedData['jenis_kota_kab'],           // From form: jenis_kota_kab
+                'NAMAKOTADOM' => $validatedData['nama_kota_kab'],      // From form: nama_kota_kab
+                'NAMAPROPDOM' => $validatedData['propinsi'],             // From form: propinsi
+                'NAMAATLET' => $validatedData['nama_atlet'],           // From form: nama_atlet
+                'GENDER' => $validatedData['gender'],                   // From form: gender
+                'KU' => $validatedData['ku'],                           // From form: ku
+                'NONIAS' => $validatedData['selected_nias_nonias'],     // From hidden input
+                'TGLLAHIR' => $tglLahir,                                 // Calculated TGLLAHIR
+                // 'EXP1009' => $validatedData['selected_nias_exp1009'],    // From hidden input (if you want to save this)
+
+                // NEW MAPPINGS BASED ON YOUR REQUEST:
+                'ASAL' => $validatedData['nama_kota_kab'],             // 'nama_kota_kab' from form -> ASAL column
+                'SP' => '0',                                             // Hardcode '0' into SP column as requested
+                'EXPIRED' => $expiredDate,
+                // 'updated_by' => Auth::id(),
+                // Note: 'NEGARA' is not explicitly requested for Atlet table, but you have it in validation if needed
+                // 'NEGARA' => $validatedData['negara'],
+            ];
+
+            // 2. Find or Create the Atlet record based on NONIAS
+            // Assumes NONIAS is your unique identifier for updateOrCreate
+            $atlet = Atlet::updateOrCreate(
+                ['NONIAS' => $validatedData['selected_nias_nonias']], // Key to find by
+                $atletData // Data to update/create
+            );
+
+            // // If a new record was created, set created_by
+            // if ($atlet->wasRecentlyCreated) {
+            //     $atlet->created_by = Auth::id();
+            //     $atlet->save(); // Save again to update created_by
+            //     $message = 'Data atlet baru berhasil ditambahkan!';
+            // } else {
+            //     // If it was updated, ensure updated_by is set (it's in $atletData)
+            //     // You might want to update it specifically for 'updated_by' if it wasn't in $atletData by default
+            //     // $atlet->updated_by = Auth::id(); // Already included in $atletData
+            //     $message = 'Data atlet berhasil diperbarui!';
+            // }
+            $message = $atlet->wasRecentlyCreated ? 'Data atlet baru berhasil ditambahkan!' : 'Data atlet berhasil diperbarui!';
+
+            // Redirect back with a success message
+            return redirect()->back()->with('success', $message);
+        } catch (ValidationException $e) {
+            // Log validation errors for debugging
+            Log::error('Validation Error saving Atlet data: ' . json_encode($e->errors()), ['request' => $request->all()]);
+            // Redirect back with validation errors and old input
+            return redirect()->back()->withErrors($e->errors())->withInput()->with('error', 'Terdapat kesalahan validasi. Mohon periksa input Anda.');
+        } catch (\Exception $e) {
+            // Handle other potential errors (database, etc.)
+            Log::error('Error saving Atlet data: ' . $e->getMessage(), ['request' => $request->all()]);
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data atlet: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    public function destroyAtlet(Request $request)
+    {
+        try {
+            $request->validate([
+                'nonias_to_delete' => 'required|string|max:50', // Validate the NONIAS
+            ]);
+
+            $nonias = $request->input('nonias_to_delete');
+
+            // Find the atlet by NONIAS and delete it
+            $deletedCount = Atlet::where('NONIAS', $nonias)->delete();
+
+            if ($deletedCount > 0) {
+                return redirect()->back()->with('success', "Atlet dengan NONIAS {$nonias} berhasil dihapus.");
+            } else {
+                return redirect()->back()->with('error', "Atlet dengan NONIAS {$nonias} tidak ditemukan atau tidak dapat dihapus.");
+            }
+        } catch (ValidationException $e) {
+            Log::error('Validation Error deleting Atlet data: ' . json_encode($e->errors()), ['request' => $request->all()]);
+            return redirect()->back()->withErrors($e->errors())->with('error', 'Gagal menghapus atlet: ID Atlet tidak valid.');
+        } catch (\Exception $e) {
+            Log::error('Error deleting Atlet data: ' . $e->getMessage(), ['request' => $request->all()]);
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menghapus data atlet: ' . $e->getMessage());
+        }
     }
 }
