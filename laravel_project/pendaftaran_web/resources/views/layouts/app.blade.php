@@ -471,7 +471,7 @@
                     </div>
                     <ul class="sub-menu">
                         <li><a class="link_name" href="#">Posts</a></li>
-                        <li><a href="#">Nomor Perorangan</a></li>
+                        <li><a href="{{ route('form_a3.nomorPerorangan') }}">Nomor Perorangan</a></li>
                         <li><a href="#">Nomor Estafet</a></li>
                     </ul>
                 </li>

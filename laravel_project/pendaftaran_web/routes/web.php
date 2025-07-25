@@ -8,6 +8,7 @@ use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Admin\UserManagementController; // Ensure this is correct namespace
 use App\Http\Controllers\CompetitionSettingController;
 use App\Http\Controllers\FormA1Controller;
+use App\Http\Controllers\FormA3Controller;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -50,10 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/form-a1/kontingen', [FormA1Controller::class, 'kontingen'])->name('form_a1.kontingen');
-
-    // Route for saving the kontingen data
     Route::post('/form-a1/kontingen/save', [FormA1Controller::class, 'saveKontingen'])->name('form_a1.saveKontingen');
-
     Route::delete('/kontingen', [FormA1Controller::class, 'destroyKontingen'])->name('kontingen.destroy');
 
     Route::get('/form-a1/daftar-atlet', [FormA1Controller::class, 'daftarAtlet'])->name('form_a1.daftarAtlet');
@@ -61,8 +59,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/form-a1/daftar-atlet', [FormA1Controller::class, 'destroyAtlet'])->name('atlet.destroyAtlet'); // Route for deletion
     Route::get('/form-a1/daftar-atlet/cari', [FormA1Controller::class, 'searchNias'])->name('atlet.niasSearch');
 
-
-
+    Route::get('/form-a3/nomor-perorangan', [FormA3Controller::class, 'index'])->name('form_a3.nomorPerorangan');
 });
 
 require __DIR__ . '/auth.php';
