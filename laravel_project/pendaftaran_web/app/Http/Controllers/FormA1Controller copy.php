@@ -595,7 +595,7 @@ class FormA1Controller extends Controller
                 'birth_year' => 'required|numeric|digits:4',
                 'ku' => 'nullable|string|max:10', // Maps to KU
                 'gender' => 'required|in:PA,PI', // Maps to GENDER
-                'sparing_partner' => 'required|in:SP,BUKAN_SP', // Will be hardcoded to '0'
+                'sparing_partner' => 'required|in:0,1', // Will be hardcoded to '0'
 
             ]);
 
@@ -642,7 +642,8 @@ class FormA1Controller extends Controller
 
                 // NEW MAPPINGS BASED ON YOUR REQUEST:
                 'ASAL' => $validatedData['nama_kota_kab'],             // 'nama_kota_kab' from form -> ASAL column
-                'SP' => '0',                                             // Hardcode '0' into SP column as requested
+                // 'SP' => '0',                                             // Hardcode '0' into SP column as requested
+                'SP' => $validatedData['sparing_partner'],
                 'EXPIRED' => $expiredDate,
                 // 'updated_by' => Auth::id(),
                 // Note: 'NEGARA' is not explicitly requested for Atlet table, but you have it in validation if needed
@@ -691,13 +692,16 @@ class FormA1Controller extends Controller
             ]);
 
             $nonias = $request->input('nonias_to_delete');
+            Log::info('Attempting to delete Atlet with NONIAS:', ['nonias' => $nonias]);
 
             // Find the atlet by NONIAS and delete it
             $deletedCount = Atlet::where('NONIAS', $nonias)->delete();
 
             if ($deletedCount > 0) {
+                Log::info('Successfully deleted Atlet with NONIAS:', ['nonias' => $nonias]);
                 return redirect()->back()->with('success', "Atlet dengan NONIAS {$nonias} berhasil dihapus.");
             } else {
+                Log::warning('Atlet with NONIAS not found or not deleted:', ['nonias' => $nonias]);
                 return redirect()->back()->with('error', "Atlet dengan NONIAS {$nonias} tidak ditemukan atau tidak dapat dihapus.");
             }
         } catch (ValidationException $e) {

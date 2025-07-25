@@ -1,11 +1,11 @@
 // resources/js/form_a1_namaatlet.js
 // Only JavaScript code here
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Main Form Submission Confirmation
     const mainForm = document.getElementById('main-form-a1-namaatlet');
     if (mainForm) {
-        mainForm.addEventListener('submit', function(event) {
+        mainForm.addEventListener('submit', function (event) {
             event.preventDefault(); // Stop default submission
 
             // Basic check: Ensure a NIAS athlete has been selected
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Delete Atlet Confirmation (for the Hapus button)
-    window.confirmDeleteAtlet = function() {
+    window.confirmDeleteAtlet = function () {
         // This gets the NONIAS from the hidden input that's populated
         // when a row in the NIAS search table is clicked.
         const noniasToDelete = document.getElementById('selected_nias_nonias').value;
@@ -48,10 +48,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // jQuery Dependent Scripts (inside $(document).ready())
-$(document).ready(function() {
+$(document).ready(function () {
     console.log('Document ready. Initializing Form A1 Nama Atlet scripts.');
 
     const niasTableBody = $('#nias-table-body'); // jQuery object for NIAS search results table
+    const atletListTableBody = $('#atlet-list-table-body'); // NEW: Get the tbody of your lower table
     const detailsDisplay = $('#selected-athlete-details'); // jQuery object for debug display
     let selectedRow = null;
 
@@ -93,9 +94,20 @@ $(document).ready(function() {
     const mstKuData = window.mstKuData || []; // Fallback to empty array if not defined globally
     console.log("MstKU Data for comparison:", mstKuData);
 
+    // Function to handle row selection (applies to both tables)
+    function handleRowSelection(clickedRow) {
+        if (selectedRow) {
+            selectedRow.removeClass('bg-blue-100 dark:bg-blue-900 ring-2 ring-blue-500');
+        }
+
+        clickedRow.addClass('bg-blue-100 dark:bg-blue-900 ring-2 ring-blue-500');
+        selectedRow = clickedRow;
+    }
+
     // --- Event Listener for NIAS table row clicks ---
-    niasTableBody.on('click', '.selectable-row', function() {
+    niasTableBody.on('click', '.selectable-row', function () {
         const clickedRow = $(this);
+        handleRowSelection(clickedRow);
 
         if (selectedRow) {
             selectedRow.removeClass('bg-blue-100 dark:bg-blue-900 ring-2 ring-blue-500');
@@ -183,6 +195,10 @@ $(document).ready(function() {
             genderWanitaRadio.prop('checked', true);
         }
 
+
+        sparingPartnerYesRadio.prop('checked', false);
+        sparingPartnerNoRadio.prop('checked', false);
+
         if (athleteDetails.SP && (athleteDetails.SP.toUpperCase() === 'Y' || athleteDetails.SP.toUpperCase() === 'SP')) {
             sparingPartnerYesRadio.prop('checked', true);
             sparingPartnerNoRadio.prop('checked', false);
@@ -192,15 +208,34 @@ $(document).ready(function() {
         }
 
         niasNumberDisplay.val(athleteDetails.NONIAS || '');
-        exp1009Input.val(athleteDetails.EXP1009 || '');
+        // exp1009Input.val(athleteDetails.EXP1009 || '');
 
         detailsDisplay.text(JSON.stringify(athleteDetails, null, 2));
+    });
+
+    // NEW: Event Listener for LOWER TABLE (Display of currently added athletes) row clicks
+    atletListTableBody.on('click', '.atlet-row-selectable', function () {
+        const clickedRow = $(this);
+        handleRowSelection(clickedRow); // Highlight the clicked row
+
+        const noniasOfSelectedAthlete = clickedRow.data('nonias');
+        console.log('Selected athlete from lower table (NONIAS):', noniasOfSelectedAthlete);
+
+        // Set the NONIAS into the hidden input that the delete button relies on
+        selectedNiasNoniasHidden.val(noniasOfSelectedAthlete);
+
+        // Optional: If you want clicking an athlete in the lower table to *also*
+        // populate all the main form fields with their data (like from the NIAS search),
+        // you would need to fetch that athlete's full details via AJAX here,
+        // or store the full details in a data-attribute on the row (like you do for NIAS rows).
+        // For simplicity, this example only updates the NONIAS for deletion.
+        // If you want full population, let me know, and we can adjust.
     });
 
     const searchNiasButton = $('#search-nias-button');
     const niasInput = $('#nias_input');
 
-    searchNiasButton.on('click', function() {
+    searchNiasButton.on('click', function () {
         const searchValue = niasInput.val();
         console.log('Searching for NIAS with input:', searchValue);
         alert('Search functionality for NIAS list is currently displaying pre-loaded data. For live search, you need a backend route that handles the search query.');

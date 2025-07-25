@@ -17,6 +17,263 @@
 /*M!100616 SET @OLD_NOTE_VERBOSITY=@@NOTE_VERBOSITY, NOTE_VERBOSITY=0 */;
 
 --
+-- Table structure for table `A3`
+--
+
+DROP TABLE IF EXISTS `A3`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `A3` (
+  `GENDER` varchar(2) DEFAULT NULL,
+  `KU` varchar(30) DEFAULT NULL,
+  `NAMAATLET` varchar(50) DEFAULT NULL,
+  `ASAL` varchar(30) DEFAULT NULL,
+  `NAMACLUB` varchar(30) DEFAULT NULL,
+  `JENISDOM` varchar(4) DEFAULT NULL,
+  `NAMAKOTADOM` varchar(50) DEFAULT NULL,
+  `NAMAPROPDOM` varchar(50) DEFAULT NULL,
+  `MON50MM` varchar(2) DEFAULT NULL,
+  `MON50SS` varchar(2) DEFAULT NULL,
+  `MON50HS` varchar(2) DEFAULT NULL,
+  `MON100MM` varchar(2) DEFAULT NULL,
+  `MON100SS` varchar(2) DEFAULT NULL,
+  `MON100HS` varchar(2) DEFAULT NULL,
+  `MON200MM` varchar(2) DEFAULT NULL,
+  `MON200SS` varchar(2) DEFAULT NULL,
+  `MON200HS` varchar(2) DEFAULT NULL,
+  `MON400MM` varchar(2) DEFAULT NULL,
+  `MON400SS` varchar(2) DEFAULT NULL,
+  `MON400HS` varchar(2) DEFAULT NULL,
+  `MON800MM` varchar(2) DEFAULT NULL,
+  `MON800SS` varchar(2) DEFAULT NULL,
+  `MON800HS` varchar(2) DEFAULT NULL,
+  `MON1500MM` varchar(2) DEFAULT NULL,
+  `MON1500SS` varchar(2) DEFAULT NULL,
+  `MON1500HS` varchar(2) DEFAULT NULL,
+  `SUB50MM` varchar(2) DEFAULT NULL,
+  `SUB50SS` varchar(2) DEFAULT NULL,
+  `SUB50HS` varchar(2) DEFAULT NULL,
+  `SUB100MM` varchar(2) DEFAULT NULL,
+  `SUB100SS` varchar(2) DEFAULT NULL,
+  `SUB100HS` varchar(2) DEFAULT NULL,
+  `SUB200MM` varchar(2) DEFAULT NULL,
+  `SUB200SS` varchar(2) DEFAULT NULL,
+  `SUB200HS` varchar(2) DEFAULT NULL,
+  `SUB400MM` varchar(2) DEFAULT NULL,
+  `SUB400SS` varchar(2) DEFAULT NULL,
+  `SUB400HS` varchar(2) DEFAULT NULL,
+  `APN50MM` varchar(2) DEFAULT NULL,
+  `APN50SS` varchar(2) DEFAULT NULL,
+  `APN50HS` varchar(2) DEFAULT NULL,
+  `IMM100MM` varchar(2) DEFAULT NULL,
+  `IMM100SS` varchar(2) DEFAULT NULL,
+  `IMM100HS` varchar(2) DEFAULT NULL,
+  `IMM400MM` varchar(2) DEFAULT NULL,
+  `IMM400SS` varchar(2) DEFAULT NULL,
+  `IMM400HS` varchar(2) DEFAULT NULL,
+  `IMM800MM` varchar(2) DEFAULT NULL,
+  `IMM800SS` varchar(2) DEFAULT NULL,
+  `IMM800HS` varchar(2) DEFAULT NULL,
+  `ESTMON200MM` varchar(2) DEFAULT NULL,
+  `ESTMON200SS` varchar(2) DEFAULT NULL,
+  `ESTMON200HS` varchar(2) DEFAULT NULL,
+  `ESTMON400MM` varchar(2) DEFAULT NULL,
+  `ESTMON400SS` varchar(2) DEFAULT NULL,
+  `ESTMON400HS` varchar(2) DEFAULT NULL,
+  `ESTMON800MM` varchar(2) DEFAULT NULL,
+  `ESTMON800SS` varchar(2) DEFAULT NULL,
+  `ESTMON800HS` varchar(2) DEFAULT NULL,
+  `ESTSUB200MM` varchar(2) DEFAULT NULL,
+  `ESTSUB200SS` varchar(2) DEFAULT NULL,
+  `ESTSUB200HS` varchar(2) DEFAULT NULL,
+  `ESTSUB400MM` varchar(2) DEFAULT NULL,
+  `ESTSUB400SS` varchar(2) DEFAULT NULL,
+  `ESTSUB400HS` varchar(2) DEFAULT NULL,
+  `ESTMONM200MM` varchar(2) DEFAULT NULL,
+  `ESTMONM200SS` varchar(2) DEFAULT NULL,
+  `ESTMONM200HS` varchar(2) DEFAULT NULL,
+  `ESTMONM400MM` varchar(2) DEFAULT NULL,
+  `ESTMONM400SS` varchar(2) DEFAULT NULL,
+  `ESTMONM400HS` varchar(2) DEFAULT NULL,
+  `ESTSUBM200MM` varchar(2) DEFAULT NULL,
+  `ESTSUBM200SS` varchar(2) DEFAULT NULL,
+  `ESTSUBM200HS` varchar(2) DEFAULT NULL,
+  `ESTSUBM400MM` varchar(2) DEFAULT NULL,
+  `ESTSUBM400SS` varchar(2) DEFAULT NULL,
+  `ESTSUBM400HS` varchar(2) DEFAULT NULL,
+  `SP` varchar(1) DEFAULT NULL,
+  `TGLLAHIR` timestamp NULL DEFAULT NULL,
+  `NOMOR` varchar(15) DEFAULT NULL,
+  `GENDERMIX` varchar(50) DEFAULT NULL,
+  `IDA3P` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`IDA3P`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `A3`
+--
+
+LOCK TABLES `A3` WRITE;
+/*!40000 ALTER TABLE `A3` DISABLE KEYS */;
+set autocommit=0;
+INSERT INTO `A3` VALUES
+('Pa','C','MUHAMMAD ABIY NUSANTARA RAIS','KOTA JAKARTA TIMUR','KOTA JAKARTA TIMUR','KOTA','JAKARTA TIMUR','DKI JAKARTA','','','','','','','','','','','','','','','','','','','00','26','70','00','58','60','02','08','50','','','','','','','','','','','','','','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0',NULL,'Perorangan','0',1);
+/*!40000 ALTER TABLE `A3` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
+-- Table structure for table `A3Arsip`
+--
+
+DROP TABLE IF EXISTS `A3Arsip`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `A3Arsip` (
+  `GENDER` varchar(2) DEFAULT NULL,
+  `KU` varchar(30) DEFAULT NULL,
+  `NAMAATLET` varchar(50) DEFAULT NULL,
+  `ASAL` varchar(30) DEFAULT NULL,
+  `NAMACLUB` varchar(30) DEFAULT NULL,
+  `JENISDOM` varchar(4) DEFAULT NULL,
+  `NAMAKOTADOM` varchar(50) DEFAULT NULL,
+  `NAMAPROPDOM` varchar(50) DEFAULT NULL,
+  `MON50MM` varchar(2) DEFAULT NULL,
+  `MON50SS` varchar(2) DEFAULT NULL,
+  `MON50HS` varchar(2) DEFAULT NULL,
+  `MON100MM` varchar(2) DEFAULT NULL,
+  `MON100SS` varchar(2) DEFAULT NULL,
+  `MON100HS` varchar(2) DEFAULT NULL,
+  `MON200MM` varchar(2) DEFAULT NULL,
+  `MON200SS` varchar(2) DEFAULT NULL,
+  `MON200HS` varchar(2) DEFAULT NULL,
+  `MON400MM` varchar(2) DEFAULT NULL,
+  `MON400SS` varchar(2) DEFAULT NULL,
+  `MON400HS` varchar(2) DEFAULT NULL,
+  `MON800MM` varchar(2) DEFAULT NULL,
+  `MON800SS` varchar(2) DEFAULT NULL,
+  `MON800HS` varchar(2) DEFAULT NULL,
+  `MON1500MM` varchar(2) DEFAULT NULL,
+  `MON1500SS` varchar(2) DEFAULT NULL,
+  `MON1500HS` varchar(2) DEFAULT NULL,
+  `SUB50MM` varchar(2) DEFAULT NULL,
+  `SUB50SS` varchar(2) DEFAULT NULL,
+  `SUB50HS` varchar(2) DEFAULT NULL,
+  `SUB100MM` varchar(2) DEFAULT NULL,
+  `SUB100SS` varchar(2) DEFAULT NULL,
+  `SUB100HS` varchar(2) DEFAULT NULL,
+  `SUB200MM` varchar(2) DEFAULT NULL,
+  `SUB200SS` varchar(2) DEFAULT NULL,
+  `SUB200HS` varchar(2) DEFAULT NULL,
+  `SUB400MM` varchar(2) DEFAULT NULL,
+  `SUB400SS` varchar(2) DEFAULT NULL,
+  `SUB400HS` varchar(2) DEFAULT NULL,
+  `APN50MM` varchar(2) DEFAULT NULL,
+  `APN50SS` varchar(2) DEFAULT NULL,
+  `APN50HS` varchar(2) DEFAULT NULL,
+  `IMM100MM` varchar(2) DEFAULT NULL,
+  `IMM100SS` varchar(2) DEFAULT NULL,
+  `IMM100HS` varchar(2) DEFAULT NULL,
+  `IMM400MM` varchar(2) DEFAULT NULL,
+  `IMM400SS` varchar(2) DEFAULT NULL,
+  `IMM400HS` varchar(2) DEFAULT NULL,
+  `IMM800MM` varchar(2) DEFAULT NULL,
+  `IMM800SS` varchar(2) DEFAULT NULL,
+  `IMM800HS` varchar(2) DEFAULT NULL,
+  `ESTMON200MM` varchar(2) DEFAULT NULL,
+  `ESTMON200SS` varchar(2) DEFAULT NULL,
+  `ESTMON200HS` varchar(2) DEFAULT NULL,
+  `ESTMON400MM` varchar(2) DEFAULT NULL,
+  `ESTMON400SS` varchar(2) DEFAULT NULL,
+  `ESTMON400HS` varchar(2) DEFAULT NULL,
+  `ESTMON800MM` varchar(2) DEFAULT NULL,
+  `ESTMON800SS` varchar(2) DEFAULT NULL,
+  `ESTMON800HS` varchar(2) DEFAULT NULL,
+  `ESTSUB200MM` varchar(2) DEFAULT NULL,
+  `ESTSUB200SS` varchar(2) DEFAULT NULL,
+  `ESTSUB200HS` varchar(2) DEFAULT NULL,
+  `ESTSUB400MM` varchar(2) DEFAULT NULL,
+  `ESTSUB400SS` varchar(2) DEFAULT NULL,
+  `ESTSUB400HS` varchar(2) DEFAULT NULL,
+  `ESTMONM200MM` varchar(2) DEFAULT NULL,
+  `ESTMONM200SS` varchar(2) DEFAULT NULL,
+  `ESTMONM200HS` varchar(2) DEFAULT NULL,
+  `ESTMONM400MM` varchar(2) DEFAULT NULL,
+  `ESTMONM400SS` varchar(2) DEFAULT NULL,
+  `ESTMONM400HS` varchar(2) DEFAULT NULL,
+  `ESTSUBM200MM` varchar(2) DEFAULT NULL,
+  `ESTSUBM200SS` varchar(2) DEFAULT NULL,
+  `ESTSUBM200HS` varchar(2) DEFAULT NULL,
+  `ESTSUBM400MM` varchar(2) DEFAULT NULL,
+  `ESTSUBM400SS` varchar(2) DEFAULT NULL,
+  `ESTSUBM400HS` varchar(2) DEFAULT NULL,
+  `SP` varchar(1) DEFAULT NULL,
+  `TGLLAHIR` timestamp NULL DEFAULT NULL,
+  `NOMOR` varchar(15) DEFAULT NULL,
+  `GENDERMIX` varchar(50) DEFAULT NULL,
+  `IDA3P` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`IDA3P`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `A3Arsip`
+--
+
+LOCK TABLES `A3Arsip` WRITE;
+/*!40000 ALTER TABLE `A3Arsip` DISABLE KEYS */;
+set autocommit=0;
+/*!40000 ALTER TABLE `A3Arsip` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
+-- Table structure for table `Atlet`
+--
+
+DROP TABLE IF EXISTS `Atlet`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `Atlet` (
+  `NAMAATLET` varchar(50) DEFAULT NULL,
+  `ASAL` varchar(30) DEFAULT NULL,
+  `NAMACLUB` varchar(30) DEFAULT NULL,
+  `JENISDOM` varchar(4) DEFAULT NULL,
+  `NAMAKOTADOM` varchar(50) DEFAULT NULL,
+  `NAMAPROPDOM` varchar(50) DEFAULT NULL,
+  `GENDER` varchar(2) DEFAULT NULL,
+  `KU` varchar(30) DEFAULT NULL,
+  `SP` varchar(1) DEFAULT NULL,
+  `NONIAS` varchar(20) DEFAULT NULL,
+  `TGLLAHIR` date DEFAULT NULL,
+  `IDATLET` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `created_by` bigint(20) unsigned DEFAULT NULL,
+  `updated_by` bigint(20) unsigned DEFAULT NULL,
+  `EXPIRED` date DEFAULT NULL,
+  PRIMARY KEY (`IDATLET`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Atlet`
+--
+
+LOCK TABLES `Atlet` WRITE;
+/*!40000 ALTER TABLE `Atlet` DISABLE KEYS */;
+set autocommit=0;
+INSERT INTO `Atlet` VALUES
+('Aprila Widyatamaka','BLITAR','TIRTA KHARISMA DC','KAB','BLITAR','JAWA TIMUR','PI','C','0','05035793011097','2010-04-12',4,'2025-07-24 00:24:41','2025-07-24 01:30:42',7,7,'2026-03-28'),
+('Inez Gildas Agatha','BLITAR','TIRTA KHARISMA DC','KAB','BLITAR','JAWA TIMUR','PI','B','0','05135054040049','2007-02-09',7,'2025-07-24 00:31:02','2025-07-24 00:31:02',7,7,'2026-03-28'),
+('Mohammad Syaeful','BLITAR','TIRTA KHARISMA DC','KAB','BLITAR','JAWA TIMUR','PA','B','0','05135054040039','2007-10-30',8,'2025-07-24 18:00:38','2025-07-24 18:01:02',7,7,'2024-03-28'),
+('Made Aditiya Pratama','BLITAR','SAILFISH DC','KAB','BLITAR','JAWA TIMUR','PA','A','1','05135054030023','2006-09-27',9,'2025-07-24 18:05:39','2025-07-24 18:05:39',7,7,'2024-03-28');
+/*!40000 ALTER TABLE `Atlet` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
 -- Table structure for table `Kompetisi`
 --
 
@@ -42,7 +299,7 @@ LOCK TABLES `Kompetisi` WRITE;
 /*!40000 ALTER TABLE `Kompetisi` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `Kompetisi` VALUES
-(1,'K','ANTAR KOTA','2025-07-08 19:33:07','2025-07-17 20:58:22','0');
+(1,'K','ANTAR KOTA','2025-07-08 19:33:07','2025-07-22 18:01:21','0');
 /*!40000 ALTER TABLE `Kompetisi` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -185,6 +442,37 @@ UNLOCK TABLES;
 commit;
 
 --
+-- Table structure for table `MstEvent`
+--
+
+DROP TABLE IF EXISTS `MstEvent`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `MstEvent` (
+  `KDEVENT` varchar(15) DEFAULT NULL,
+  `NAMAEVENT` varchar(55) DEFAULT NULL,
+  `TGLMULAIEVENT` date DEFAULT NULL,
+  `TGLAKHIREVENT` date DEFAULT NULL,
+  `LOKASI` varchar(50) DEFAULT NULL,
+  `IDEVENT` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`IDEVENT`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `MstEvent`
+--
+
+LOCK TABLES `MstEvent` WRITE;
+/*!40000 ALTER TABLE `MstEvent` DISABLE KEYS */;
+set autocommit=0;
+INSERT INTO `MstEvent` VALUES
+('Gub Cup 2024','Kejurnas Fin Swimming Gubernur Cup Jatim 2024','2024-11-15','2024-11-17','Kolam Renang GAJAYANA di MALANG',1);
+/*!40000 ALTER TABLE `MstEvent` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
 -- Table structure for table `MstKU`
 --
 
@@ -242,7 +530,7 @@ CREATE TABLE `MstPeserta` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`IDPESERTA`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -254,7 +542,7 @@ LOCK TABLES `MstPeserta` WRITE;
 set autocommit=0;
 INSERT INTO `MstPeserta` VALUES
 ('SURABAYA','KOTA SURABAYA','KOTA','SURABAYA','JAWA TIMUR','INDONESIA','LAWRENCE STROLL','123','1',NULL,3,'lancestroll@mail.com','2025-07-14 20:45:01','2025-07-15 01:40:54'),
-('JEMBER','KAB JEMBER','KAB','JEMBER','JAWA TIMUR','INDONESIA',NULL,NULL,'1',NULL,7,'landonorris@mail.com','2025-07-15 18:30:31','2025-07-15 18:30:31');
+('BLITAR','KAB BLITAR','KAB','BLITAR','JAWA TIMUR','INDONESIA','LANDO NORRIS','123','1',NULL,9,'landonorris@mail.com','2025-07-22 18:29:51','2025-07-22 18:29:51');
 /*!40000 ALTER TABLE `MstPeserta` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -3041,6 +3329,61 @@ UNLOCK TABLES;
 commit;
 
 --
+-- Table structure for table `PesertaEmail`
+--
+
+DROP TABLE IF EXISTS `PesertaEmail`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `PesertaEmail` (
+  `KDEVENT` varchar(15) DEFAULT NULL,
+  `NAMAEVENT` varchar(55) DEFAULT NULL,
+  `TGLMULAIEVENT` date DEFAULT NULL,
+  `TGLAKHIREVENT` date DEFAULT NULL,
+  `LOKASI` varchar(50) DEFAULT NULL,
+  `ASAL` varchar(30) DEFAULT NULL,
+  `NAMACLUB` varchar(30) DEFAULT NULL,
+  `JENISDOM` varchar(4) DEFAULT NULL,
+  `NAMAKOTADOM` varchar(50) DEFAULT NULL,
+  `NAMAPROPDOM` varchar(50) DEFAULT NULL,
+  `NAMANEGDOM` varchar(50) DEFAULT NULL,
+  `GENDER` varchar(2) DEFAULT NULL,
+  `KU` varchar(30) DEFAULT NULL,
+  `NAMAATLET` varchar(50) DEFAULT NULL,
+  `NONIAS` varchar(20) DEFAULT NULL,
+  `TPTLAHIR` varchar(30) DEFAULT NULL,
+  `TGLLAHIR` date DEFAULT NULL,
+  `NOMOR` varchar(15) DEFAULT NULL,
+  `SP` varchar(1) DEFAULT NULL,
+  `GAYA` varchar(50) DEFAULT NULL,
+  `MM` varchar(2) DEFAULT NULL,
+  `MMdes` varchar(1) DEFAULT NULL,
+  `SS` varchar(2) DEFAULT NULL,
+  `SSdes` varchar(1) DEFAULT NULL,
+  `HS` varchar(2) DEFAULT NULL,
+  `DAFTAR` varchar(8) DEFAULT NULL,
+  `CETAKPIAGAMPESERTA` varchar(1) DEFAULT NULL,
+  `IDATLET` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`IDATLET`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `PesertaEmail`
+--
+
+LOCK TABLES `PesertaEmail` WRITE;
+/*!40000 ALTER TABLE `PesertaEmail` DISABLE KEYS */;
+set autocommit=0;
+INSERT INTO `PesertaEmail` VALUES
+('Gub Cup 2024','Kejurnas Fin Swimming Gubernur Cup Jatim 2024','2024-11-15','2024-11-17','Kolam Renang GAJAYANA di MALANG','KOTA JAKARTA TIMUR','KOTA JAKARTA TIMUR','KOTA','JAKARTA TIMUR','DKI JAKARTA','INDONESIA','Pa','C','MUHAMMAD ABIY NUSANTARA RAIS','\'NONIAS',NULL,'2010-08-13','Perorangan','0','50 m Bifin','00',':','26','.','70','00:26.70','0',1),
+('Gub Cup 2024','Kejurnas Fin Swimming Gubernur Cup Jatim 2024','2024-11-15','2024-11-17','Kolam Renang GAJAYANA di MALANG','KOTA JAKARTA TIMUR','KOTA JAKARTA TIMUR','KOTA','JAKARTA TIMUR','DKI JAKARTA','INDONESIA','Pa','C','MUHAMMAD ABIY NUSANTARA RAIS','\'NONIAS',NULL,'2010-08-13','Perorangan','0','100 m Bifin','00',':','58','.','60','00:58.60','0',2),
+('Gub Cup 2024','Kejurnas Fin Swimming Gubernur Cup Jatim 2024','2024-11-15','2024-11-17','Kolam Renang GAJAYANA di MALANG','KOTA JAKARTA TIMUR','KOTA JAKARTA TIMUR','KOTA','JAKARTA TIMUR','DKI JAKARTA','INDONESIA','Pa','C','MUHAMMAD ABIY NUSANTARA RAIS','\'NONIAS',NULL,'2010-08-13','Perorangan','0','200 m Bifin','02',':','08','.','50','02:08.50','0',3);
+/*!40000 ALTER TABLE `PesertaEmail` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
 -- Table structure for table `PilihanPesertaKotaKab`
 --
 
@@ -3683,7 +4026,7 @@ LOCK TABLES `cache` WRITE;
 /*!40000 ALTER TABLE `cache` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `cache` VALUES
-('possi_jatim_cache_spatie.permission.cache','a:3:{s:5:\"alias\";a:4:{s:1:\"a\";s:2:\"id\";s:1:\"b\";s:4:\"name\";s:1:\"c\";s:10:\"guard_name\";s:1:\"r\";s:5:\"roles\";}s:11:\"permissions\";a:11:{i:0;a:4:{s:1:\"a\";i:19;s:1:\"b\";s:12:\"create users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:1;a:4:{s:1:\"a\";i:20;s:1:\"b\";s:10:\"edit users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:2;a:4:{s:1:\"a\";i:21;s:1:\"b\";s:12:\"delete users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:3;a:4:{s:1:\"a\";i:22;s:1:\"b\";s:10:\"view users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:4;a:4:{s:1:\"a\";i:23;s:1:\"b\";s:12:\"create posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:9;i:1;i:10;i:2;i:12;}}i:5;a:4:{s:1:\"a\";i:24;s:1:\"b\";s:10:\"edit posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:9;i:1;i:10;i:2;i:12;}}i:6;a:4:{s:1:\"a\";i:25;s:1:\"b\";s:12:\"delete posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:7;a:4:{s:1:\"a\";i:26;s:1:\"b\";s:13:\"publish posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:9;i:1;i:10;i:2;i:12;}}i:8;a:4:{s:1:\"a\";i:27;s:1:\"b\";s:10:\"view posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:4:{i:0;i:9;i:1;i:10;i:2;i:11;i:3;i:12;}}i:9;a:4:{s:1:\"a\";i:28;s:1:\"b\";s:13:\"view settings\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:10;a:4:{s:1:\"a\";i:29;s:1:\"b\";s:15:\"manage settings\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}}s:5:\"roles\";a:4:{i:0;a:3:{s:1:\"a\";i:9;s:1:\"b\";s:5:\"admin\";s:1:\"c\";s:3:\"web\";}i:1;a:3:{s:1:\"a\";i:10;s:1:\"b\";s:6:\"editor\";s:1:\"c\";s:3:\"web\";}i:2;a:3:{s:1:\"a\";i:12;s:1:\"b\";s:8:\"operator\";s:1:\"c\";s:3:\"web\";}i:3;a:3:{s:1:\"a\";i:11;s:1:\"b\";s:4:\"user\";s:1:\"c\";s:3:\"web\";}}}',1752897477);
+('possi_jatim_cache_spatie.permission.cache','a:3:{s:5:\"alias\";a:4:{s:1:\"a\";s:2:\"id\";s:1:\"b\";s:4:\"name\";s:1:\"c\";s:10:\"guard_name\";s:1:\"r\";s:5:\"roles\";}s:11:\"permissions\";a:11:{i:0;a:4:{s:1:\"a\";i:19;s:1:\"b\";s:12:\"create users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:1;a:4:{s:1:\"a\";i:20;s:1:\"b\";s:10:\"edit users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:2;a:4:{s:1:\"a\";i:21;s:1:\"b\";s:12:\"delete users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:3;a:4:{s:1:\"a\";i:22;s:1:\"b\";s:10:\"view users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:4;a:4:{s:1:\"a\";i:23;s:1:\"b\";s:12:\"create posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:9;i:1;i:10;i:2;i:12;}}i:5;a:4:{s:1:\"a\";i:24;s:1:\"b\";s:10:\"edit posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:9;i:1;i:10;i:2;i:12;}}i:6;a:4:{s:1:\"a\";i:25;s:1:\"b\";s:12:\"delete posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:7;a:4:{s:1:\"a\";i:26;s:1:\"b\";s:13:\"publish posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:9;i:1;i:10;i:2;i:12;}}i:8;a:4:{s:1:\"a\";i:27;s:1:\"b\";s:10:\"view posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:4:{i:0;i:9;i:1;i:10;i:2;i:11;i:3;i:12;}}i:9;a:4:{s:1:\"a\";i:28;s:1:\"b\";s:13:\"view settings\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:10;a:4:{s:1:\"a\";i:29;s:1:\"b\";s:15:\"manage settings\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}}s:5:\"roles\";a:4:{i:0;a:3:{s:1:\"a\";i:9;s:1:\"b\";s:5:\"admin\";s:1:\"c\";s:3:\"web\";}i:1;a:3:{s:1:\"a\";i:10;s:1:\"b\";s:6:\"editor\";s:1:\"c\";s:3:\"web\";}i:2;a:3:{s:1:\"a\";i:12;s:1:\"b\";s:8:\"operator\";s:1:\"c\";s:3:\"web\";}i:3;a:3:{s:1:\"a\";i:11;s:1:\"b\";s:4:\"user\";s:1:\"c\";s:3:\"web\";}}}',1753495032);
 /*!40000 ALTER TABLE `cache` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -3902,7 +4245,8 @@ INSERT INTO `model_has_roles` VALUES
 (11,'App\\Models\\User',7),
 (12,'App\\Models\\User',8),
 (11,'App\\Models\\User',9),
-(11,'App\\Models\\User',10);
+(11,'App\\Models\\User',10),
+(11,'App\\Models\\User',11);
 /*!40000 ALTER TABLE `model_has_roles` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -4087,8 +4431,8 @@ LOCK TABLES `sessions` WRITE;
 /*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `sessions` VALUES
-('CAbhHdut6Xd5AfyyZNnjiLS77G3CwfnPlKWUgBTu',7,'127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36','YTo1OntzOjY6Il90b2tlbiI7czo0MDoieGtHelZaYjBsdDdQYlZlSmhTM09EMTFETkVYSGRWZVp0ZDZWZ1lrQyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDI6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9mb3JtLWExL2RhZnRhci1hdGxldCI7fXM6MzoidXJsIjthOjA6e31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aTo3O30=',1752811103),
-('zhhfaDLMmga3n752ynIshdc6gkI0HmnV8akhJUFL',2,'127.0.0.1','Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0','YTo0OntzOjY6Il90b2tlbiI7czo0MDoiVmZjcTFFb3ZsazhOd2xTWExkUnROTVJUZnhsOEJNUHhWSlZtV0JLYSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDI6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9jb21wZXRpdGlvbi1zZXR0aW5ncyI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjI7fQ==',1752811102);
+('Re8E3pgikMosGYY00WVKgmU2tiQb6zJneCs210Mn',2,'127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36','YTo0OntzOjY6Il90b2tlbiI7czo0MDoiZDFMTEZqcHVTOGVCRFpZckFuaTlsS2dTdUgxcEtKRUVHODRXdEpYTyI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MzA6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9zZXR0aW5ncyI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjI7fQ==',1753408653),
+('zEA7fQRp8Ery1Oa5yI1D3SbQwr6LoNTx2fVrDjm2',7,'127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36','YTo1OntzOjY6Il90b2tlbiI7czo0MDoiV3dSbXBwUW55MnZlV0JRVGRvZVVBTlpMQXlSRm56SjhQN1hzRzlVYSI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDI6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9mb3JtLWExL2RhZnRhci1hdGxldCI7fXM6MzoidXJsIjthOjA6e31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aTo3O30=',1753408727);
 /*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -4148,9 +4492,15 @@ CREATE TABLE `users` (
   `KDCLUB` varchar(2) DEFAULT NULL,
   `NAMACLUB` varchar(100) DEFAULT NULL,
   `IDCLUB` int(11) NOT NULL,
+  `KDJENISDOM` varchar(1) DEFAULT NULL,
+  `JENISDOM` varchar(4) DEFAULT NULL,
+  `KDKOTADOM` varchar(5) DEFAULT NULL,
+  `NAMAKOTADOM` varchar(50) DEFAULT NULL,
+  `KDPROPDOM` varchar(2) DEFAULT NULL,
+  `NAMAPROPDOM` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_email_unique` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4161,12 +4511,13 @@ LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `users` VALUES
-(1,'Test User','test@example.com','2025-05-28 00:55:26','$2y$12$5ms4E59l6E3w3YzTRIU7Ve1C21P1L/NRuRESOpjzQDM2RDTRFTKiO','uXHPSL1CIs','2025-05-28 00:55:26','2025-05-28 00:55:26',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0),
-(2,'achmad kusumo','achmadkusumo@mail.com',NULL,'$2y$12$b975tgSk9gGnPbJl1OGy6O8xC9SCC3bUO0XxADA/gbGel7uzcTBmC',NULL,'2025-05-28 01:08:20','2025-05-30 20:15:28','00','Admin','0','Admin','0000','Admin','00','Admin',128),
-(7,'lando norris','landonorris@mail.com',NULL,'$2y$12$OavXOQ6z2jhbiVlTcY0wvOD..MpGp8.4tNB4r5gb9OaH0BOnDSFda',NULL,'2025-05-29 21:21:25','2025-07-09 21:11:18','05','Jawa Timur','1','Kab','3509','Jember','01','HQL. ALAM',30),
-(8,'widad nadia','widadnadia@mail.com',NULL,'$2y$12$oVDztSuA56C2ZrJ44SnwL.fv2W9BscQePOq0TkHmRu8E7p6Ab0Ty2',NULL,'2025-05-30 03:26:57','2025-07-08 20:30:00','05','Jawa Timur','0','Kota','3574','Probolinggo','01','BATRA DC',84),
-(9,'adit kusumo','aadityakusumo@gmail.com',NULL,'$2y$12$Xh5rjtBQcu83KfsqPhFP4uOXv03.y6tnOkJQ1WOVLByKhqYCAzaJ6',NULL,'2025-05-30 05:47:33','2025-07-10 02:15:43','05','Jawa Timur','1','Kab','3507','Malang','01','CORENA',22),
-(10,'lance stroll','lancestroll@mail.com',NULL,'$2y$12$NWjLrGETqUzPu4gyptQ6guOHiNmuKMytREJN6pnFoa4eN/JDEr7GO',NULL,'2025-07-10 02:18:44','2025-07-10 02:18:44','05','Jawa Timur','0','Kota','3578','Surabaya','01','EAGLE DC',93);
+(1,'Test User','test@example.com','2025-05-28 00:55:26','$2y$12$5ms4E59l6E3w3YzTRIU7Ve1C21P1L/NRuRESOpjzQDM2RDTRFTKiO','uXHPSL1CIs','2025-05-28 00:55:26','2025-05-28 00:55:26',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,NULL,NULL,NULL),
+(2,'achmad kusumo','achmadkusumo@mail.com',NULL,'$2y$12$b975tgSk9gGnPbJl1OGy6O8xC9SCC3bUO0XxADA/gbGel7uzcTBmC',NULL,'2025-05-28 01:08:20','2025-05-30 20:15:28','00','Admin','0','Admin','0000','Admin','00','Admin',128,NULL,NULL,NULL,NULL,NULL,NULL),
+(7,'lando norris','landonorris@mail.com',NULL,'$2y$12$OavXOQ6z2jhbiVlTcY0wvOD..MpGp8.4tNB4r5gb9OaH0BOnDSFda',NULL,'2025-05-29 21:21:25','2025-07-20 19:18:07','05','Jawa Timur','1','Kab','3506','Kediri','05','HENS DC',21,'1','Kab','3505','Blitar','05','Jawa Timur'),
+(8,'widad nadia','widadnadia@mail.com',NULL,'$2y$12$oVDztSuA56C2ZrJ44SnwL.fv2W9BscQePOq0TkHmRu8E7p6Ab0Ty2',NULL,'2025-05-30 03:26:57','2025-07-21 23:03:35','05','Jawa Timur','0','Kota','3574','Probolinggo','01','BATRA DC',84,'1','Kab','3502','Ponorogo','05','Jawa Timur'),
+(9,'adit kusumo','aadityakusumo@gmail.com',NULL,'$2y$12$Xh5rjtBQcu83KfsqPhFP4uOXv03.y6tnOkJQ1WOVLByKhqYCAzaJ6',NULL,'2025-05-30 05:47:33','2025-07-21 23:03:45','05','Jawa Timur','1','Kab','3507','Malang','01','CORENA',22,'0','Kota','3578','Surabaya','05','Jawa Timur'),
+(10,'lance stroll','lancestroll@mail.com',NULL,'$2y$12$NWjLrGETqUzPu4gyptQ6guOHiNmuKMytREJN6pnFoa4eN/JDEr7GO',NULL,'2025-07-10 02:18:44','2025-07-21 23:04:02','05','Jawa Timur','0','Kota','3578','Surabaya','01','EAGLE DC',93,'1','Kab','3519','Madiun','05','Jawa Timur'),
+(11,'hamilton lewis','hamiltonlewis@mail.com',NULL,'$2y$12$I9oJhq5ieCpGCIeYiqUGr.gf8Up33behWzBqflwJ/zl1Xm04wioPG',NULL,'2025-07-20 19:48:52','2025-07-21 23:04:10','05','Jawa Timur','0','Kota','3579','Batu','01','LOTUS AQUATIC CLUB',101,'1','Kab','3507','Malang','05','Jawa Timur');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -4184,4 +4535,4 @@ commit;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2025-07-18 10:59:59
+-- Dump completed on 2025-07-25  8:59:33

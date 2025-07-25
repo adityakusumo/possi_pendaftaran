@@ -595,7 +595,7 @@ class FormA1Controller extends Controller
                 'birth_year' => 'required|numeric|digits:4',
                 'ku' => 'nullable|string|max:10', // Maps to KU
                 'gender' => 'required|in:PA,PI', // Maps to GENDER
-                'sparing_partner' => 'required|in:SP,BUKAN_SP', // Will be hardcoded to '0'
+                'sparing_partner' => 'required|in:0,1', // Will be hardcoded to '0'
 
             ]);
 
@@ -642,7 +642,8 @@ class FormA1Controller extends Controller
 
                 // NEW MAPPINGS BASED ON YOUR REQUEST:
                 'ASAL' => $validatedData['nama_kota_kab'],             // 'nama_kota_kab' from form -> ASAL column
-                'SP' => '0',                                             // Hardcode '0' into SP column as requested
+                // 'SP' => '0',                                             // Hardcode '0' into SP column as requested
+                'SP' => $validatedData['sparing_partner'],
                 'EXPIRED' => $expiredDate,
                 // 'updated_by' => Auth::id(),
                 // Note: 'NEGARA' is not explicitly requested for Atlet table, but you have it in validation if needed
@@ -710,5 +711,71 @@ class FormA1Controller extends Controller
             Log::error('Error deleting Atlet data: ' . $e->getMessage(), ['request' => $request->all()]);
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menghapus data atlet: ' . $e->getMessage());
         }
+    }
+
+    public function searchNias(Request $request)
+    {
+        $searchQuery = $request->query('query'); // Get the search term from the 'query' parameter
+        $page = $request->query('page', 1); // Get the current page for pagination
+        $perPage = 20; // Number of items per page, match your view
+
+        $user = Auth::user();
+
+        $kompetisi = Kompetisi::first(); // Fetch the relevant competition record
+
+        $query = NIAS::query();
+
+        // Apply filtering logic based on JNSKOMPETISI (similar to daftarAtlet)
+        if ($kompetisi && $kompetisi->JNSKOMPETISI) {
+            $userJnsKompetisi = mb_strtoupper($kompetisi->JNSKOMPETISI, 'UTF-8');
+            switch ($userJnsKompetisi) {
+                case 'K':
+                    if ($user->JENISDOM) {
+                        $query->whereRaw('UPPER(JENISDOM) = ?', [mb_strtoupper($user->JENISDOM, 'UTF-8')]);
+                    } else {
+                        $query->whereRaw('1 = 0');
+                    }
+                    if ($user->NAMAKOTADOM) {
+                        $query->whereRaw('UPPER(NAMAKOTADOM) = ?', [mb_strtoupper($user->NAMAKOTADOM, 'UTF-8')]);
+                    } else {
+                        $query->whereRaw('1 = 0');
+                    }
+                    break;
+                case 'C':
+                    if ($user->NAMACLUB) {
+                        $query->whereRaw('UPPER(NAMACLUB) = ?', [mb_strtoupper($user->NAMACLUB, 'UTF-8')]);
+                    } else {
+                        $query->whereRaw('1 = 0');
+                    }
+                    break;
+                case 'P':
+                    if ($user->NAMAPROP) {
+                        $query->whereRaw('UPPER(NAMAPROP) = ?', [mb_strtoupper($user->NAMAPROP, 'UTF-8')]);
+                    } else {
+                        $query->whereRaw('1 = 0');
+                    }
+                    break;
+                default:
+                    $query->whereRaw('1 = 0');
+                    break;
+            }
+        } else {
+            // If no competition or JNSKOMPETISI, return no results for search
+            $query->whereRaw('1 = 0');
+        }
+
+        // Apply search query: search by NONIAS or NAMA
+        if ($searchQuery) {
+            $searchQueryUpper = mb_strtoupper($searchQuery, 'UTF-8');
+            $query->where(function ($q) use ($searchQueryUpper) {
+                $q->whereRaw('UPPER(NONIAS) LIKE ?', ['%' . $searchQueryUpper . '%'])
+                    ->orWhereRaw('UPPER(NAMA) LIKE ?', ['%' . $searchQueryUpper . '%']);
+            });
+        }
+
+        $niasList = $query->orderBy('NAMA', 'asc')->paginate($perPage, ['*'], 'page', $page);
+
+        // Return the paginated data as JSON
+        return response()->json($niasList);
     }
 }

@@ -61,12 +61,12 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-md">
+                                <!-- <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-md">
                                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Selected Athlete Details (for debugging)</h3>
                                     <pre id="selected-athlete-details" class="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-800 p-3 rounded-md">
-            No athlete selected yet. Click a row to see details.
-        </pre>
-                                </div>
+                                        No athlete selected yet. Click a row to see details.
+                                    </pre>
+                                </div> -->
 
                                 <div class="overflow-x-auto shadow-md sm:rounded-lg" style="max-height: 300px; overflow-y: auto;">
                                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
@@ -89,7 +89,7 @@
                                                     {{ ($niasList->currentPage() - 1) * $niasList->perPage() + $loop->iteration }}
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $niaspeserta->NAMACLUB ?? '' }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $niaspeserta->KDJENIS ?? $niaspeserta->JENIS ?? '' }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $niaspeserta->JENIS ?? '' }}</td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $niaspeserta->NAMAKOTA ?? '' }}</td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $niaspeserta->NAMAPROP ?? '' }}</td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ $niaspeserta->NAMA ?? '' }}</td>
@@ -212,11 +212,11 @@
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Sparing Partner') }}</label>
                                         <div class="mt-1 flex items-center gap-4">
                                             <label class="inline-flex items-center">
-                                                <input type="radio" name="sparing_partner" value="SP" id="sparing_partner_yes" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                <input type="radio" name="sparing_partner" value="1" id="sparing_partner_yes" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                 <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('SP') }}</span>
                                             </label>
                                             <label class="inline-flex items-center">
-                                                <input type="radio" name="sparing_partner" value="BUKAN_SP" id="sparing_partner_no" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600" checked>
+                                                <input type="radio" name="sparing_partner" value="0" id="sparing_partner_no" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600" checked>
                                                 <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Bukan SP') }}</span>
                                             </label>
 
@@ -360,6 +360,19 @@
         // Any inline scripts specific to this page can go here, after all files are loaded.
         // e.g., if you had a specific initialization function for this page
         // myPageInitFunction();
+    </script>
+
+    <script>
+        // Define global JavaScript variables for routes and translations
+        window.appConfig = {
+            routes: {
+                niasSearch: "{{ route('atlet.niasSearch') }}"
+            },
+            translations: {
+                noNiasData: "{{ __('Tidak ada data NIAS yang ditemukan.') }}",
+                failedToLoadNias: "{{ __('Gagal memuat data NIAS. Coba lagi.') }}"
+            }
+        };
     </script>
     @endpush
 
