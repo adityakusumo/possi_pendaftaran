@@ -568,7 +568,11 @@ class FormA1Controller extends Controller
         }
 
         $userID = $user->id;
-        $atletList = \App\Models\Atlet::where('updated_by', $userID)->get();
+        // $atletList = \App\Models\Atlet::where('updated_by', $userID)->get();
+        $atletList = \App\Models\Atlet::where('updated_by', $userID)
+            ->orderBy('GENDER', 'asc')    // Sort by GENDER first
+            ->orderBy('NAMAATLET', 'asc') // Then by NAMAATLET
+            ->get();
 
         return view('form_a1_namaatlet', compact('niasList', 'autoFillDetails', 'mstKuOptions', 'mstKuData', 'wajibNiasStatusText', 'atletList'));
     }

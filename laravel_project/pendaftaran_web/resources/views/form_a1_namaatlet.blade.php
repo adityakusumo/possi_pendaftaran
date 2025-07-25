@@ -120,41 +120,41 @@
                                         <label for="nama_club_new" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Club') }}</label>
                                         {{-- IMPORTANT: Changed name to 'nama_club' for controller --}}
                                         <input type="text" id="nama_club_new" name="nama_club"
-                                            value="{{ old('nama_club', $autoFillDetails['NAMACLUB'] ?? '') }}" readonly
+                                            {{-- value="{{ old('nama_club', $autoFillDetails['NAMACLUB'] ?? '') }}" readonly --}}
                                             class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                     <div>
                                         <label for="kota_kab_new" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Kota / Kab') }}</label>
                                         {{-- IMPORTANT: Changed name to 'jenis_kota_kab' for controller --}}
                                         <input type="text" id="kota_kab_new" name="jenis_kota_kab"
-                                            value="{{ old('jenis_kota_kab', $autoFillDetails['JENIS'] ?? '') }}"
+                                            {{-- value="{{ old('jenis_kota_kab', $autoFillDetails['JENIS'] ?? '') }}" --}}
                                             class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                     <div class="col-span-2"> {{-- Spans full width --}}
                                         <label for="nama_kota_kab_new" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Kota / Kab') }}</label>
                                         {{-- IMPORTANT: Changed name to 'nama_kota_kab' for controller --}}
                                         <input type="text" id="nama_kota_kab_new" name="nama_kota_kab"
-                                            value="{{ old('nama_kota_kab', $autoFillDetails['NAMAKOTA'] ?? '') }}"
+                                            {{-- value="{{ old('nama_kota_kab', $autoFillDetails['NAMAKOTA'] ?? '') }}" --}}
                                             class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                     <div>
                                         <label for="propinsi_new" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Propinsi') }}</label>
                                         {{-- IMPORTANT: Changed name to 'propinsi' for controller --}}
                                         <input type="text" id="propinsi_new" name="propinsi"
-                                            value="{{ old('propinsi', $autoFillDetails['NAMAPROP'] ?? '') }}"
+                                            {{-- value="{{ old('propinsi', $autoFillDetails['NAMAPROP'] ?? '') }}" --}}
                                             class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                     <div>
                                         <label for="negara_new" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Negara') }}</label>
                                         {{-- IMPORTANT: Changed name to 'negara' for controller --}}
-                                        <input type="text" id="negara_new" name="negara" value="INDONESIA" readonly
+                                        <input type="text" id="negara_new" name="negara" readonly
                                             class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
                                     <div class="col-span-2"> {{-- Spans full width --}}
                                         <label for="nama_atlet_new" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Atlet') }}</label>
                                         {{-- IMPORTANT: Changed name to 'nama_atlet' for controller --}}
                                         <input type="text" id="nama_atlet_new" name="nama_atlet"
-                                            value="{{ old('nama_atlet', $autoFillDetails['NAMA'] ?? '') }}"
+                                            {{-- value="{{ old('nama_atlet', $autoFillDetails['NAMA'] ?? '') }}" --}}
                                             class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
 
@@ -220,36 +220,50 @@
                                                 <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Bukan SP') }}</span>
                                             </label>
 
-                                            {{-- IMPORTANT: This input shows NIAS number, using 'nias_number_display' name --}}
+                                            <!-- {{-- IMPORTANT: This input shows NIAS number, using 'nias_number_display' name --}}
                                             <input type="text" name="nias_number_display" id="nias_number" value="" readonly
-                                                class="flex-1 rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                class="flex-1 rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"> -->
                                         </div>
                                     </div>
 
-                                    {{-- NEW: EXP1009 Input --}}
-                                    <div>
-                                        <label for="exp1009_input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('EXP1009') }}</label>
-                                        {{-- IMPORTANT: Changed name to 'exp1009' for controller --}}
-                                        <input type="text" id="exp1009_input" name="exp1009"
-                                            class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" readonly>
+                                    <div class="col-span-2">
+                                        {{-- IMPORTANT: This input shows NIAS number, using 'nias_number_display' name --}}
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nomor NIAS') }}</label>
+                                        <input type="text" name="nias_number_display" id="nias_number" value="" readonly
+                                            class="flex-1 rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     </div>
-                                </div>
-                            </div> {{-- End of DATA ATLET section --}}
 
-                            {{-- Action Buttons above lower table (Wajib NIAS Status) --}}
-                            <div class="mt-8 flex flex-wrap justify-center sm:justify-start gap-3 mb-6">
-                                <input type="text"
-                                    id="wajib_nias_status_display"
-                                    name="wajib_nias_status_display"
-                                    value="{{ $wajibNiasStatusText }}"
-                                    readonly
-                                    class="px-4 py-2
+                                    {{-- (Wajib NIAS Status) --}}
+                                    <div class="col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Status Wajib Nias') }}</label>
+                                        <div class="mt-1 flex items-center gap-4">
+                                            <input type="text"
+                                                id="wajib_nias_status_display"
+                                                name="wajib_nias_status_display"
+                                                value="{{ $wajibNiasStatusText }}"
+                                                readonly
+                                                class="px-4 py-2
                                               {{ $wajibNiasStatusText === 'Bebas' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white' }}
                                               rounded-md shadow
                                               dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600
                                               text-sm font-semibold text-center cursor-default
                                               focus:outline-none focus:ring-0">
-                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- {{-- NEW: EXP1009 Input --}}
+                                    <div>
+                                        <label for="exp1009_input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('EXP1009') }}</label>
+                                        {{-- IMPORTANT: Changed name to 'exp1009' for controller --}}
+                                        <input type="text" id="exp1009_input" name="exp1009"
+                                            class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" readonly>
+                                    </div> -->
+
+                                </div>
+
+
+
+                            </div> {{-- End of DATA ATLET section --}}
 
                             {{-- Lower Table (Display of currently added athletes to this kontingen) --}}
                             <div class="overflow-x-auto rounded-lg shadow mb-6" style="max-height: 300px; overflow-y: auto;">
