@@ -5,6 +5,8 @@ import './script';
 
 import './form_a1_namaatlet'
 
+import './form_a3_noperorangan'
+
 import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;

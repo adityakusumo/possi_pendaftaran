@@ -7,6 +7,12 @@
         </h2>
     </x-slot>
 
+    {{-- Pass athlete data to JavaScript --}}
+    <script>
+        window.atletDetails = @json($atletDetailsForJs ?? []);
+        console.log('Atlet Details for JS:', window.atletDetails); // For debugging
+    </script>
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
@@ -23,10 +29,26 @@
                                     <div class="flex flex-col sm:flex-row items-center gap-4 mb-4">
                                         <div class="flex-1 w-full">
                                             <label for="nama_atlet_input" class="sr-only">{{ __('Nama Atlet') }}</label>
-                                            <input type="text" id="nama_atlet_input" name="nama_atlet_input" placeholder="Nama Atlet"
+                                            <!-- <input type="text" id="nama_atlet_input" name="nama_atlet_input" placeholder="Nama Atlet"
+                                                class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"> -->
+                                            <!-- <select name="nama_atlet_input" id="nama_atlet_input" class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                <option value="">Pilih Atlet</option>
+                                                @foreach($NamaAtletList as $atletNames)
+                                                <option value="{{ $atletNames }}" {{ old('ku') == $atletNames ? 'selected' : '' }}>
+                                                    {{ $atletNames }}
+                                                </option>
+                                                @endforeach
+                                            </select> -->
+                                            <select name="selected_atlet_nonias" id="nama_atlet_input"
                                                 class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                <option value="">Pilih Atlet</option>
+                                                @foreach($NamaAtletList as $idAtlet => $atletName)
+                                                <option value="{{ $idAtlet }}">{{ $atletName }}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
-                                        <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-indigo-700 dark:hover:bg-indigo-600">
+                                        <button type="button" id="pilih-atlet-button"
+                                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-indigo-700 dark:hover:bg-indigo-600">
                                             {{ __('Pilih') }}
                                         </button>
                                     </div>
@@ -35,11 +57,11 @@
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Gender') }}</label>
                                         <div class="flex gap-2">
                                             <label class="inline-flex items-center">
-                                                <input type="radio" name="gender" value="PA" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                <input type="radio" name="gender" value="PA" id="gender_pa" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                 <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Pa') }}</span>
                                             </label>
                                             <label class="inline-flex items-center">
-                                                <input type="radio" name="gender" value="PI" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                <input type="radio" name="gender" value="PI" id="gender_pi" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                 <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Pi') }}</span>
                                             </label>
                                         </div>
@@ -51,15 +73,18 @@
                                             <option value="A">A</option>
                                             <option value="B">B</option>
                                             <option value="C">C</option>
+                                            <option value="D">D</option>
+                                            <option value="E">E</option>
+                                            <option value="F">F</option>
                                         </select>
                                         {{-- SP / Bukan SP --}}
                                         <div class="flex gap-2">
                                             <label class="inline-flex items-center">
-                                                <input type="radio" name="sp_status" value="SP" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                <input type="radio" name="sp_status" value="SP" id="sp_yes" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                 <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('SP') }}</span>
                                             </label>
                                             <label class="inline-flex items-center">
-                                                <input type="radio" name="sp_status" value="BUKAN_SP" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                <input type="radio" name="sp_status" value="BUKAN_SP" id="sp_no" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                 <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Bukan SP') }}</span>
                                             </label>
                                         </div>
@@ -119,7 +144,27 @@
                                         </label>
                                     </div>
                                 </div>
+                                {{-- NEW: Checkbox and Time Inputs Section --}}
+                                <div id="time_inputs_container" class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm hidden">
+                                    <div class="flex items-center mb-4">
+                                        <input type="checkbox" id="enable_time_input" name="enable_time_input" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                        <label for="enable_time_input" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Input Waktu') }}</label>
+                                    </div>
 
+                                    <div id="time_fields" class="flex items-center gap-2 hidden">
+                                        <label for="mm_input" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('MM:') }}</label>
+                                        <input type="text" id="mm_input" name="mm_input" placeholder="00" maxlength="2"
+                                            class="w-16 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+
+                                        <label for="ss_input" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('SS:') }}</label>
+                                        <input type="text" id="ss_input" name="ss_input" placeholder="00" maxlength="2"
+                                            class="w-16 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+
+                                        <label for="hs_input" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('HS:') }}</label>
+                                        <input type="text" id="hs_input" name="hs_input" placeholder="00" maxlength="2"
+                                            class="w-16 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    </div>
+                                </div>
                                 {{-- Large Empty Area (for future use, e.g., selected perorangan events) --}}
                                 <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm h-64">
                                     {{-- This area can be used for displaying selected events or other details --}}
