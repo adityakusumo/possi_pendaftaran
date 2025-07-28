@@ -144,31 +144,75 @@
                                         </label>
                                     </div>
                                 </div>
-                                {{-- NEW: Checkbox and Time Inputs Section --}}
-                                <div id="time_inputs_container" class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm hidden">
-                                    <div class="flex items-center mb-4">
-                                        <input type="checkbox" id="enable_time_input" name="enable_time_input" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                        <label for="enable_time_input" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Input Waktu') }}</label>
-                                    </div>
 
-                                    <div id="time_fields" class="flex items-center gap-2 hidden">
-                                        <label for="mm_input" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('MM:') }}</label>
-                                        <input type="text" id="mm_input" name="mm_input" placeholder="00" maxlength="2"
-                                            class="w-16 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-
-                                        <label for="ss_input" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('SS:') }}</label>
-                                        <input type="text" id="ss_input" name="ss_input" placeholder="00" maxlength="2"
-                                            class="w-16 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-
-                                        <label for="hs_input" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('HS:') }}</label>
-                                        <input type="text" id="hs_input" name="hs_input" placeholder="00" maxlength="2"
-                                            class="w-16 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    </div>
-                                </div>
                                 {{-- Large Empty Area (for future use, e.g., selected perorangan events) --}}
-                                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm h-64">
-                                    {{-- This area can be used for displaying selected events or other details --}}
+                                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm h-64 mb-4"> {{-- Added mb-4 for spacing --}}
                                     <p class="text-gray-500 dark:text-gray-400 text-center py-10">{{ __('Area untuk daftar nomor perorangan yang dipilih.') }}</p>
+                                </div>
+
+                                {{-- NEW CONTAINER FOR TIME INPUTS (to make them side-by-side) --}}
+                                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm">
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 text-center">{{ __('Input Waktu Catatan') }}</h3>
+                                    <div class="flex flex-col sm:flex-row justify-center items-start gap-4"> {{-- flex-col for small screens, flex-row for medium+ --}}
+
+                                        {{-- SF 50m Group --}}
+                                        <div id="SF_50m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
+                                            <div class="flex items-center mb-4">
+                                                <input type="checkbox" id="SF_50m_enable_time_chkbx" name="SF_50m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                <label for="SF_50m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('50m') }}</label>
+                                            </div>
+
+                                            {{-- Updated time fields layout for 50m --}}
+                                            <div id="SF_50m_time_fields" class="flex gap-2 hidden justify-center"> {{-- Added justify-center for centering --}}
+                                                <div class="flex flex-col items-center"> {{-- Each label/input pair is a column --}}
+                                                    <label for="SF_50m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                    <input type="text" id="SF_50m_mm_txtbx" name="SF_50m_mm_txtbx" placeholder="00" maxlength="2"
+                                                        class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                </div>
+
+                                                <div class="flex flex-col items-center">
+                                                    <label for="SF_50m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                    <input type="text" id="SF_50m_ss_txtbx" name="SF_50m_ss_txtbx" placeholder="00" maxlength="2"
+                                                        class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                </div>
+
+                                                <div class="flex flex-col items-center">
+                                                    <label for="SF_50m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                    <input type="text" id="SF_50m_hs_txtbx" name="SF_50m_hs_txtbx" placeholder="00" maxlength="2"
+                                                        class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- SF 100m Group --}}
+                                        <div id="SF_100m_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
+                                            <div class="flex items-center mb-4">
+                                                <input type="checkbox" id="SF_100m_enable_time_chkbx" name="SF_100m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                <label for="SF_100m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('100m') }}</label>
+                                            </div>
+
+                                            {{-- Updated time fields layout for 100m --}}
+                                            <div id="SF_100m_time_fields" class="flex gap-2 hidden justify-center"> {{-- Added justify-center for centering --}}
+                                                <div class="flex flex-col items-center"> {{-- Each label/input pair is a column --}}
+                                                    <label for="SF_100m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                    <input type="text" id="SF_100m_mm_txtbx" name="SF_100m_mm_txtbx" placeholder="00" maxlength="2"
+                                                        class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                </div>
+
+                                                <div class="flex flex-col items-center">
+                                                    <label for="SF_100m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                    <input type="text" id="SF_100m_ss_txtbx" name="SF_100m_ss_txtbx" placeholder="00" maxlength="2"
+                                                        class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                </div>
+
+                                                <div class="flex flex-col items-center">
+                                                    <label for="SF_100m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                    <input type="text" id="SF_100m_hs_txtbx" name="SF_100m_hs_txtbx" placeholder="00" maxlength="2"
+                                                        class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
