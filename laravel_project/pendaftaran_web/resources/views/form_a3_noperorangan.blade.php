@@ -150,68 +150,371 @@
                                     <p class="text-gray-500 dark:text-gray-400 text-center py-10">{{ __('Area untuk daftar nomor perorangan yang dipilih.') }}</p>
                                 </div>
 
-                                {{-- NEW CONTAINER FOR TIME INPUTS (to make them side-by-side) --}}
+                                {{-- UPDATED CONTAINER FOR TIME INPUTS (Surface) --}}
                                 <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm">
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 text-center">{{ __('Input Waktu Catatan') }}</h3>
-                                    <div class="flex flex-col sm:flex-row justify-center items-start gap-4"> {{-- flex-col for small screens, flex-row for medium+ --}}
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 text-center">{{ __('Surface') }}</h3>
+                                    {{-- Changed sm:flex-row to sm:flex-wrap and added mb-4 to the first row --}}
+                                    <div class="flex flex-col sm:flex-row sm:flex-wrap justify-center items-start gap-4">
 
-                                        {{-- SF 50m Group --}}
-                                        <div id="SF_50m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
-                                            <div class="flex items-center mb-4">
-                                                <input type="checkbox" id="SF_50m_enable_time_chkbx" name="SF_50m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                                <label for="SF_50m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('50m') }}</label>
-                                            </div>
-
-                                            {{-- Updated time fields layout for 50m --}}
-                                            <div id="SF_50m_time_fields" class="flex gap-2 hidden justify-center"> {{-- Added justify-center for centering --}}
-                                                <div class="flex flex-col items-center"> {{-- Each label/input pair is a column --}}
-                                                    <label for="SF_50m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
-                                                    <input type="text" id="SF_50m_mm_txtbx" name="SF_50m_mm_txtbx" placeholder="00" maxlength="2"
-                                                        class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                        {{-- Row 1: SF 50m and SF 100m Group --}}
+                                        <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mb-4"> {{-- New wrapper for the first row --}}
+                                            {{-- SF 50m Group --}}
+                                            <div id="SF_50m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
+                                                <div class="flex items-center mb-4">
+                                                    <input type="checkbox" id="SF_50m_enable_time_chkbx" name="SF_50m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                    <label for="SF_50m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('50m') }}</label>
                                                 </div>
-
-                                                <div class="flex flex-col items-center">
-                                                    <label for="SF_50m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
-                                                    <input type="text" id="SF_50m_ss_txtbx" name="SF_50m_ss_txtbx" placeholder="00" maxlength="2"
-                                                        class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
-                                                </div>
-
-                                                <div class="flex flex-col items-center">
-                                                    <label for="SF_50m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
-                                                    <input type="text" id="SF_50m_hs_txtbx" name="SF_50m_hs_txtbx" placeholder="00" maxlength="2"
-                                                        class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {{-- SF 100m Group --}}
-                                        <div id="SF_100m_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
-                                            <div class="flex items-center mb-4">
-                                                <input type="checkbox" id="SF_100m_enable_time_chkbx" name="SF_100m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                                <label for="SF_100m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('100m') }}</label>
-                                            </div>
-
-                                            {{-- Updated time fields layout for 100m --}}
-                                            <div id="SF_100m_time_fields" class="flex gap-2 hidden justify-center"> {{-- Added justify-center for centering --}}
-                                                <div class="flex flex-col items-center"> {{-- Each label/input pair is a column --}}
-                                                    <label for="SF_100m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
-                                                    <input type="text" id="SF_100m_mm_txtbx" name="SF_100m_mm_txtbx" placeholder="00" maxlength="2"
-                                                        class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
-                                                </div>
-
-                                                <div class="flex flex-col items-center">
-                                                    <label for="SF_100m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
-                                                    <input type="text" id="SF_100m_ss_txtbx" name="SF_100m_ss_txtbx" placeholder="00" maxlength="2"
-                                                        class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
-                                                </div>
-
-                                                <div class="flex flex-col items-center">
-                                                    <label for="SF_100m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
-                                                    <input type="text" id="SF_100m_hs_txtbx" name="SF_100m_hs_txtbx" placeholder="00" maxlength="2"
-                                                        class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                <div id="SF_50m_time_fields" class="flex gap-2 hidden justify-center">
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_50m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                        <input type="text" id="SF_50m_mm_txtbx" name="SF_50m_mm_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_50m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                        <input type="text" id="SF_50m_ss_txtbx" name="SF_50m_ss_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_50m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                        <input type="text" id="SF_50m_hs_txtbx" name="SF_50m_hs_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+
+                                            {{-- SF 100m Group --}}
+                                            <div id="SF_100m_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
+                                                <div class="flex items-center mb-4">
+                                                    <input type="checkbox" id="SF_100m_enable_time_chkbx" name="SF_100m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                    <label for="SF_100m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('100m') }}</label>
+                                                </div>
+                                                <div id="SF_100m_time_fields" class="flex gap-2 hidden justify-center">
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_100m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                        <input type="text" id="SF_100m_mm_txtbx" name="SF_100m_mm_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_100m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                        <input type="text" id="SF_100m_ss_txtbx" name="SF_100m_ss_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_100m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                        <input type="text" id="SF_100m_hs_txtbx" name="SF_100m_hs_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> {{-- End of Row 1 wrapper --}}
+
+                                        {{-- Row 2: SF 200m and SF 400m Group --}}
+                                        <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mt-4"> {{-- New wrapper for the second row, added sm:mt-4 for spacing --}}
+                                            {{-- SF 200m Group (Previously UW_200m_container, now SF_200m_container) --}}
+                                            <div id="SF_200m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
+                                                <div class="flex items-center mb-4">
+                                                    <input type="checkbox" id="SF_200m_enable_time_chkbx" name="SF_200m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                    <label for="SF_200m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('200m') }}</label>
+                                                </div>
+                                                <div id="SF_200m_time_fields" class="flex gap-2 hidden justify-center">
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_200m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                        <input type="text" id="SF_200m_mm_txtbx" name="SF_200m_mm_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_200m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                        <input type="text" id="SF_200m_ss_txtbx" name="SF_200m_ss_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_200m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                        <input type="text" id="SF_200m_hs_txtbx" name="SF_200m_hs_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- SF 400m Group (Previously UW_400m_container, now SF_400m_container) --}}
+                                            <div id="SF_400m_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
+                                                <div class="flex items-center mb-4">
+                                                    <input type="checkbox" id="SF_400m_enable_time_chkbx" name="SF_400m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                    <label for="SF_400m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('400m') }}</label>
+                                                </div>
+                                                <div id="SF_400m_time_fields" class="flex gap-2 hidden justify-center">
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_400m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                        <input type="text" id="SF_400m_mm_txtbx" name="SF_400m_mm_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_400m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                        <input type="text" id="SF_400m_ss_txtbx" name="SF_400m_ss_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_400m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                        <input type="text" id="SF_400m_hs_txtbx" name="SF_400m_hs_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> {{-- End of Row 2 wrapper --}}
+
+                                        {{-- Row 3: SF 800m and SF 1500m Group --}}
+                                        <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mt-4"> {{-- New wrapper for the second row, added sm:mt-4 for spacing --}}
+                                            {{-- SF 800m Group (Previously UW_800m_container, now SF_800m_container) --}}
+                                            <div id="SF_800m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
+                                                <div class="flex items-center mb-4">
+                                                    <input type="checkbox" id="SF_800m_enable_time_chkbx" name="SF_800m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                    <label for="SF_800m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('800m') }}</label>
+                                                </div>
+                                                <div id="SF_800m_time_fields" class="flex gap-2 hidden justify-center">
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_800m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                        <input type="text" id="SF_800m_mm_txtbx" name="SF_800m_mm_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_800m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                        <input type="text" id="SF_800m_ss_txtbx" name="SF_800m_ss_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_800m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                        <input type="text" id="SF_800m_hs_txtbx" name="SF_800m_hs_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- SF 1500m Group (Previously UW_1500m_container, now SF_1500m_container) --}}
+                                            <div id="SF_1500m_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
+                                                <div class="flex items-center mb-4">
+                                                    <input type="checkbox" id="SF_1500m_enable_time_chkbx" name="SF_1500m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                    <label for="SF_1500m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('1500m') }}</label>
+                                                </div>
+                                                <div id="SF_1500m_time_fields" class="flex gap-2 hidden justify-center">
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_1500m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                        <input type="text" id="SF_1500m_mm_txtbx" name="SF_1500m_mm_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_1500m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                        <input type="text" id="SF_1500m_ss_txtbx" name="SF_1500m_ss_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="SF_1500m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                        <input type="text" id="SF_1500m_hs_txtbx" name="SF_1500m_hs_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> {{-- End of Row 3 wrapper --}}
+                                    </div>
+                                </div>
+
+                                {{-- NEW CONTAINER FOR TIME INPUTS (Bifin) --}}
+                                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm mt-4"> {{-- Added mt-4 for spacing from previous section --}}
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 text-center">{{ __('Bifin') }}</h3>
+                                    <div class="flex flex-col sm:flex-row sm:flex-wrap justify-center items-start gap-4">
+
+                                        {{-- Row 1: BF 50m and BF 100m Group --}}
+                                        <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mb-4"> {{-- New wrapper for the first row --}}
+                                            {{-- BF 50m Group --}}
+                                            <div id="BF_50m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
+                                                <div class="flex items-center mb-4">
+                                                    <input type="checkbox" id="BF_50m_enable_time_chkbx" name="BF_50m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                    <label for="BF_50m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('50m') }}</label>
+                                                </div>
+                                                <div id="BF_50m_time_fields" class="flex gap-2 hidden justify-center">
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_50m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                        <input type="text" id="BF_50m_mm_txtbx" name="BF_50m_mm_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_50m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                        <input type="text" id="BF_50m_ss_txtbx" name="BF_50m_ss_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_50m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                        <input type="text" id="BF_50m_hs_txtbx" name="BF_50m_hs_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- BF 100m Group --}}
+                                            <div id="BF_100m_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
+                                                <div class="flex items-center mb-4">
+                                                    <input type="checkbox" id="BF_100m_enable_time_chkbx" name="BF_100m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                    <label for="BF_100m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('100m') }}</label>
+                                                </div>
+                                                <div id="BF_100m_time_fields" class="flex gap-2 hidden justify-center">
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_100m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                        <input type="text" id="BF_100m_mm_txtbx" name="BF_100m_mm_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_100m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                        <input type="text" id="BF_100m_ss_txtbx" name="BF_100m_ss_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_100m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                        <input type="text" id="BF_100m_hs_txtbx" name="BF_100m_hs_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> {{-- End of Row 1 wrapper --}}
+
+                                        {{-- Row 2: BF 200m and BF 400m Group --}}
+                                        <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mt-4"> {{-- New wrapper for the second row, added sm:mt-4 for spacing --}}
+                                            {{-- BF 200m Group --}}
+                                            <div id="BF_200m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
+                                                <div class="flex items-center mb-4">
+                                                    <input type="checkbox" id="BF_200m_enable_time_chkbx" name="BF_200m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                    <label for="BF_200m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('200m') }}</label>
+                                                </div>
+                                                <div id="BF_200m_time_fields" class="flex gap-2 hidden justify-center">
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_200m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                        <input type="text" id="BF_200m_mm_txtbx" name="BF_200m_mm_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_200m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                        <input type="text" id="BF_200m_ss_txtbx" name="BF_200m_ss_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_200m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                        <input type="text" id="BF_200m_hs_txtbx" name="BF_200m_hs_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- BF 400m Group --}}
+                                            <div id="BF_400m_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
+                                                <div class="flex items-center mb-4">
+                                                    <input type="checkbox" id="BF_400m_enable_time_chkbx" name="BF_400m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                    <label for="BF_400m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('400m') }}</label>
+                                                </div>
+                                                <div id="BF_400m_time_fields" class="flex gap-2 hidden justify-center">
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_400m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                        <input type="text" id="BF_400m_mm_txtbx" name="BF_400m_mm_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_400m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                        <input type="text" id="BF_400m_ss_txtbx" name="BF_400m_ss_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_400m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                        <input type="text" id="BF_400m_hs_txtbx" name="BF_400m_hs_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> {{-- End of Row 2 wrapper --}}
+
+                                        {{-- Row 3: BF 800m and BF 1500m Group --}}
+                                        <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mt-4"> {{-- New wrapper for the third row, added sm:mt-4 for spacing --}}
+                                            {{-- BF 800m Group --}}
+                                            <div id="BF_800m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
+                                                <div class="flex items-center mb-4">
+                                                    <input type="checkbox" id="BF_800m_enable_time_chkbx" name="BF_800m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                    <label for="BF_800m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('800m') }}</label>
+                                                </div>
+                                                <div id="BF_800m_time_fields" class="flex gap-2 hidden justify-center">
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_800m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                        <input type="text" id="BF_800m_mm_txtbx" name="BF_800m_mm_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_800m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                        <input type="text" id="BF_800m_ss_txtbx" name="BF_800m_ss_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_800m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                        <input type="text" id="BF_800m_hs_txtbx" name="BF_800m_hs_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- BF 1500m Group --}}
+                                            <div id="BF_1500m_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
+                                                <div class="flex items-center mb-4">
+                                                    <input type="checkbox" id="BF_1500m_enable_time_chkbx" name="BF_1500m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                    <label for="BF_1500m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('1500m') }}</label>
+                                                </div>
+                                                <div id="BF_1500m_time_fields" class="flex gap-2 hidden justify-center">
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_1500m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                        <input type="text" id="BF_1500m_mm_txtbx" name="BF_1500m_mm_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_1500m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                        <input type="text" id="BF_1500m_ss_txtbx" name="BF_1500m_ss_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="BF_1500m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                        <input type="text" id="BF_1500m_hs_txtbx" name="BF_1500m_hs_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> {{-- End of Row 3 wrapper --}}
+                                    </div>
+                                </div>
+
+                                {{-- NEW CONTAINER FOR TIME INPUTS (Apnea) --}}
+                                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm mt-4"> {{-- Added mt-4 for spacing from previous section --}}
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 text-center">{{ __('Apnea') }}</h3>
+                                    <div class="flex flex-col sm:flex-row sm:flex-wrap justify-center items-start gap-4">
+
+                                        {{-- Row 1: AP 50m --}}
+                                        <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mb-4"> {{-- New wrapper for the first row --}}
+                                            {{-- AP 50m Group --}}
+                                            <div id="AP_50m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
+                                                <div class="flex items-center mb-4">
+                                                    <input type="checkbox" id="AP_50m_enable_time_chkbx" name="AP_50m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                    <label for="AP_50m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('50m') }}</label>
+                                                </div>
+                                                <div id="AP_50m_time_fields" class="flex gap-2 hidden justify-center">
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="AP_50m_mm_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('MM') }}</label>
+                                                        <input type="text" id="AP_50m_mm_txtbx" name="AP_50m_mm_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="AP_50m_ss_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('SS') }}</label>
+                                                        <input type="text" id="AP_50m_ss_txtbx" name="AP_50m_ss_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <label for="AP_50m_hs_txtbx" class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('HS') }}</label>
+                                                        <input type="text" id="AP_50m_hs_txtbx" name="AP_50m_hs_txtbx" placeholder="00" maxlength="2"
+                                                            class="w-10 text-center rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-1">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> {{-- End of Row 1 wrapper --}}
                                     </div>
                                 </div>
                             </div>

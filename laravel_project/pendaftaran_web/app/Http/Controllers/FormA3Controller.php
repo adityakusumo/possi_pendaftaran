@@ -11,6 +11,7 @@ use App\Models\MstPeserta;
 use App\Models\MstKU;
 use App\Models\NIAS;
 use App\Models\Atlet;
+use App\Models\A3;
 use Carbon\Carbon;
 
 class FormA3Controller extends Controller
@@ -34,8 +35,12 @@ class FormA3Controller extends Controller
         $propinsi = $user->NAMAPROPDOM ?? 'Propinsi User'; // Example: Get from authenticated user
         $negara = 'INDONESIA'; // Default
 
+        $userEmail = $user->email;
         // This list will be populated by the "Daftar Entri" table on the right
-        $daftarEntriList = []; // Initialize as empty array for now
+        $daftarEntriList = \App\Models\A3::where('email', $userEmail)
+            ->orderBy('GENDER', 'asc')    // Sort by GENDER first
+            ->orderBy('NAMAATLET', 'asc') // Then by NAMAATLET
+            ->get();
 
         // Kontingen Summary data
         $kontingenSummary = [
