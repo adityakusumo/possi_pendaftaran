@@ -15,6 +15,9 @@ $(document).ready(function () {
     const propinsiInput = $('#propinsi');
     const negaraInput = $('#negara');
 
+    // Simpan button reference
+    const simpanButton = $('#simpan-button');
+
     // NEW: References for 50m inputs
     const sf50mContainer = $('#SF_50m_container');
     const sf50mEnableCheckbox = $('#SF_50m_enable_time_chkbx');
@@ -122,6 +125,7 @@ $(document).ready(function () {
     // This object will contain all athlete details, keyed by their IDATLET.
     const allAtletDetails = window.atletDetails || {};
     console.log('Loaded allAtletDetails:', allAtletDetails);
+    const currentUserEmail = window.currentUserEmail || ''; // Get current user's email
 
     // Function to handle input for MM, SS, HS to allow only 2-digit integers
     function enforceTwoDigitInteger(event) {
@@ -172,24 +176,56 @@ $(document).ready(function () {
         };
     }
 
+    // Reusable function to get and validate time input data for a specific group
+    // Returns an object { mm, ss, hs, isValid, errorMessage }
+    function processTimeInputGroupData(prefix, enableCheckbox, mmInput, ssInput, hsInput) {
+        let mm = mmInput.val().trim();
+        let ss = ssInput.val().trim();
+        let hs = hsInput.val().trim();
+        let isValid = true;
+        let errorMessage = '';
+
+        if (enableCheckbox.is(':checked')) {
+            // Check for all null
+            if (mm === '' && ss === '' && hs === '') {
+                mm = '99';
+                ss = '99';
+                hs = '99';
+            } else {
+                // Handle partial nulls (set to 0)
+                mm = mm === '' ? '0' : mm;
+                ss = ss === '' ? '0' : ss;
+                hs = hs === '' ? '0' : hs;
+
+                // Validate SS value
+                if (parseInt(ss) < 1) {
+                    isValid = false;
+                    errorMessage = `Input waktu ${prefix} tidak boleh kurang dari 1 detik!`;
+                }
+            }
+        } else {
+            // If checkbox is not checked, values should be null/empty
+            mm = '';
+            ss = '';
+            hs = '';
+        }
+
+        return { mm: mm, ss: ss, hs: hs, isValid: isValid, errorMessage: errorMessage };
+    }
+
     // Setup all time input groups
     const resetSf50mGroupContents = setupTimeInputGroup(sf50mContainer, sf50mEnableCheckbox, sf50mTimeFieldsDiv, sf50mMmInput, sf50mSsInput, sf50mHsInput);
     const resetSf100mGroupContents = setupTimeInputGroup(sf100mContainer, sf100mEnableCheckbox, sf100mTimeFieldsDiv, sf100mMmInput, sf100mSsInput, sf100mHsInput);
-    // ADDED: Setup 200m and 400m time input groups
     const resetSf200mGroupContents = setupTimeInputGroup(sf200mContainer, sf200mEnableCheckbox, sf200mTimeFieldsDiv, sf200mMmInput, sf200mSsInput, sf200mHsInput);
     const resetSf400mGroupContents = setupTimeInputGroup(sf400mContainer, sf400mEnableCheckbox, sf400mTimeFieldsDiv, sf400mMmInput, sf400mSsInput, sf400mHsInput);
-    // ADDED: Setup 800m and 1500m time input groups
     const resetSf800mGroupContents = setupTimeInputGroup(sf800mContainer, sf800mEnableCheckbox, sf800mTimeFieldsDiv, sf800mMmInput, sf800mSsInput, sf800mHsInput);
     const resetSf1500mGroupContents = setupTimeInputGroup(sf1500mContainer, sf1500mEnableCheckbox, sf1500mTimeFieldsDiv, sf1500mMmInput, sf1500mSsInput, sf1500mHsInput);
-
 
     // Setup all time input groups
     const resetBf50mGroupContents = setupTimeInputGroup(bf50mContainer, bf50mEnableCheckbox, bf50mTimeFieldsDiv, bf50mMmInput, bf50mSsInput, bf50mHsInput);
     const resetBf100mGroupContents = setupTimeInputGroup(bf100mContainer, bf100mEnableCheckbox, bf100mTimeFieldsDiv, bf100mMmInput, bf100mSsInput, bf100mHsInput);
-    // ADDED: Setup 200m and 400m time input groups
     const resetBf200mGroupContents = setupTimeInputGroup(bf200mContainer, bf200mEnableCheckbox, bf200mTimeFieldsDiv, bf200mMmInput, bf200mSsInput, bf200mHsInput);
     const resetBf400mGroupContents = setupTimeInputGroup(bf400mContainer, bf400mEnableCheckbox, bf400mTimeFieldsDiv, bf400mMmInput, bf400mSsInput, bf400mHsInput);
-    // ADDED: Setup 800m and 1500m time input groups
     const resetBf800mGroupContents = setupTimeInputGroup(bf800mContainer, bf800mEnableCheckbox, bf800mTimeFieldsDiv, bf800mMmInput, bf800mSsInput, bf800mHsInput);
     const resetBf1500mGroupContents = setupTimeInputGroup(bf1500mContainer, bf1500mEnableCheckbox, bf1500mTimeFieldsDiv, bf1500mMmInput, bf1500mSsInput, bf1500mHsInput);
 
@@ -202,17 +238,15 @@ $(document).ready(function () {
         const selectedIdAtlet = namaAtletSelect.val();
 
         if (!selectedIdAtlet) {
-            alert('Silakan pilih atlet dari daftar terlebih dahulu.');
+            alert('Silahkan pilih atlet dari daftar terlebih dahulu.');
             sf50mContainer.addClass('hidden'); // Explicitly hide the container
             resetSf50mGroupContents(); // Reset inner checkbox/fields
             sf100mContainer.addClass('hidden'); // Explicitly hide the container
             resetSf100mGroupContents(); // Reset inner checkbox/fields
-            // ADDED: Hide and reset 200m and 400m containers
             sf200mContainer.addClass('hidden');
             resetSf200mGroupContents();
             sf400mContainer.addClass('hidden');
             resetSf400mGroupContents();
-            // ADDED: Hide and reset 800m and 1500m containers
             sf800mContainer.addClass('hidden');
             resetSf800mGroupContents();
             sf1500mContainer.addClass('hidden');
@@ -223,12 +257,10 @@ $(document).ready(function () {
             resetBf50mGroupContents(); // Reset inner checkbox/fields
             bf100mContainer.addClass('hidden'); // Explicitly hide the container
             resetBf100mGroupContents(); // Reset inner checkbox/fields
-            // ADDED: Hide and reset 200m and 400m containers
             bf200mContainer.addClass('hidden');
             resetBf200mGroupContents();
             bf400mContainer.addClass('hidden');
             resetBf400mGroupContents();
-            // ADDED: Hide and reset 800m and 1500m containers
             bf800mContainer.addClass('hidden');
             resetBf800mGroupContents();
             bf1500mContainer.addClass('hidden');
@@ -368,5 +400,96 @@ $(document).ready(function () {
             ap50mContainer.addClass('hidden'); // Explicitly hide the container
             resetAp50mGroupContents(); // Reset inner checkbox/fields
         }
+    });
+
+    // Event listener for the "Simpan" button
+    simpanButton.on('click', function (e) {
+        e.preventDefault(); // Prevent default form submission
+
+        const selectedIdAtlet = namaAtletSelect.val();
+        if (!selectedIdAtlet) {
+            alert('Silakan pilih atlet terlebih dahulu sebelum menyimpan.');
+            return;
+        }
+
+        const athlete = allAtletDetails[selectedIdAtlet];
+        if (!athlete) {
+            alert('Data atlet tidak ditemukan. Mohon pilih atlet yang valid.');
+            return;
+        }
+
+        // Collect general athlete data
+        const formData = {
+            _token: $('meta[name="csrf-token"]').attr('content'), // Get CSRF token
+            gender: $('input[name="gender"]:checked').val(),
+            ku: kuSelect.val(),
+            nama_atlet: athlete.NAMAATLET,
+            asal: athlete.ASAL, // Assuming ASAL is available in athleteDetails
+            nama_club: athlete.NAMACLUB,
+            jenis_dom: athlete.JENISDOM,
+            nama_kota_dom: athlete.NAMAKOTADOM,
+            nama_prop_dom: athlete.NAMAPROPDOM,
+            sp: athlete.SP,
+            tgl_lahir: athlete.TGLLAHIR,
+            nomor: 'Perorangan', // Fixed value as requested
+            email: currentUserEmail, // User's email from Blade
+        };
+
+        // Process SF 50m time data
+        const sf50mTimeData = processTimeInputGroupData(
+            '50m', sf50mEnableCheckbox, sf50mMmInput, sf50mSsInput, sf50mHsInput
+        );
+
+        if (!sf50mTimeData.isValid) {
+            alert(sf50mTimeData.errorMessage);
+            return;
+        }
+
+        // Add SF 50m data to formData
+        formData.MON50MM = sf50mTimeData.mm;
+        formData.MON50SS = sf50mTimeData.ss;
+        formData.MON50HS = sf50mTimeData.hs;
+
+        // You would repeat this for SF 100m, SF 200m, SF 400m, SF 800m, SF 1500m etc.
+        // For example:
+        // const sf100mTimeData = processTimeInputGroupData(
+        //     '100m', sf100mEnableCheckbox, sf100mMmInput, sf100mSsInput, sf100mHsInput
+        // );
+        // if (!sf100mTimeData.isValid) { alert(sf100mTimeData.errorMessage); return; }
+        // formData.MON100MM = sf100mTimeData.mm;
+        // formData.MON100SS = sf100mTimeData.ss;
+        // formData.MON100HS = sf100mTimeData.hs;
+
+
+        console.log('Data to be sent:', formData); // For debugging
+
+        // Send data via AJAX
+        $.ajax({
+            url: $('#form-a3-perorangan').attr('action'), // Get URL from form action
+            method: 'POST',
+            data: formData,
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message);
+                    // Optionally, clear the form or update the "Daftar Entri" table
+                    // For now, just a simple alert.
+                } else {
+                    alert('Gagal menyimpan data: ' + response.message);
+                }
+            },
+            error: function (xhr) {
+                console.error('AJAX Error:', xhr.responseText);
+                let errorMessage = 'Terjadi kesalahan saat menyimpan data.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage += '\n' + xhr.responseJSON.message;
+                }
+                if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    for (const key in xhr.responseJSON.errors) {
+                        errorMessage += '\n' + xhr.responseJSON.errors[key].join(', ');
+                    }
+                }
+                alert(errorMessage);
+            }
+        });
     });
 });

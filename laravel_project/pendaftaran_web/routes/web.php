@@ -60,6 +60,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/form-a1/daftar-atlet/cari', [FormA1Controller::class, 'searchNias'])->name('atlet.niasSearch');
 
     Route::get('/form-a3/nomor-perorangan', [FormA3Controller::class, 'index'])->name('form_a3.nomorPerorangan');
+    Route::post('/form-a3/save-perorangan', [FormA3Controller::class, 'savePerorangan'])->name('form_a3.savePerorangan');
+
 });
 
 require __DIR__ . '/auth.php';

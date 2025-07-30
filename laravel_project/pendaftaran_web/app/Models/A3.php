@@ -118,7 +118,7 @@ class A3 extends Model
         'ESTSUBM400SS',
         'ESTSUBM400HS',
         'SP',
-        'TGL_LAHIR', // Assuming this is string/date representation
+        'TGLLAHIR', // Assuming this is string/date representation
         'NOMOR', // Assuming this is string
         'GENDERMIX', // Assuming this is string
         'email',
@@ -132,6 +132,6 @@ class A3 extends Model
      */
     protected $casts = [
         // Define casts for date, datetime, or json columns if needed
-        'TGL_LAHIR' => 'date', // Example if TGL_LAHIR should be a Carbon instance
+        'TGLLAHIR' => 'date', // Example if TGL_LAHIR should be a Carbon instance
     ];
 }
