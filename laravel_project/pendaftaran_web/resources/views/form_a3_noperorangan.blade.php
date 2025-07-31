@@ -525,7 +525,7 @@
                             <div class="md:col-span-1 bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm flex flex-col" style="min-height: 400px;">
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('Daftar Entri') }}</h3>
                                 <div class="overflow-x-auto rounded-lg shadow flex-grow">
-                                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600" id="daftarEntriTable"> {{-- Add an ID to the table --}}
                                         <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10">
                                             <tr>
                                                 <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('GENDER') }}</th>
@@ -535,12 +535,27 @@
                                                 <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('JENISDOM') }}</th>
                                                 <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('NAMAKOTADOM') }}</th>
                                                 <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('NAMAPROPDOM') }}</th>
+                                                {{-- Add hidden columns for SP, TGLLAHIR, email, and MON times if they are part of the table display logic or needed for matching --}}
                                             </tr>
                                         </thead>
                                         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600 text-sm">
-                                            {{-- Use $daftarEntriList from controller to populate this table --}}
                                             @forelse($daftarEntriList as $entry)
-                                            <tr>
+                                            {{-- Add 'data-' attributes to the row for easy JavaScript access --}}
+                                            <tr class="entry-row cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+                                                data-namaatlet="{{ $entry->NAMAATLET }}"
+                                                data-gender="{{ $entry->GENDER }}"
+                                                data-ku="{{ $entry->KU }}"
+                                                data-sp="{{ $entry->SP == 1 ? 'SP' : 'BUKAN_SP' }}"
+                                                data-namaclub="{{ $entry->NAMACLUB }}"
+                                                data-jenisdom="{{ $entry->JENISDOM }}"
+                                                data-namakotadom="{{ $entry->NAMAKOTADOM }}"
+                                                data-namapropdom="{{ $entry->NAMAPROPDOM }}"
+                                                data-tgllahir="{{ $entry->TGLLAHIR ? \Carbon\Carbon::parse($entry->TGLLAHIR)->format('Y-m-d') : '' }}" {{-- Format date for consistency --}}
+                                                data-email="{{ $entry->email }}"
+                                                data-mon50mm="{{ $entry->MON50MM ?? '' }}"
+                                                data-mon50ss="{{ $entry->MON50SS ?? '' }}"
+                                                data-mon50hs="{{ $entry->MON50HS ?? '' }}"
+                                                {{-- Add other MON/SUB/IMM fields as needed --}}>
                                                 <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $entry->GENDER }}</td>
                                                 <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $entry->KU }}</td>
                                                 <td class="px-3 py-2 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $entry->NAMAATLET }}</td>

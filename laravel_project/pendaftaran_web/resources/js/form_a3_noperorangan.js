@@ -471,6 +471,7 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.success) {
                     alert(response.message);
+                    location.reload();
                     // Optionally, clear the form or update the "Daftar Entri" table
                     // For now, just a simple alert.
                 } else {
@@ -492,4 +493,127 @@ $(document).ready(function () {
             }
         });
     });
+
+    // Function to set radio button value
+    function setRadioValue(name, value) {
+        $(`input[name="${name}"][value="${value}"]`).prop('checked', true);
+    }
+
+    // Function to handle showing/hiding time input group
+    function toggleTimeInputGroup(prefix, enable) {
+        const containerId = `#${prefix}_container`; //SF_50m_container
+        const checkboxId = `#${prefix}_enable_time_chkbx`;
+        const mmInputId = `#${prefix}_mm_txtbx`;
+        const ssInputId = `#${prefix}_ss_txtbx`;
+        const hsInputId = `#${prefix}_hs_txtbx`; //SF_50m_time_fields
+
+        // !!! THIS IS THE CRUCIAL NEW SELECTOR !!!
+        // Assuming the div containing MM, SS, HS has an ID like 'SF_50m_time_fields_div'
+        // or you can select it relative to the container like:
+        // $(containerId).find('.your-time-fields-wrapper-class');
+        const timeFieldsDivId = `#${prefix}_time_fields`; // <-- Adjust this ID based on your HTML
+        console.log('Toggling container:', containerId, 'and time fields div:', timeFieldsDivId, 'Enable:', enable);
+
+
+        console.log('Toggling container:', containerId, 'Enable:', enable); // ADD THIS
+        console.log('Container element:', $(containerId)); // ADD THIS to see if jQuery finds it
+
+
+        if (enable) {
+            $(containerId).removeClass('hidden'); // Show the container
+            $(timeFieldsDivId).removeClass('hidden');
+            $(checkboxId).prop('checked', true); // Check the checkbox
+            // Enable inputs if they were disabled
+            $(mmInputId).prop('disabled', false);
+            $(ssInputId).prop('disabled', false);
+            $(hsInputId).prop('disabled', false);
+        } else {
+            $(containerId).addClass('hidden'); // Hide the container
+            $(timeFieldsDivId).addClass('hidden');
+            $(checkboxId).prop('checked', false); // Uncheck the checkbox
+            // Clear inputs and disable them
+            $(mmInputId).val('');
+            $(ssInputId).val('');
+            $(hsInputId).val('');
+            $(mmInputId).prop('disabled', true);
+            $(ssInputId).prop('disabled', true);
+            $(hsInputId).prop('disabled', true);
+        }
+    }
+
+
+    // Event listener for table row clicks
+    $('#daftarEntriTable').on('click', '.entry-row', function () {
+        // Remove 'selected' class from previously selected row
+        $('.entry-row').removeClass('bg-blue-100 dark:bg-blue-800');
+        // Add 'selected' class to the clicked row
+        $(this).addClass('bg-blue-100 dark:bg-blue-800');
+
+        const rowData = $(this).data(); // Get all data- attributes as an object
+
+        console.log('Selected Row Data:', rowData); // For debugging
+
+        // Populate form fields
+        // 1. NAMAATLET to nama_atlet_input (select dropdown)
+        // You'll need to update your athlete dropdown based on the retrieved name.
+        // If your dropdown is populated with IDATLET as value, you might need to find
+        // the corresponding IDATLET from `allAtletDetails` using the NAMAATLET.
+        // For simplicity, let's assume `nama_atlet_input` is just a text field for now,
+        // or ensure your dropdown has the NAMAATLET as its <option> text.
+        // If it's a dropdown, you would do:
+        // $('#namaAtlet').val(rowData.namaatlet); // This assumes the option value is NAMAATLET
+        // More robust if using IDATLET:
+        const selectedAthleteFromTable = Object.values(allAtletDetails).find(
+            athlete => athlete.NAMAATLET === rowData.namaatlet && athlete.GENDER === rowData.gender && athlete.TGLLAHIR.startsWith(rowData.tgllahir)
+        );
+        if (selectedAthleteFromTable) {
+            $('#nama_atlet_input').val(selectedAthleteFromTable.IDATLET).trigger('change'); // Trigger change if other fields depend on it
+            // The change event on #namaAtlet should ideally populate other fields automatically
+            // based on the `allAtletDetails` object.
+            // If it doesn't, you need to manually populate them here:
+            // This part might be redundant if your existing `namaAtlet` change event already does this.
+            setRadioValue('gender', rowData.gender);
+            $('#ku_select').val(rowData.ku);
+            setRadioValue('sp_status', rowData.sp); // Assuming name="sp_status" for SP radio
+            $('#nama_club').val(rowData.namaclub);
+            $('#kota_kab').val(rowData.jenisdom);
+            $('#nama_kota_dom').val(rowData.namakotadom);
+            $('#nama_prop_dom').val(rowData.namapropdom);
+            $('#negara').val('INDONESIA'); // Fixed value as per requirement
+
+            // Populate time inputs and manage checkbox/visibility
+            const mon50mm = rowData.mon50mm;
+            const mon50ss = rowData.mon50ss;
+            const mon50hs = rowData.mon50hs;
+
+            if (mon50mm !== '' || mon50ss !== '' || mon50hs !== '') { // Check if any part of the time is not empty
+                toggleTimeInputGroup('SF_50m', true); // Show and check
+                $('#SF_50m_mm_txtbx').val(mon50mm);
+                $('#SF_50m_ss_txtbx').val(mon50ss);
+                $('#SF_50m_hs_txtbx').val(mon50hs);
+            } else {
+                toggleTimeInputGroup('SF_50m', false); // Hide and uncheck
+            }
+
+            // You would repeat this for other distances (MON100, MON200, etc.)
+            // Example for MON100:
+            // const mon100mm = rowData.mon100mm;
+            // const mon100ss = rowData.mon100ss;
+            // const mon100hs = rowData.mon100hs;
+            // if (mon100mm !== '' || mon100ss !== '' || mon100hs !== '') {
+            //     toggleTimeInputGroup('SF_100m', true);
+            //     $('#SF_100m_mm_txtbx').val(mon100mm);
+            //     $('#SF_100m_ss_txtbx').val(mon100ss);
+            //     $('#SF_100m_hs_txtbx').val(mon100hs);
+            // } else {
+            //     toggleTimeInputGroup('SF_100m', false);
+            // }
+
+
+        } else {
+            console.warn("Athlete not found in `allAtletDetails` for selected table row.", rowData.namaatlet);
+            // You might want to clear the form or show a message here
+        }
+    });
+
 });
