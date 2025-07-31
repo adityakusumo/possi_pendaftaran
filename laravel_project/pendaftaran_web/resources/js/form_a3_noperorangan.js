@@ -126,6 +126,52 @@ $(document).ready(function () {
     const allAtletDetails = window.atletDetails || {};
     console.log('Loaded allAtletDetails:', allAtletDetails);
     const currentUserEmail = window.currentUserEmail || ''; // Get current user's email
+    const existingA3Entries = window.existingA3Entries || [];
+    console.log('Loaded existingA3Entries:', existingA3Entries);
+
+    // Helper function to format date to YYYY-MM-DD (for consistency with DB DATE type)
+    function formatDateToYYYYMMDD(isoDateString) {
+        if (!isoDateString) return '';
+        const date = new Date(isoDateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // --- NEW FUNCTION TO POPULATE ATHLETE DROPDOWN BASED ON EXISTING ENTRIES ---
+    function populateAtletDropdown() {
+        namaAtletSelect.empty(); // Clear existing options
+        namaAtletSelect.append($('<option>', { value: '', text: 'Pilih Atlet' })); // Add default option
+
+        // Create a Set of unique keys for athletes already in A3 for this user
+        // The key must match the logic in your controller's updateOrCreate method.
+        // NAMAATLET, GENDER, TGLLAHIR, email
+        const existingA3AthleteKeys = new Set();
+        existingA3Entries.forEach(entry => {
+            // Create a consistent key string for matching
+            const key = `${entry.NAMAATLET}_${entry.GENDER}_${formatDateToYYYYMMDD(entry.TGLLAHIR)}_${entry.email}`;
+            existingA3AthleteKeys.add(key);
+        });
+
+        // Filter and add athletes to the dropdown
+        for (const idAtlet in allAtletDetails) {
+            const athlete = allAtletDetails[idAtlet];
+            // Create the same consistent key string for the current athlete
+            const athleteKey = `${athlete.NAMAATLET}_${athlete.GENDER}_${formatDateToYYYYMMDD(athlete.TGLLAHIR)}_${currentUserEmail}`;
+
+            // Only add if this athlete is NOT in the existing A3 entries for this user
+            if (!existingA3AthleteKeys.has(athleteKey)) {
+                namaAtletSelect.append($('<option>', {
+                    value: athlete.IDATLET,
+                    text: `${athlete.NAMAATLET} (${athlete.GENDER} / ${athlete.KU})`
+                }));
+            }
+        }
+    }
+
+    // Call this function when the page loads to populate the dropdown initially
+    populateAtletDropdown();
 
     // Function to handle input for MM, SS, HS to allow only 2-digit integers
     function enforceTwoDigitInteger(event) {
@@ -211,6 +257,46 @@ $(document).ready(function () {
         }
 
         return { mm: mm, ss: ss, hs: hs, isValid: isValid, errorMessage: errorMessage };
+    }
+
+    // Function to toggle visibility and state of a time input group
+    // This function is used by the table click event and the new Pilih button logic
+    function populateTimeInputGroup(prefix, mmValue, ssValue, hsValue) {
+        const containerId = `#${prefix}_container`;
+        const checkboxId = `#${prefix}_enable_time_chkbx`;
+        const timeFieldsDivId = `#${prefix}_time_fields`; // This is the div containing MM, SS, HS
+        const mmInputId = `#${prefix}_mm_txtbx`;
+        const ssInputId = `#${prefix}_ss_txtbx`;
+        const hsInputId = `#${prefix}_hs_txtbx`;
+
+        // Check if any value is present (not null or empty string)
+        if (mmValue !== null && mmValue !== '' ||
+            ssValue !== null && ssValue !== '' ||
+            hsValue !== null && hsValue !== '') {
+
+            $(containerId).removeClass('hidden');
+            $(checkboxId).prop('checked', true);
+            $(timeFieldsDivId).removeClass('hidden'); // Ensure the MM/SS/HS wrapper is visible
+
+            $(mmInputId).val(mmValue);
+            $(ssInputId).val(ssValue);
+            $(hsInputId).val(hsValue);
+
+            $(mmInputId).prop('disabled', false);
+            $(ssInputId).prop('disabled', false);
+            $(hsInputId).prop('disabled', false);
+        } else {
+            // If no values, hide and clear the group
+            $(containerId).addClass('hidden');
+            $(checkboxId).prop('checked', false);
+            $(timeFieldsDivId).addClass('hidden');
+            $(mmInputId).val('');
+            $(ssInputId).val('');
+            $(hsInputId).val('');
+            $(mmInputId).prop('disabled', true);
+            $(ssInputId).prop('disabled', true);
+            $(hsInputId).prop('disabled', true);
+        }
     }
 
     // Setup all time input groups
@@ -406,6 +492,8 @@ $(document).ready(function () {
     simpanButton.on('click', function (e) {
         e.preventDefault(); // Prevent default form submission
 
+        // const selectedAthleteName = $('#nama_atlet_input').val(); // Get selected name
+
         const selectedIdAtlet = namaAtletSelect.val();
         if (!selectedIdAtlet) {
             alert('Silakan pilih atlet terlebih dahulu sebelum menyimpan.');
@@ -463,35 +551,54 @@ $(document).ready(function () {
 
         console.log('Data to be sent:', formData); // For debugging
 
-        // Send data via AJAX
-        $.ajax({
-            url: $('#form-a3-perorangan').attr('action'), // Get URL from form action
-            method: 'POST',
-            data: formData,
-            success: function (response) {
-                if (response.success) {
-                    alert(response.message);
-                    location.reload();
-                    // Optionally, clear the form or update the "Daftar Entri" table
-                    // For now, just a simple alert.
-                } else {
-                    alert('Gagal menyimpan data: ' + response.message);
-                }
-            },
-            error: function (xhr) {
-                console.error('AJAX Error:', xhr.responseText);
-                let errorMessage = 'Terjadi kesalahan saat menyimpan data.';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMessage += '\n' + xhr.responseJSON.message;
-                }
-                if (xhr.responseJSON && xhr.responseJSON.errors) {
-                    for (const key in xhr.responseJSON.errors) {
-                        errorMessage += '\n' + xhr.responseJSON.errors[key].join(', ');
+        const athleteNameForConfirmation = formData.nama_atlet; // Get the athlete's name
+
+        const confirmationMessage = `Yakin ingin menyimpan data ${athleteNameForConfirmation}?`;
+
+        if (confirm(confirmationMessage)) { // Show the confirmation popup
+            console.log('User confirmed. Data to be sent:', formData); // For debugging AFTER confirmation
+
+            // Send data via AJAX
+            $.ajax({
+                url: $('#form-a3-perorangan').attr('action'), // Get URL from form action
+                method: 'POST',
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        location.reload(); // Reload page after success
+                    } else {
+                        // Handle server-side validation errors or custom messages
+                        let errorMessage = response.message || 'Gagal menyimpan data.';
+                        if (response.errors) {
+                            for (const field in response.errors) {
+                                errorMessage += '\n' + response.errors[field].join(', ');
+                            }
+                        }
+                        alert(errorMessage);
+                        console.error('Server response error:', response);
                     }
+                },
+                error: function (xhr) {
+                    // Handle AJAX request errors (network issues, 500 errors, etc.)
+                    console.error('AJAX Error:', xhr.responseText);
+                    let errorMessage = 'Terjadi kesalahan saat menyimpan data.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage += '\n' + xhr.responseJSON.message;
+                    }
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        for (const key in xhr.responseJSON.errors) {
+                            errorMessage += '\n' + xhr.responseJSON.errors[key].join(', ');
+                        }
+                    }
+                    alert(errorMessage);
                 }
-                alert(errorMessage);
-            }
-        });
+            });
+        } else {
+            // User clicked 'Cancel' on the confirmation
+            alert('Penyimpanan data dibatalkan.');
+            console.log('Data submission cancelled by user.');
+        }
     });
 
     // Function to set radio button value

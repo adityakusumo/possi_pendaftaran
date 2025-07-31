@@ -13,6 +13,7 @@
         console.log('Atlet Details for JS:', window.atletDetails); // For debugging
         // Pass current user's email to JavaScript
         window.currentUserEmail = "{{ Auth::user()->email ?? '' }}";
+        window.existingA3Entries = @json($existingA3Entries);
     </script>
 
     <div class="py-12">

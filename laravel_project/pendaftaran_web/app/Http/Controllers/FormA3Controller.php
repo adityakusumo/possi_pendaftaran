@@ -84,13 +84,26 @@ class FormA3Controller extends Controller
                 'NAMAKOTADOM' => $atlet->NAMAKOTADOM,
                 'NAMAPROPDOM' => $atlet->NAMAPROPDOM,
                 'SP' => $atlet->SP,
-                'TGLLAHIR' => $atlet->TGLLAHIR, // <-- MAKE SURE THIS LINE IS PRESENT
+                'TGLLAHIR' => Carbon::parse($atlet->TGLLAHIR)->toDateString(), // <-- MAKE SURE THIS LINE IS PRESENT
                 'ASAL' => $atlet->ASAL,       // <-- MAKE SURE THIS LINE IS PRESENT
                 // Add any other fields you might need for auto-filling later (e.g., TGLLAHIR, EXPIRED)
             ];
         }
 
         Log::info('Final atletDetailsForJs sent to view: ' . json_encode($atletDetailsForJs)); // <--- Log the final array
+
+        // Fetch A3 entries for the current user
+        // Select only the columns needed for matching (NAMAATLET, GENDER, TGLLAHIR, email)
+        $existingA3Entries = A3::where('email', $userEmail)
+                                ->select('NAMAATLET', 'GENDER', 'TGLLAHIR', 'email')
+                                ->get()
+                                ->map(function($entry) {
+                                    // Ensure TGLLAHIR is also formatted as YYYY-MM-DD for consistent matching
+                                    $entry->TGLLAHIR = Carbon::parse($entry->TGLLAHIR)->toDateString();
+                                    return $entry;
+                                });
+
+        Log::info('Existing A3 entries for user (for filtering): ' . json_encode($existingA3Entries));
 
         // Pass data to the view
         return view('form_a3_noperorangan', compact(
@@ -101,7 +114,8 @@ class FormA3Controller extends Controller
             'daftarEntriList',
             'kontingenSummary',
             'NamaAtletList', // For the Blade dropdown
-            'atletDetailsForJs' // For JavaScript to read
+            'atletDetailsForJs', // For JavaScript to read
+            'existingA3Entries',
         ));
     }
 
