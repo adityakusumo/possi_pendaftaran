@@ -1,9 +1,9 @@
 <x-app-layout>
-    <x-slot name="title">{{ __('Entri Form A3 - Nomor Perorangan') }}</x-slot>
+    <x-slot name="title">{{ __('Entri Form A3 - Nomor Estafet') }}</x-slot>
 
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Form A3 - Nomor Perorangan') }}
+            {{ __('Form A3 - Nomor Estafet') }}
         </h2>
     </x-slot>
 
@@ -22,7 +22,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-full">
-                    <form id="form-a3-perorangan" action="{{ route('form_a3.savePerorangan') }}" method="POST">
+                    <form id="form-a3-estafet" action="{{ route('form_a3.saveEstafet') }}" method="POST">
                         @csrf
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -150,9 +150,9 @@
                                     </div>
                                 </div>
 
-                                {{-- Large Empty Area (for future use, e.g., selected perorangan events) --}}
+                                {{-- Large Empty Area (for future use, e.g., selected estafet events) --}}
                                 <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm h-64 mb-4"> {{-- Added mb-4 for spacing --}}
-                                    <p class="text-gray-500 dark:text-gray-400 text-center py-10">{{ __('Area untuk daftar nomor perorangan yang dipilih.') }}</p>
+                                    <p class="text-gray-500 dark:text-gray-400 text-center py-10">{{ __('Area untuk daftar nomor estafet yang dipilih.') }}</p>
                                 </div>
 
                                 {{-- UPDATED CONTAINER FOR TIME INPUTS (Surface) --}}
@@ -571,7 +571,7 @@
                                             @empty
                                             <tr>
                                                 <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">
-                                                    {{ __('Belum ada entri nomor perorangan.') }}
+                                                    {{ __('Belum ada entri nomor estafet.') }}
                                                 </td>
                                             </tr>
                                             @endforelse
