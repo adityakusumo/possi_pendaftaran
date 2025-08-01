@@ -16,6 +16,8 @@
         window.existingA3Entries = @json($existingA3Entries);
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
@@ -99,27 +101,27 @@
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <label for="nama_club" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Club') }}</label>
-                                            <input type="text" id="nama_club" name="nama_club" value="{{ $clubName }}" readonly
+                                            <input type="text" id="nama_club" name="nama_club" readonly
                                                 class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         </div>
                                         <div>
                                             <label for="kota_kab" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Kota / Kab') }}</label>
-                                            <input type="text" id="kota_kab" name="kota_kab" value="{{ $kotaKab }}" readonly
+                                            <input type="text" id="kota_kab" name="kota_kab" readonly
                                                 class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         </div>
                                         <div class="col-span-2">
                                             <label for="nama_kota_kab" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Kota / Kab') }}</label>
-                                            <input type="text" id="nama_kota_kab" name="nama_kota_kab" value="{{ $kotaKab }}" readonly
+                                            <input type="text" id="nama_kota_kab" name="nama_kota_kab" readonly
                                                 class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         </div>
                                         <div>
                                             <label for="propinsi" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Propinsi') }}</label>
-                                            <input type="text" id="propinsi" name="propinsi" value="{{ $propinsi }}" readonly
+                                            <input type="text" id="propinsi" name="propinsi" readonly
                                                 class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         </div>
                                         <div>
                                             <label for="negara" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Negara') }}</label>
-                                            <input type="text" id="negara" name="negara" value="{{ $negara }}" readonly
+                                            <input type="text" id="negara" name="negara" readonly
                                                 class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         </div>
                                     </div>
@@ -543,6 +545,7 @@
                                             @forelse($daftarEntriList as $entry)
                                             {{-- Add 'data-' attributes to the row for easy JavaScript access --}}
                                             <tr class="entry-row cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+                                                data-id-a3="{{ $entry->IDA3P }}"
                                                 data-namaatlet="{{ $entry->NAMAATLET }}"
                                                 data-gender="{{ $entry->GENDER }}"
                                                 data-ku="{{ $entry->KU }}"
@@ -589,12 +592,15 @@
                         {{-- Action Buttons --}}
                         <div class="mt-6 flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
                             <button type="button" class="rounded-md bg-gray-200 dark:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-800 dark:text-gray-300 shadow-sm hover:bg-gray-300 dark:hover:bg-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">{{ __('Keluar') }}</button>
-                            <button type="button" class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">{{ __('Hapus') }}</button>
+                            <button type="button" id="hapus-button" class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">{{ __('Hapus') }}</button>
                             <button type="button" class="rounded-md bg-yellow-400 px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm hover:bg-yellow-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">{{ __('Batal') }}</button>
                             <button type="button" class="rounded-md bg-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">{{ __('Ubah') }}</button>
                             <button type="button" id="simpan-button" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">{{ __('Simpan') }}</button>
                             <button type="button" class="rounded-md bg-green-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500">{{ __('Tambah') }}</button>
                         </div>
+                        {{-- hidden fields to store the selected record's ID and name --}}
+                        <input type="hidden" id="selected-a3-id" value="">
+                        <input type="hidden" id="selected-a3-name" value="">
                     </form>
                 </div>
             </div>

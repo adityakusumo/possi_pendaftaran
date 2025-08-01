@@ -42,13 +42,20 @@ class FormA3Controller extends Controller
             ->orderBy('NAMAATLET', 'asc') // Then by NAMAATLET
             ->get();
 
-        // Kontingen Summary data
+        // --- ADAPTED PART: ACTIVATE KONTINGEN SUMMARY SECTION ---
+        // Base query for counting entries for the current user and 'Perorangan'
+        $baseSummaryQuery = A3::where('email', $userEmail)
+            ->where('NOMOR', 'Perorangan');
+
         $kontingenSummary = [
-            'atletPa' => 0,
-            'atletPi' => 0,
-            'totalAtlet' => 0,
-            'totalSp' => 0,
+            'atletPa' => $baseSummaryQuery->clone()->where('GENDER', 'PA')->count(),
+            'atletPi' => $baseSummaryQuery->clone()->where('GENDER', 'PI')->count(),
+            'totalAtlet' => $baseSummaryQuery->clone()->count(),
+            'totalSp' => $baseSummaryQuery->clone()->where('SP', 1)->count(), // Assuming 'SP' is stored as 1
         ];
+
+        Log::info('Kontingen Summary Data:', $kontingenSummary);
+        // --- END OF ADAPTED PART ---
 
         // You might fetch competition data here if needed for specific logic
         $kompetisi = Kompetisi::first(); // Or based on a specific competition ID
@@ -95,13 +102,13 @@ class FormA3Controller extends Controller
         // Fetch A3 entries for the current user
         // Select only the columns needed for matching (NAMAATLET, GENDER, TGLLAHIR, email)
         $existingA3Entries = A3::where('email', $userEmail)
-                                ->select('NAMAATLET', 'GENDER', 'TGLLAHIR', 'email')
-                                ->get()
-                                ->map(function($entry) {
-                                    // Ensure TGLLAHIR is also formatted as YYYY-MM-DD for consistent matching
-                                    $entry->TGLLAHIR = Carbon::parse($entry->TGLLAHIR)->toDateString();
-                                    return $entry;
-                                });
+            ->select('NAMAATLET', 'GENDER', 'TGLLAHIR', 'email')
+            ->get()
+            ->map(function ($entry) {
+                // Ensure TGLLAHIR is also formatted as YYYY-MM-DD for consistent matching
+                $entry->TGLLAHIR = Carbon::parse($entry->TGLLAHIR)->toDateString();
+                return $entry;
+            });
 
         Log::info('Existing A3 entries for user (for filtering): ' . json_encode($existingA3Entries));
 
@@ -237,6 +244,44 @@ class FormA3Controller extends Controller
             // Handle other exceptions
             Log::error('Error saving A3 data: ' . $e->getMessage(), $request->all());
             return response()->json(['success' => false, 'message' => 'Terjadi kesalahan server saat menyimpan data.'], 500);
+        }
+    }
+
+    public function deletePerorangan(Request $request, $id)
+    {
+        // 1. Get the authenticated user's email for a security check
+        $currentUserEmail = Auth::user()->email;
+
+        try {
+            // 2. Find the A3 record by its ID and the current user's email
+            $a3Record = A3::where('IDA3P', $id)
+                ->where('email', $currentUserEmail)
+                ->first();
+
+            // 3. Check if the record exists and belongs to the user
+            if (!$a3Record) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak ditemukan atau Anda tidak memiliki izin untuk menghapusnya.'
+                ], 404); // 404 Not Found
+            }
+
+            // 4. Delete the record
+            $a3Record->delete();
+
+            // 5. Log and return a success response
+            Log::info("A3 record with IDA3P={$id} deleted by user {$currentUserEmail}.");
+            return response()->json([
+                'success' => true,
+                'message' => "Data {$a3Record->NAMAATLET} berhasil dihapus."
+            ]);
+        } catch (\Exception $e) {
+            // Handle any exceptions (e.g., database error)
+            Log::error('Error deleting A3 data: ' . $e->getMessage(), ['id' => $id, 'user_email' => $currentUserEmail]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server saat menghapus data.'
+            ], 500); // 500 Internal Server Error
         }
     }
 

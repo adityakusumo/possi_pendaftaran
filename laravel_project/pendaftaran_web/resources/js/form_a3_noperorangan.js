@@ -17,6 +17,9 @@ $(document).ready(function () {
 
     // Simpan button reference
     const simpanButton = $('#simpan-button');
+    const hapusButton = $('#hapus-button');
+    const selectedA3IdInput = $('#selected-a3-id');
+    const selectedA3NameInput = $('#selected-a3-name');
 
     // NEW: References for 50m inputs
     const sf50mContainer = $('#SF_50m_container');
@@ -506,6 +509,18 @@ $(document).ready(function () {
             return;
         }
 
+        // --- MODIFIED SECTION: Get and convert SP value ---
+        // Get the value of the checked radio button (e.g., "SP" or "BUKAN_SP")
+        // Assuming your radio buttons have the name 'sp_status'. Adjust if needed.
+        const spRadioValue = $('input[name="sp_status"]:checked').val();
+
+        // Map the string value to an integer: 1 for "SP", 0 for "BUKAN_SP"
+        const spValueForDatabase = (spRadioValue === 'SP') ? 1 : 0;
+
+        // Log the converted value for debugging
+        console.log(`Radio button value is '${spRadioValue}', converted to '${spValueForDatabase}' for the database.`);
+        // --- END OF MODIFIED SECTION ---
+
         // Collect general athlete data
         const formData = {
             _token: $('meta[name="csrf-token"]').attr('content'), // Get CSRF token
@@ -517,7 +532,7 @@ $(document).ready(function () {
             jenis_dom: athlete.JENISDOM,
             nama_kota_dom: athlete.NAMAKOTADOM,
             nama_prop_dom: athlete.NAMAPROPDOM,
-            sp: athlete.SP,
+            sp: spValueForDatabase, // sp: athlete.SP,
             tgl_lahir: athlete.TGLLAHIR,
             nomor: 'Perorangan', // Fixed value as requested
             email: currentUserEmail, // User's email from Blade
@@ -660,6 +675,10 @@ $(document).ready(function () {
 
         console.log('Selected Row Data:', rowData); // For debugging
 
+        // Store the ID and Name in hidden fields
+        selectedA3IdInput.val(rowData.idA3);
+        selectedA3NameInput.val(rowData.namaAtlet);
+
         // Populate form fields
         // 1. NAMAATLET to nama_atlet_input (select dropdown)
         // You'll need to update your athlete dropdown based on the retrieved name.
@@ -684,8 +703,8 @@ $(document).ready(function () {
             setRadioValue('sp_status', rowData.sp); // Assuming name="sp_status" for SP radio
             $('#nama_club').val(rowData.namaclub);
             $('#kota_kab').val(rowData.jenisdom);
-            $('#nama_kota_dom').val(rowData.namakotadom);
-            $('#nama_prop_dom').val(rowData.namapropdom);
+            $('#nama_kota_kab').val(rowData.namakotadom);
+            $('#propinsi').val(rowData.namapropdom);
             $('#negara').val('INDONESIA'); // Fixed value as per requirement
 
             // Populate time inputs and manage checkbox/visibility
@@ -721,6 +740,64 @@ $(document).ready(function () {
             console.warn("Athlete not found in `allAtletDetails` for selected table row.", rowData.namaatlet);
             // You might want to clear the form or show a message here
         }
+    });
+
+    // --- Event listener for the HAPUS button ---
+    hapusButton.on('click', function (e) {
+        e.preventDefault();
+
+        const idA3 = selectedA3IdInput.val();
+        const namaAtlet = selectedA3NameInput.val();
+
+        // Check if an entry is selected
+        if (!idA3) {
+            alert('Mohon pilih data atlet dari tabel di samping untuk dihapus.');
+            return;
+        }
+
+        // Use SweetAlert2 for a better confirmation UI (install via npm or CDN)
+        Swal.fire({
+            title: 'Anda yakin?',
+            html: `Anda yakin ingin menghapus data <b>${namaAtlet}</b>?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33', // Red for 'YA'
+            cancelButtonColor: '#3085d6', // Blue for 'TIDAK'
+            confirmButtonText: 'YA, Hapus!',
+            cancelButtonText: 'TIDAK'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // User clicked YA, proceed with AJAX deletion
+                $.ajax({
+                    url: `/form-a3/delete-perorangan/${idA3}`, // New DELETE route
+                    method: 'DELETE',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (response) {
+                        Swal.fire(
+                            'Dihapus!',
+                            response.message,
+                            'success'
+                        ).then(() => {
+                            location.reload(); // Reload the page to refresh the table
+                        });
+                    },
+                    error: function (xhr) {
+                        console.error('AJAX Error:', xhr.responseText);
+                        let errorMessage = 'Terjadi kesalahan saat menghapus data.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        Swal.fire(
+                            'Gagal!',
+                            errorMessage,
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
     });
 
 });

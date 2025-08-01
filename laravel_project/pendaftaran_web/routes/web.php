@@ -61,6 +61,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/form-a3/nomor-perorangan', [FormA3Controller::class, 'index'])->name('form_a3.nomorPerorangan');
     Route::post('/form-a3/save-perorangan', [FormA3Controller::class, 'savePerorangan'])->name('form_a3.savePerorangan');
+    Route::delete('/form-a3/delete-perorangan/{id}', [FormA3Controller::class, 'deletePerorangan'])->name('form-a3.delete');
 
 });
 
