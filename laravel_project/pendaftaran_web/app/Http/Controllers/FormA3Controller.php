@@ -313,7 +313,7 @@ class FormA3Controller extends Controller
         // --- ADAPTED PART: ACTIVATE KONTINGEN SUMMARY SECTION ---
         // Base query for counting entries for the current user and 'Perorangan'
         $baseSummaryQuery = A3::where('email', $userEmail)
-            ->where('NOMOR', 'Perorangan');
+            ->where('NOMOR', 'Estafet');
 
         $kontingenSummary = [
             'atletPa' => $baseSummaryQuery->clone()->where('GENDER', 'PA')->count(),
@@ -381,7 +381,7 @@ class FormA3Controller extends Controller
         Log::info('Existing A3 entries for user (for filtering): ' . json_encode($existingA3Entries));
 
         // Pass data to the view
-        return view('form_a3_noperorangan', compact(
+        return view('form_a3_noestafet', compact(
             'clubName',
             'kotaKab',
             'propinsi',

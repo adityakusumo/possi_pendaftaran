@@ -64,8 +64,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/form-a3/delete-perorangan/{id}', [FormA3Controller::class, 'deletePerorangan'])->name('form-a3.delete');
 
     Route::get('/form-a3/nomor-estafet', [FormA3Controller::class, 'indexEstafet'])->name('form_a3.nomorEstafet');
-    // Route::post('/form-a3/save-estafet', [FormA3Controller::class, 'saveEstafet'])->name('form_a3.saveEstafet');
-    // Route::delete('/form-a3/delete-estafet/{id}', [FormA3Controller::class, 'deleteEstafet'])->name('form-a3.deleteEstafet');
+    Route::post('/form-a3/save-estafet', [FormA3Controller::class, 'saveEstafet'])->name('form_a3.saveEstafet');
+    Route::delete('/form-a3/delete-estafet/{id}', [FormA3Controller::class, 'deleteEstafet'])->name('form-a3.deleteEstafet');
 });
 
 require __DIR__ . '/auth.php';
