@@ -38,6 +38,7 @@ class FormA3Controller extends Controller
         $userEmail = $user->email;
         // This list will be populated by the "Daftar Entri" table on the right
         $daftarEntriList = \App\Models\A3::where('email', $userEmail)
+            ->where('NOMOR', 'Perorangan')
             ->orderBy('GENDER', 'asc')    // Sort by GENDER first
             ->orderBy('NAMAATLET', 'asc') // Then by NAMAATLET
             ->get();
@@ -306,6 +307,7 @@ class FormA3Controller extends Controller
         $userEmail = $user->email;
         // This list will be populated by the "Daftar Entri" table on the right
         $daftarEntriList = \App\Models\A3::where('email', $userEmail)
+            ->where('NOMOR', 'Estafet')
             ->orderBy('GENDER', 'asc')    // Sort by GENDER first
             ->orderBy('NAMAATLET', 'asc') // Then by NAMAATLET
             ->get();

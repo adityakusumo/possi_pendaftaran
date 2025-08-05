@@ -72,7 +72,7 @@
                                     <div class="flex flex-col sm:flex-row items-center gap-4 mb-4">
                                         <div class="flex-1 w-full">
                                             <!-- <label for="nama_regu" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Regu') }}</label> -->
-                                            <input type="text" id="nama_regu" name="nama_regu" readonly
+                                            <input type="text" id="nama_regu" name="nama_regu"
                                                 class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
 
                                             <!-- <label for="nama_atlet_input" class="sr-only">{{ __('Nama Atlet') }}</label>
@@ -84,7 +84,7 @@
                                                 @endforeach
                                             </select> -->
                                         </div>
-                                        <button type="button" id="pilih-atlet-button"
+                                        <button type="button" id="pilih-regu-button"
                                             class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-indigo-700 dark:hover:bg-indigo-600">
                                             {{ __('Pilih') }}
                                         </button>
