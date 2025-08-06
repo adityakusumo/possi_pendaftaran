@@ -7,6 +7,7 @@ use Illuminate\View\View; // Import View class
 use Illuminate\Support\Facades\Auth; // For Auth::user()
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use App\Models\Kompetisi; // Assuming you have a Kompetisi model
 use App\Models\MstPeserta;
 use App\Models\MstKU;
@@ -416,17 +417,41 @@ class FormA3Controller extends Controller
                 ->where('GAYA', 'LIKE', '%Estafet%')
                 ->pluck('GAYA')
                 ->map(function ($gaya) {
-                    // Normalize the GAYA name to match your container IDs
-                    // e.g., 'SF 4x50m Estafet' -> 'sf4x50m'
-                    return strtolower(str_replace([' ', 'Estafet', 'Mix'], '', $gaya));
-                });
+                    $normalized = '';
+                    $gayaLower = strtolower($gaya);
+
+                    // 1. Determine the style prefix (BF or SF)
+                    if (Str::contains($gayaLower, 'bifin')) {
+                        $normalized .= 'BF_';
+                    } elseif (Str::contains($gayaLower, 'surface')) {
+                        $normalized .= 'SF_';
+                    }
+
+                    // 2. Extract and normalize the distance (e.g., '4x50m')
+                    // This regex finds patterns like '4 x 50 m'
+                    if (preg_match('/(\d+\s*x\s*\d+\s*m)/', $gayaLower, $matches)) {
+                        $distance = str_replace(' ', '', $matches[1]);
+                        $normalized .= $distance;
+                    }
+
+                    // 3. Add 'Mix' if applicable
+                    if (Str::contains($gayaLower, 'mix')) {
+                        $normalized .= 'Mix';
+                    }
+
+                    return $normalized;
+                })
+                ->unique()
+                ->values();
+
+            Log::info('Fetched Estafet Events:', ['ku' => $ku, 'gender' => $gender, 'events' => $events->toArray()]);
 
             return response()->json([
                 'success' => true,
-                'events' => $events->unique()->values() // Return a unique list of events
+                'events' => $events
             ]);
         } catch (\Exception $e) {
-            Log::error('Error getting estafet events: ' . $e->getMessage());
+            Log::error('Error getting estafet events: ' . $e->getMessage(), ['ku' => $ku, 'gender' => $gender]);
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan server saat mencari acara.'

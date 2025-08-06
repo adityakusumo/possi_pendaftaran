@@ -9,6 +9,7 @@ $(document).ready(function () {
     const kuSelectEstafet = $('#ku_select_estafet'); // KU dropdown
     const spYesRadio = $('#sp_yes'); // SP radio button
     const spNoRadio = $('#sp_no'); // Bukan SP radio button
+    const spStatusEstafet = $('input[name="sp_status_estafet"]');
     const namaClubInput = $('#nama_club');
     const kotaKabInput = $('#kota_kab');
     const namaKotaKabInput = $('#nama_kota_kab');
@@ -310,6 +311,31 @@ $(document).ready(function () {
     const resetBf4x100mMixGroupContents = setupTimeInputGroup(bf4x100mMixContainer, bf4x100mMixEnableCheckbox, bf4x100mMixTimeFieldsDiv, bf4x100mMixMmInput, bf4x100mMixSsInput, bf4x100mMixHsInput);
     const resetBf4x200mMixGroupContents = setupTimeInputGroup(bf4x200mMixContainer, bf4x200mMixEnableCheckbox, bf4x200mMixTimeFieldsDiv, bf4x200mMixMmInput, bf4x200mMixSsInput, bf4x200mMixHsInput);
 
+    // List all containers for easy iteration (make sure all are included)
+    const allRelayContainers = [
+        sf4x50mContainer, sf4x100mContainer, sf4x200mContainer,
+        sf4x50mMixContainer, sf4x100mMixContainer, sf4x200mMixContainer,
+        bf4x50mContainer, bf4x100mContainer, bf4x200mContainer,
+        bf4x50mMixContainer, bf4x100mMixContainer, bf4x200mMixContainer,
+    ];
+
+    // Helper function to reset all relay time input groups
+    function resetAllRelayTimeInputGroups() {
+        allRelayContainers.forEach(container => {
+            container.addClass('hidden'); // Hide the main container
+            // Find the time fields div within this container and hide it
+            container.find('[id$="_time_fields"]').addClass('hidden');
+            // Find inputs and clear/disable them
+            container.find('input[type="text"]').val('').prop('disabled', true);
+            container.find('input[type="checkbox"]').prop('checked', false);
+        });
+    }
+
+    // Function to set radio button value (re-used from perorangan)
+    function setRadioValue(name, value) {
+        $(`input[name="${name}"][value="${value}"]`).prop('checked', true);
+    }
+
     // Event listener for the "Pilih" button
     pilihReguButton.on('click', function () {
         const ku = kuSelectEstafet.val();
@@ -328,56 +354,62 @@ $(document).ready(function () {
         // 1. Basic Validation
         if (!ku) {
             alert('Silakan pilih Kelompok Umur (KU) terlebih dahulu.');
+            resetAllRelayTimeInputGroups();
             return;
         }
         if (!gender) {
             alert('Silakan pilih Gender terlebih dahulu.');
+            resetAllRelayTimeInputGroups();
             return;
         }
         if (!namaRegu.trim()) {
             alert('Silakan isi Nama Regu terlebih dahulu.');
+            resetAllRelayTimeInputGroups();
             return;
         }
 
+        // Set default SP status to BUKAN_SP
+        setRadioValue('sp_status_estafet', 'BUKAN_SP');
+
+
         // 2. Perform an AJAX request to the server
         $.ajax({
-            url: '/form-a3/nomor-estafet/get-event-options', // NEW endpoint
-            method: 'POST',
+            url: '/form-a3/nomor-estafet/get-estafet-events', // NEW endpoint
+            method: 'GET', // Use GET as we are fetching data
             data: {
-                _token: $('meta[name="csrf-token"]').attr('content'),
-                ku: ku.toUpperCase(), // Send KU as uppercase for consistent checking
+                ku: ku.toUpperCase(), // Send KU as uppercase
                 gender: gender.toUpperCase() // Send Gender as uppercase
             },
             success: function (response) {
-                console.log('Server response:', response);
+                console.log('Server response for Estafet Events:', response);
 
-                // 3. Reset all containers
-                // resetAllContainers();
-                sf4x50mContainer.removeClass('hidden');
-                resetSf4x50mGroupContents();
+                // Always reset all containers first
+                resetAllRelayTimeInputGroups();
 
-                // 4. Show only the containers that are returned in the response
-                if (response.success) {
-                    if (response.events.length > 0) {
-                        alert('Data cabang lomba estafet berhasil dimuat.');
-                        response.events.forEach(eventName => {
-                            const container = $(`#${eventName}-container`); // Assumes IDs match event names
-                            if (container.length) {
-                                container.removeClass('hidden');
-                                // You would call the specific reset function here
-                                // e.g., if (eventName === 'sf4x50m') { resetSf4x50mGroupContents(); }
-                            }
-                        });
-                    } else {
-                        alert('Tidak ada cabang lomba estafet yang tersedia untuk KU dan Gender yang dipilih.');
-                    }
+                if (response.success && response.events && response.events.length > 0) {
+                    alert('Cabang lomba estafet yang tersedia berhasil dimuat.');
+                    response.events.forEach(eventName => {
+                        // Construct the ID based on the normalized eventName from the server
+                        const containerId = `#${eventName}_container`;
+                        const container = $(containerId);
+
+                        if (container.length) {
+                            container.removeClass('hidden'); // Show the main container
+                            // The inner time_fields div is still hidden by default,
+                            // it will be revealed when the user checks the checkbox
+                            // (handled by setupTimeInputGroup).
+                        } else {
+                            console.warn(`Container with ID ${containerId} not found in HTML for event: ${eventName}.`);
+                        }
+                    });
                 } else {
-                    alert('Gagal mengambil data cabang lomba.');
+                    alert('Tidak ada cabang lomba estafet yang tersedia untuk KU dan Gender yang dipilih.');
                 }
             },
             error: function (xhr) {
-                console.error('AJAX Error:', xhr.responseText);
-                alert('Terjadi kesalahan saat menghubungi server.');
+                console.error('AJAX Error fetching Estafet Events:', xhr.responseText);
+                alert('Terjadi kesalahan saat menghubungi server untuk mencari cabang lomba estafet.');
+                resetAllRelayTimeInputGroups(); // Reset on error
             }
         });
     });
