@@ -28,13 +28,13 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {{-- Left Section --}}
                             <div class="md:col-span-2 space-y-4">
-                                {{-- Nama Atlet Section --}}
+                                {{-- Nama Regu Section --}}
                                 <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm">
                                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('Nama Regu') }}</h3>
                                     <div class="flex flex-wrap items-center gap-4">
                                         {{-- KU --}}
-                                        <label for="ku_select" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('KU') }}</label>
-                                        <select id="ku_select" name="ku" class="rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        <label for="ku_select_estafet" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('KU') }}</label>
+                                        <select id="ku_select_estafet" name="ku_select_estafet" class="rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                             <option value="">-- Pilih KU --</option>
                                             {{-- Options will be dynamically loaded or passed from controller --}}
                                             <option value="A">A</option>
@@ -48,11 +48,11 @@
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Gender') }}</label>
                                         <div class="flex gap-2">
                                             <label class="inline-flex items-center">
-                                                <input type="radio" name="gender" value="PA" id="gender_pa" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                <input type="radio" name="gender_estafet" value="PA" id="gender_estafet_pa" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                 <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Pa') }}</span>
                                             </label>
                                             <label class="inline-flex items-center">
-                                                <input type="radio" name="gender" value="PI" id="gender_pi" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                <input type="radio" name="gender_estafet" value="PI" id="gender_estafet_pi" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                 <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Pi') }}</span>
                                             </label>
                                         </div>
@@ -60,11 +60,11 @@
                                         {{-- SP / Bukan SP --}}
                                         <div class="flex gap-2">
                                             <label class="inline-flex items-center">
-                                                <input type="radio" name="sp_status" value="SP" id="sp_yes" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                <input type="radio" name="sp_status_estafet" value="SP" id="sp_yes" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                 <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('SP') }}</span>
                                             </label>
                                             <label class="inline-flex items-center">
-                                                <input type="radio" name="sp_status" value="BUKAN_SP" id="sp_no" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                <input type="radio" name="sp_status_estafet" value="BUKAN_SP" id="sp_no" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                 <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Bukan SP') }}</span>
                                             </label>
                                         </div>
@@ -89,7 +89,6 @@
                                             {{ __('Pilih') }}
                                         </button>
                                     </div>
-
                                 </div>
 
                                 {{-- Club/Location Details Section --}}

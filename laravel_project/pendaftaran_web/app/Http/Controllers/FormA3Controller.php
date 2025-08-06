@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View; // Import View class
 use Illuminate\Support\Facades\Auth; // For Auth::user()
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Models\Kompetisi; // Assuming you have a Kompetisi model
 use App\Models\MstPeserta;
 use App\Models\MstKU;
@@ -394,5 +395,42 @@ class FormA3Controller extends Controller
             'atletDetailsForJs', // For JavaScript to read
             'existingA3Entries',
         ));
+    }
+
+    public function getEstafetEvents(Request $request)
+    {
+        // Validate the incoming data
+        $request->validate([
+            'ku' => 'required|string',
+            'gender' => 'required|string',
+        ]);
+
+        $ku = trim(strtoupper($request->input('ku')));
+        $gender = trim(strtoupper($request->input('gender')));
+
+        // Query the tSyaratPrestasi table
+        try {
+            $events = DB::table('tSyaratPrestasi')
+                ->where('KU', $ku)
+                ->where('GENDER', $gender)
+                ->where('GAYA', 'LIKE', '%Estafet%')
+                ->pluck('GAYA')
+                ->map(function ($gaya) {
+                    // Normalize the GAYA name to match your container IDs
+                    // e.g., 'SF 4x50m Estafet' -> 'sf4x50m'
+                    return strtolower(str_replace([' ', 'Estafet', 'Mix'], '', $gaya));
+                });
+
+            return response()->json([
+                'success' => true,
+                'events' => $events->unique()->values() // Return a unique list of events
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting estafet events: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server saat mencari acara.'
+            ], 500);
+        }
     }
 }

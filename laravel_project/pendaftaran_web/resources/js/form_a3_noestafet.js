@@ -2,11 +2,11 @@ $(document).ready(function () {
     console.log('Document ready. Initializing Form A3 Nomor Estafet scripts.');
 
     // Get references to elements
-    const namaReguSelect = $('#nama_regu'); // The dropdown for athlete names
+    const namaReguInput = $('#nama_regu'); // The dropdown for athlete names
     const pilihReguButton = $('#pilih-regu-button'); // The "Pilih" button
-    const genderPaRadio = $('#gender_pa'); // Radio button for Pria (Male)
-    const genderPiRadio = $('#gender_pi'); // Radio button for Wanita (Female)
-    const kuSelect = $('#ku_select'); // KU dropdown
+    const genderPaRadioEstafet = $('#gender_estafet_pa'); // Radio button for Pria (Male)
+    const genderPiRadioEstafet = $('#gender_estafet_pi'); // Radio button for Wanita (Female)
+    const kuSelectEstafet = $('#ku_select_estafet'); // KU dropdown
     const spYesRadio = $('#sp_yes'); // SP radio button
     const spNoRadio = $('#sp_no'); // Bukan SP radio button
     const namaClubInput = $('#nama_club');
@@ -166,7 +166,7 @@ $(document).ready(function () {
     }
 
     // Call this function when the page loads to populate the dropdown initially
-    populateAtletDropdown();
+    // populateAtletDropdown();
 
     // Function to handle input for MM, SS, HS to allow only 2-digit integers
     function enforceTwoDigitInteger(event) {
@@ -312,163 +312,74 @@ $(document).ready(function () {
 
     // Event listener for the "Pilih" button
     pilihReguButton.on('click', function () {
-        // Get the IDATLET from the selected option
-        const selectedIdAtlet = namaReguSelect.val();
+        const ku = kuSelectEstafet.val();
+        const gender = $('input[name="gender_estafet"]:checked').val();
+        const namaRegu = namaReguInput.val();
 
-        if (!selectedIdAtlet) {
-            alert('Silahkan pilih atlet dari daftar terlebih dahulu.');
-            sf4x50mContainer.addClass('hidden'); // Explicitly hide the container
-            resetSf4x50mGroupContents(); // Reset inner checkbox/fields
-            sf4x100mContainer.addClass('hidden'); // Explicitly hide the container
-            resetSf4x100mGroupContents(); // Reset inner checkbox/fields
-            sf4x200mContainer.addClass('hidden');
-            resetSf4x200mGroupContents();
-            sf4x50mMixContainer.addClass('hidden');
-            resetSf4x50mMixGroupContents();
-            sf4x100mMixContainer.addClass('hidden');
-            resetSf4x100mMixGroupContents();
-            sf4x200mMixContainer.addClass('hidden');
-            resetSf4x200mMixGroupContents();
+        // --- DEBUGGING CONSOLE LOGS START HERE ---
+        console.log('--- Pilih Button Click Debug ---');
+        console.log('KU Select Element (jQuery object):', kuSelectEstafet);
+        console.log('Raw value from KU select (kuSelectEstafet.val()):', ku);
+        console.log('Selected Gender:', gender);
+        console.log('Nama Regu:', namaRegu);
+        console.log('--------------------------------');
+        // --- DEBUGGING CONSOLE LOGS END HERE ---
 
-
-            bf4x50mContainer.addClass('hidden'); // Explicitly hide the container
-            resetBf4x50mGroupContents(); // Reset inner checkbox/fields
-            bf4x100mContainer.addClass('hidden'); // Explicitly hide the container
-            resetBf4x100mGroupContents(); // Reset inner checkbox/fields
-            bf4x200mContainer.addClass('hidden');
-            resetBf4x200mGroupContents();
-            bf4x50mMixContainer.addClass('hidden');
-            resetBf4x50mMixGroupContents();
-            bf4x100mMixContainer.addClass('hidden');
-            resetBf4x100mMixGroupContents();
-            bf4x200mMixContainer.addClass('hidden');
-            resetBf4x200mMixGroupContents();
-
+        // 1. Basic Validation
+        if (!ku) {
+            alert('Silakan pilih Kelompok Umur (KU) terlebih dahulu.');
+            return;
+        }
+        if (!gender) {
+            alert('Silakan pilih Gender terlebih dahulu.');
+            return;
+        }
+        if (!namaRegu.trim()) {
+            alert('Silakan isi Nama Regu terlebih dahulu.');
             return;
         }
 
-        // Look up the athlete details using IDATLET
-        const athlete = allAtletDetails[selectedIdAtlet];
-        console.log('Attempting to retrieve athlete with IDATLET:', selectedIdAtlet);
-        console.log('Retrieved athlete object:', athlete);
+        // 2. Perform an AJAX request to the server
+        $.ajax({
+            url: '/form-a3/nomor-estafet/get-event-options', // NEW endpoint
+            method: 'POST',
+            data: {
+                _token: $('meta[name="csrf-token"]').attr('content'),
+                ku: ku.toUpperCase(), // Send KU as uppercase for consistent checking
+                gender: gender.toUpperCase() // Send Gender as uppercase
+            },
+            success: function (response) {
+                console.log('Server response:', response);
 
-        if (athlete) {
-            console.log('Selected athlete details:', athlete);
+                // 3. Reset all containers
+                // resetAllContainers();
+                sf4x50mContainer.removeClass('hidden');
+                resetSf4x50mGroupContents();
 
-            // 1. Set Gender Radio Button
-            genderPaRadio.prop('checked', false); // Clear both first
-            genderPiRadio.prop('checked', false);
-            if (athlete.GENDER && athlete.GENDER.toUpperCase() === 'PA') {
-                genderPaRadio.prop('checked', true);
-            } else if (athlete.GENDER && athlete.GENDER.toUpperCase() === 'PI') {
-                genderPiRadio.prop('checked', true);
+                // 4. Show only the containers that are returned in the response
+                if (response.success) {
+                    if (response.events.length > 0) {
+                        alert('Data cabang lomba estafet berhasil dimuat.');
+                        response.events.forEach(eventName => {
+                            const container = $(`#${eventName}-container`); // Assumes IDs match event names
+                            if (container.length) {
+                                container.removeClass('hidden');
+                                // You would call the specific reset function here
+                                // e.g., if (eventName === 'sf4x50m') { resetSf4x50mGroupContents(); }
+                            }
+                        });
+                    } else {
+                        alert('Tidak ada cabang lomba estafet yang tersedia untuk KU dan Gender yang dipilih.');
+                    }
+                } else {
+                    alert('Gagal mengambil data cabang lomba.');
+                }
+            },
+            error: function (xhr) {
+                console.error('AJAX Error:', xhr.responseText);
+                alert('Terjadi kesalahan saat menghubungi server.');
             }
-
-            // 2. Set KU Select (if KU is available in athlete data)
-            if (athlete.KU) {
-                kuSelect.val(athlete.KU);
-            } else {
-                kuSelect.val(''); // Clear if no KU data
-            }
-
-            // 3. Set SP Status Radio Button
-            spYesRadio.prop('checked', false);
-            spNoRadio.prop('checked', false);
-            // Assuming SP column contains 'Y' for SP and anything else for Bukan SP
-            if (athlete.SP && (athlete.SP.toUpperCase() === '1' || athlete.SP.toUpperCase() === 'SP')) {
-                spYesRadio.prop('checked', true);
-            } else {
-                spNoRadio.prop('checked', true); // Default to Bukan SP if not SP
-            }
-
-            // 4. Auto-fill Club/Location Details (if you want to override the initial values)
-            // You might want to keep these readonly fields as they are, representing the user's kontingen.
-            // If you want them to reflect the *athlete's* original club/location:
-            namaClubInput.val(athlete.NAMACLUB || '');
-            kotaKabInput.val(athlete.JENISDOM || '');
-            namaKotaKabInput.val(athlete.NAMAKOTADOM || '');
-            propinsiInput.val(athlete.NAMAPROPDOM || '');
-            negaraInput.val(athlete.NEGARA || 'INDONESIA'); // Uncomment if NEGARA is in Atlet table
-
-            // NEW: Show the containers for all surface distances
-            sf4x50mContainer.removeClass('hidden');
-            resetSf4x50mGroupContents(); // Reset to initial state (checkbox unchecked, fields hidden)
-            sf4x100mContainer.removeClass('hidden');
-            resetSf4x100mGroupContents(); // Reset to initial state (checkbox unchecked, fields hidden)
-            // ADDED: Show and reset 200m and 400m containers
-            sf4x200mContainer.removeClass('hidden');
-            resetSf4x200mGroupContents();
-            sf4x50mMixContainer.removeClass('hidden');
-            resetSf4x50mMixGroupContents();
-            // ADDED: Show and reset 800m and 1500m containers
-            sf4x100mMixContainer.removeClass('hidden');
-            resetSf4x100mMixGroupContents();
-            sf4x200mMixContainer.removeClass('hidden');
-            resetSf4x200mMixGroupContents();
-
-
-            // NEW: Show the containers for all surface distances
-            bf4x50mContainer.removeClass('hidden');
-            resetBf4x50mGroupContents(); // Reset to initial state (checkbox unchecked, fields hidden)
-            bf4x100mContainer.removeClass('hidden');
-            resetBf4x100mGroupContents(); // Reset to initial state (checkbox unchecked, fields hidden)
-            // ADDED: Show and reset 200m and 400m containers
-            bf4x200mContainer.removeClass('hidden');
-            resetBf4x200mGroupContents();
-            bf4x50mMixContainer.removeClass('hidden');
-            resetBf4x50mMixGroupContents();
-            // ADDED: Show and reset 800m and 1500m containers
-            bf4x100mMixContainer.removeClass('hidden');
-            resetBf4x100mMixGroupContents();
-            bf4x200mMixContainer.removeClass('hidden');
-            resetBf4x200mMixGroupContents();
-
-        } else {
-            alert('Detail atlet tidak ditemukan untuk pilihan ini.');
-            // Clear fields if athlete not found
-            genderPaRadio.prop('checked', false);
-            genderPiRadio.prop('checked', false);
-            kuSelect.val('');
-            spYesRadio.prop('checked', false);
-            spNoRadio.prop('checked', false);
-            namaClubInput.val('');
-            kotaKabInput.val('');
-            namaKotaKabInput.val('');
-            propinsiInput.val('');
-            negaraInput.val('INDONESIA'); // Reset or clear as appropriate
-
-            sf4x50mContainer.addClass('hidden'); // Explicitly hide the container
-            resetSf4x50mGroupContents(); // Reset inner checkbox/fields
-            sf4x100mContainer.addClass('hidden'); // Explicitly hide the container
-            resetSf4x100mGroupContents(); // Reset inner checkbox/fields
-            // ADDED: Hide and reset 200m and 400m containers
-            sf4x200mContainer.addClass('hidden');
-            resetSf4x200mGroupContents();
-            sf4x50mMixContainer.addClass('hidden');
-            resetSf4x50mMixGroupContents();
-            // ADDED: Hide and reset 800m and 1500m containers
-            sf4x100mMixContainer.addClass('hidden');
-            resetSf4x100mMixGroupContents();
-            sf4x200mMixContainer.addClass('hidden');
-            resetSf4x200mMixGroupContents();
-
-
-            bf4x50mContainer.addClass('hidden'); // Explicitly hide the container
-            resetBf4x50mGroupContents(); // Reset inner checkbox/fields
-            bf4x100mContainer.addClass('hidden'); // Explicitly hide the container
-            resetBf4x100mGroupContents(); // Reset inner checkbox/fields
-            // ADDED: Hide and reset 200m and 400m containers
-            bf4x200mContainer.addClass('hidden');
-            resetBf4x200mGroupContents();
-            bf4x50mMixContainer.addClass('hidden');
-            resetBf4x50mMixGroupContents();
-            // ADDED: Hide and reset 800m and 1500m containers
-            bf4x100mMixContainer.addClass('hidden');
-            resetBf4x100mMixGroupContents();
-            bf4x200mMixContainer.addClass('hidden');
-            resetBf4x200mMixGroupContents();
-
-        }
+        });
     });
 
     // Event listener for the "Simpan" button
