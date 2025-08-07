@@ -290,6 +290,33 @@ class FormA3Controller extends Controller
 
     // You will add other methods (e.g., savePerorangan, deletePerorangan, searchAtlet) here later
 
+    /**
+     * Fetches the LAHIRSAMPAI date for a given KU from MstKU table.
+     */
+    public function getKuEndDate(Request $request)
+    {
+        $request->validate([
+            'ku' => 'required|string|max:30', // Validate KU
+        ]);
+
+        $ku = trim(strtoupper($request->input('ku')));
+
+        try {
+            $mstKuEntry = MstKU::where('KU', $ku)->first();
+
+            if ($mstKuEntry && $mstKuEntry->LAHIRSAMPAI) {
+                // Return date in YYYY-MM-DD format
+                $kuEndDate = Carbon::parse($mstKuEntry->LAHIRSAMPAI)->toDateString();
+                return response()->json(['success' => true, 'kuEndDate' => $kuEndDate]);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Tanggal akhir KU tidak ditemukan.'], 404);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error fetching KU end date: ' . $e->getMessage(), ['ku' => $ku]);
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan server.'], 500);
+        }
+    }
+
     public function indexEstafet(): View
     {
         $user = Auth::user();
@@ -411,11 +438,24 @@ class FormA3Controller extends Controller
 
         // Query the tSyaratPrestasi table
         try {
-            $events = DB::table('tSyaratPrestasi')
+            $query = DB::table('tSyaratPrestasi')
                 ->where('KU', $ku)
-                ->where('GENDER', $gender)
-                ->where('GAYA', 'LIKE', '%Estafet%')
-                ->pluck('GAYA')
+                ->where('GAYA', 'LIKE', '%Estafet%');
+
+            // --- NEW LOGIC FOR MIX GENDER ---
+            // If the user selected 'MIX', we only show GAYA that contains 'Mix'.
+            if ($gender === 'MIX') {
+                $query->where('GAYA', 'LIKE', '%Mix%');
+            }
+            // If the user selected 'PA' or 'PI', we show GAYA that matches the gender
+            // AND does not contain 'Mix'.
+            else {
+                $query->where('GENDER', $gender)
+                    ->where('GAYA', 'NOT LIKE', '%Mix%');
+            }
+            // --- END OF NEW LOGIC ---
+
+            $events = $query->pluck('GAYA')
                 ->map(function ($gaya) {
                     $normalized = '';
                     $gayaLower = strtolower($gaya);
@@ -428,7 +468,6 @@ class FormA3Controller extends Controller
                     }
 
                     // 2. Extract and normalize the distance (e.g., '4x50m')
-                    // This regex finds patterns like '4 x 50 m'
                     if (preg_match('/(\d+\s*x\s*\d+\s*m)/', $gayaLower, $matches)) {
                         $distance = str_replace(' ', '', $matches[1]);
                         $normalized .= $distance;
@@ -456,6 +495,171 @@ class FormA3Controller extends Controller
                 'success' => false,
                 'message' => 'Terjadi kesalahan server saat mencari acara.'
             ], 500);
+        }
+    }
+
+    /**
+     * Saves or updates an Estafet (relay) entry in the A3 table.
+     */
+    public function saveEstafet(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not authenticated.'], 401);
+        }
+
+        try {
+            // 1. Server-side Validation
+            $request->validate([
+                'KU' => ['required', 'string', 'max:255'],
+                'GENDER' => ['required', 'string', 'in:PA,PI'], // GENDER will be PA/PI only
+                'GENDERMIX' => ['required', 'integer', 'in:0,1'], // GENDERMIX will be 0 or 1
+                'NAMAATLET' => ['required', 'string', 'max:255'], // This is Nama Regu
+                'SP' => ['required', 'integer', 'in:0,1'],
+                'NOMOR' => ['required', 'string', 'in:Estafet'],
+                'email' => ['required', 'email', 'max:255'],
+                'TGLLAHIR' => ['required', 'date'], // KU End Date
+
+                // User's kontingen details (nullable if not always present)
+                'JENISDOM' => ['nullable', 'string', 'max:255'],
+                'NAMAKOTADOM' => ['nullable', 'string', 'max:255'],
+                'NAMAPROPDOM' => ['nullable', 'string', 'max:255'],
+
+                // Time fields validation (all are nullable integers)
+                'ESTMON200MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON200SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON200HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON400MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON400SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON400HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON800MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON800SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON800HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+
+                'ESTSUB200MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB200SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB200HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB400MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB400SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB400HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB800MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB800SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB800HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+
+                'ESTMONM200MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMONM200SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMONM200HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMONM400MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMONM400SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMONM400HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+
+                'ESTSUBM200MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUBM200SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUBM200HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUBM400MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUBM400SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUBM400HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+            ]);
+
+            // 2. Prepare data for insertion/update
+            $dataToSave = $request->only([
+                'KU',
+                'GENDER',
+                'GENDERMIX',
+                'NAMAATLET',
+                'SP',
+                'NOMOR',
+                'email',
+                'TGLLAHIR',
+                // Time fields
+                'ESTMON200MM',
+                'ESTMON200SS',
+                'ESTMON200HS',
+                'ESTMON400MM',
+                'ESTMON400SS',
+                'ESTMON400HS',
+                'ESTMON800MM',
+                'ESTMON800SS',
+                'ESTMON800HS',
+                'ESTSUB200MM',
+                'ESTSUB200SS',
+                'ESTSUB200HS',
+                'ESTSUB400MM',
+                'ESTSUB400SS',
+                'ESTSUB400HS',
+                'ESTSUB800MM',
+                'ESTSUB800SS',
+                'ESTSUB800HS',
+                'ESTMONM200MM',
+                'ESTMONM200SS',
+                'ESTMONM200HS',
+                'ESTMONM400MM',
+                'ESTMONM400SS',
+                'ESTMONM400HS',
+                'ESTSUBM200MM',
+                'ESTSUBM200SS',
+                'ESTSUBM200HS',
+                'ESTSUBM400MM',
+                'ESTSUBM400SS',
+                'ESTSUBM400HS',
+            ]);
+
+            // 3. Handle NAMACLUB and ASAL based on JNSKOMPETISI
+            $jnsKompetisi = $user->JNSKOMPETISI ?? 'C'; // Default to 'C' if not set
+            $namaclub = '';
+            $asal = '';
+
+            if ($jnsKompetisi === 'K') {
+                $namaclub = ($user->JENISDOM ?? '') . '.' . ($user->NAMAKOTADOM ?? '');
+                $asal = $namaclub; // ASAL is same as NAMACLUB
+            } elseif ($jnsKompetisi === 'C') {
+                $namaclub = $user->NAMACLUB ?? '';
+                $asal = $namaclub; // ASAL is same as NAMACLUB
+            } elseif ($jnsKompetisi === 'P') {
+                $namaclub = $user->NAMAPROPDOM ?? '';
+                $asal = $namaclub; // ASAL is same as NAMACLUB
+            }
+            // If JNSKOMPETISI is 'K', and JENISDOM is 'KOTA', then it's 'KOTA SURABAYA'
+            if ($jnsKompetisi === 'K' && ($user->JENISDOM ?? '') === 'KOTA') {
+                $namaclub = 'KOTA ' . ($user->NAMAKOTADOM ?? '');
+                $asal = $namaclub;
+            }
+
+
+            $dataToSave['NAMACLUB'] = $namaclub;
+            $dataToSave['ASAL'] = $asal;
+            $dataToSave['JENISDOM'] = $user->JENISDOM ?? null;
+            $dataToSave['NAMAKOTADOM'] = $user->NAMAKOTADOM ?? null;
+            $dataToSave['NAMAPROPDOM'] = $user->NAMAPROPDOM ?? null;
+
+
+            // 4. Define the attributes to find a matching record (upsert criteria)
+            $matchCriteria = [
+                'NAMAATLET' => $request->NAMAATLET, // Nama Regu
+                'KU' => $request->KU,
+                'GENDER' => $request->GENDER,
+                'GENDERMIX' => $request->GENDERMIX,
+                'NOMOR' => 'Estafet',
+                'email' => $request->email,
+            ];
+
+            // 5. Use updateOrCreate to either update the existing record or create a new one
+            $a3Record = A3::updateOrCreate($matchCriteria, $dataToSave);
+
+            // 6. Log and return success response
+            if ($a3Record->wasRecentlyCreated) {
+                Log::info('New A3 Estafet record created:', $dataToSave);
+                return response()->json(['success' => true, 'message' => 'Data regu estafet berhasil disimpan!']);
+            } else {
+                Log::info('Existing A3 Estafet record updated:', $dataToSave);
+                return response()->json(['success' => true, 'message' => 'Data regu estafet berhasil diperbarui!']);
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation Error saving A3 Estafet data: ' . $e->getMessage(), $e->errors());
+            return response()->json(['success' => false, 'message' => 'Validasi gagal', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Error saving A3 Estafet data: ' . $e->getMessage(), $request->all());
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan server saat menyimpan data.'], 500);
         }
     }
 }

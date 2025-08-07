@@ -7,16 +7,16 @@
         </h2>
     </x-slot>
 
-    {{-- Pass athlete data to JavaScript --}}
+    <!-- {{-- Pass athlete data to JavaScript --}}
     <script>
         window.atletDetails = @json($atletDetailsForJs ?? []);
         console.log('Atlet Details for JS:', window.atletDetails); // For debugging
         // Pass current user's email to JavaScript
         window.currentUserEmail = "{{ Auth::user()->email ?? '' }}";
         window.existingA3Entries = @json($existingA3Entries);
-    </script>
+    </script> -->
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> -->
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -54,6 +54,10 @@
                                             <label class="inline-flex items-center">
                                                 <input type="radio" name="gender_estafet" value="PI" id="gender_estafet_pi" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                 <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Pi') }}</span>
+                                            </label>
+                                            <label class="inline-flex items-center">
+                                                <input type="radio" name="gender_estafet" value="MIX" id="gender_estafet_mix" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                                <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Mix') }}</span>
                                             </label>
                                         </div>
 
@@ -156,13 +160,13 @@
                                     {{-- Changed sm:flex-row to sm:flex-wrap and added mb-4 to the first row --}}
                                     <div class="flex flex-col sm:flex-row sm:flex-wrap justify-center items-start gap-4">
 
-                                        {{-- Row 1: SF 50m and SF 100m Group --}}
+                                        {{-- Row 1: SF 4x50m and SF 4x100m Group --}}
                                         <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mb-4"> {{-- New wrapper for the first row --}}
-                                            {{-- SF 50m Group --}}
+                                            {{-- SF 4x50m Group --}}
                                             <div id="SF_4x50m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="SF_4x50m_enable_time_chkbx" name="SF_4x50m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                                    <label for="SF_4x50m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('50m') }}</label>
+                                                    <label for="SF_4x50m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x50m') }}</label>
                                                 </div>
                                                 <div id="SF_4x50m_time_fields" class="flex gap-2 hidden justify-center">
                                                     <div class="flex flex-col items-center">
@@ -183,11 +187,11 @@
                                                 </div>
                                             </div>
 
-                                            {{-- SF 100m Group --}}
+                                            {{-- SF 4x100m Group --}}
                                             <div id="SF_4x100m_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="SF_4x100m_enable_time_chkbx" name="SF_4x100m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                                    <label for="SF_4x100m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('100m') }}</label>
+                                                    <label for="SF_4x100m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x100m') }}</label>
                                                 </div>
                                                 <div id="SF_4x100m_time_fields" class="flex gap-2 hidden justify-center">
                                                     <div class="flex flex-col items-center">
@@ -209,13 +213,13 @@
                                             </div>
                                         </div> {{-- End of Row 1 wrapper --}}
 
-                                        {{-- Row 2: SF 200m and SF 400m Group --}}
+                                        {{-- Row 2: SF 4x200m and SF 4x50mMix Group --}}
                                         <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mt-4"> {{-- New wrapper for the second row, added sm:mt-4 for spacing --}}
-                                            {{-- SF 200m Group (Previously UW_200m_container, now SF_4x200m_container) --}}
+                                            {{-- SF 4x200m Group (Previously UW_200m_container, now SF_4x200m_container) --}}
                                             <div id="SF_4x200m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="SF_4x200m_enable_time_chkbx" name="SF_4x200m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                                    <label for="SF_4x200m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('200m') }}</label>
+                                                    <label for="SF_4x200m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x200m') }}</label>
                                                 </div>
                                                 <div id="SF_4x200m_time_fields" class="flex gap-2 hidden justify-center">
                                                     <div class="flex flex-col items-center">
@@ -236,11 +240,11 @@
                                                 </div>
                                             </div>
 
-                                            {{-- SF 400m Group (Previously UW_400m_container, now SF_4x50mMix_container) --}}
+                                            {{-- SF 4x50mMix Group (SF_4x50mMix_container) --}}
                                             <div id="SF_4x50mMix_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="SF_4x50mMix_enable_time_chkbx" name="SF_4x50mMix_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                                    <label for="SF_4x50mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('400m') }}</label>
+                                                    <label for="SF_4x50mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x50m Mix') }}</label>
                                                 </div>
                                                 <div id="SF_4x50mMix_time_fields" class="flex gap-2 hidden justify-center">
                                                     <div class="flex flex-col items-center">
@@ -262,13 +266,13 @@
                                             </div>
                                         </div> {{-- End of Row 2 wrapper --}}
 
-                                        {{-- Row 3: SF 800m and SF 1500m Group --}}
+                                        {{-- Row 3: SF 4x100mMix and SF 4x200mMix Group --}}
                                         <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mt-4"> {{-- New wrapper for the second row, added sm:mt-4 for spacing --}}
-                                            {{-- SF 800m Group (Previously UW_800m_container, now SF_4x100mMix_container) --}}
+                                            {{-- SF 4x100mMix Group (Previously UW_800m_container, now SF_4x100mMix_container) --}}
                                             <div id="SF_4x100mMix_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="SF_4x100mMix_enable_time_chkbx" name="SF_4x100mMix_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                                    <label for="SF_4x100mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('800m') }}</label>
+                                                    <label for="SF_4x100mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x100m Mix') }}</label>
                                                 </div>
                                                 <div id="SF_4x100mMix_time_fields" class="flex gap-2 hidden justify-center">
                                                     <div class="flex flex-col items-center">
@@ -289,11 +293,11 @@
                                                 </div>
                                             </div>
 
-                                            {{-- SF 1500m Group (Previously UW_1500m_container, now SF_4x200mMix_container) --}}
+                                            {{-- SF 4x200mMix Group (Previously UW_1500m_container, now SF_4x200mMix_container) --}}
                                             <div id="SF_4x200mMix_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="SF_4x200mMix_enable_time_chkbx" name="SF_4x200mMix_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                                    <label for="SF_4x200mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('1500m') }}</label>
+                                                    <label for="SF_4x200mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x200m Mix') }}</label>
                                                 </div>
                                                 <div id="SF_4x200mMix_time_fields" class="flex gap-2 hidden justify-center">
                                                     <div class="flex flex-col items-center">
@@ -322,13 +326,13 @@
                                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 text-center">{{ __('Estafet Bifin') }}</h3>
                                     <div class="flex flex-col sm:flex-row sm:flex-wrap justify-center items-start gap-4">
 
-                                        {{-- Row 1: BF 50m and BF 100m Group --}}
+                                        {{-- Row 1: BF 4x50m and BF 4x100m Group --}}
                                         <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mb-4"> {{-- New wrapper for the first row --}}
-                                            {{-- BF 50m Group --}}
+                                            {{-- BF 4x50m Group --}}
                                             <div id="BF_4x50m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="BF_4x50m_enable_time_chkbx" name="BF_4x50m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                                    <label for="BF_4x50m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('50m') }}</label>
+                                                    <label for="BF_4x50m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x50m') }}</label>
                                                 </div>
                                                 <div id="BF_4x50m_time_fields" class="flex gap-2 hidden justify-center">
                                                     <div class="flex flex-col items-center">
@@ -349,11 +353,11 @@
                                                 </div>
                                             </div>
 
-                                            {{-- BF 100m Group --}}
+                                            {{-- BF 4x100m Group --}}
                                             <div id="BF_4x100m_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="BF_4x100m_enable_time_chkbx" name="BF_4x100m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                                    <label for="BF_4x100m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('100m') }}</label>
+                                                    <label for="BF_4x100m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x100m') }}</label>
                                                 </div>
                                                 <div id="BF_4x100m_time_fields" class="flex gap-2 hidden justify-center">
                                                     <div class="flex flex-col items-center">
@@ -375,13 +379,13 @@
                                             </div>
                                         </div> {{-- End of Row 1 wrapper --}}
 
-                                        {{-- Row 2: BF 200m and BF 400m Group --}}
+                                        {{-- Row 2: BF 4x200m and BF 4x50mMix Group --}}
                                         <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mt-4"> {{-- New wrapper for the second row, added sm:mt-4 for spacing --}}
-                                            {{-- BF 200m Group --}}
+                                            {{-- BF 4x200m Group --}}
                                             <div id="BF_4x200m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="BF_4x200m_enable_time_chkbx" name="BF_4x200m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                                    <label for="BF_4x200m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('200m') }}</label>
+                                                    <label for="BF_4x200m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x200m') }}</label>
                                                 </div>
                                                 <div id="BF_4x200m_time_fields" class="flex gap-2 hidden justify-center">
                                                     <div class="flex flex-col items-center">
@@ -402,11 +406,11 @@
                                                 </div>
                                             </div>
 
-                                            {{-- BF 400m Group --}}
+                                            {{-- BF 4x50mMix Group --}}
                                             <div id="BF_4x50mMix_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="BF_4x50mMix_enable_time_chkbx" name="BF_4x50mMix_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                                    <label for="BF_4x50mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('400m') }}</label>
+                                                    <label for="BF_4x50mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x50m Mix') }}</label>
                                                 </div>
                                                 <div id="BF_4x50mMix_time_fields" class="flex gap-2 hidden justify-center">
                                                     <div class="flex flex-col items-center">
@@ -428,13 +432,13 @@
                                             </div>
                                         </div> {{-- End of Row 2 wrapper --}}
 
-                                        {{-- Row 3: BF 800m and BF 1500m Group --}}
+                                        {{-- Row 3: BF 4x100mMix and BF 4x200mMix Group --}}
                                         <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mt-4"> {{-- New wrapper for the third row, added sm:mt-4 for spacing --}}
-                                            {{-- BF 800m Group --}}
+                                            {{-- BF 4x100mMix Group --}}
                                             <div id="BF_4x100mMix_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="BF_4x100mMix_enable_time_chkbx" name="BF_4x100mMix_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                                    <label for="BF_4x100mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('800m') }}</label>
+                                                    <label for="BF_4x100mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x100m Mix') }}</label>
                                                 </div>
                                                 <div id="BF_4x100mMix_time_fields" class="flex gap-2 hidden justify-center">
                                                     <div class="flex flex-col items-center">
@@ -455,11 +459,11 @@
                                                 </div>
                                             </div>
 
-                                            {{-- BF 1500m Group --}}
+                                            {{-- BF 4x200mMix Group --}}
                                             <div id="BF_4x200mMix_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="BF_4x200mMix_enable_time_chkbx" name="BF_4x200mMix_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
-                                                    <label for="BF_4x200mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('1500m') }}</label>
+                                                    <label for="BF_4x200mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x200m Mix') }}</label>
                                                 </div>
                                                 <div id="BF_4x200mMix_time_fields" class="flex gap-2 hidden justify-center">
                                                     <div class="flex flex-col items-center">
@@ -554,10 +558,10 @@
                         {{-- Action Buttons --}}
                         <div class="mt-6 flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
                             <!-- <button type="button" class="rounded-md bg-gray-200 dark:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-800 dark:text-gray-300 shadow-sm hover:bg-gray-300 dark:hover:bg-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">{{ __('Keluar') }}</button> -->
-                            <button type="button" id="hapus-button" class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">{{ __('Hapus') }}</button>
+                            <button type="button" id="hapus-regu-button" class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">{{ __('Hapus') }}</button>
                             <!-- <button type="button" class="rounded-md bg-yellow-400 px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm hover:bg-yellow-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">{{ __('Batal') }}</button> -->
                             <!-- <button type="button" class="rounded-md bg-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">{{ __('Ubah') }}</button> -->
-                            <button type="button" id="simpan-button" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">{{ __('Simpan') }}</button>
+                            <button type="button" id="simpan-regu-button" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">{{ __('Simpan') }}</button>
                             <!-- <button type="button" class="rounded-md bg-green-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500">{{ __('Tambah') }}</button> -->
                         </div>
                         {{-- hidden fields to store the selected record's ID and name --}}
@@ -568,4 +572,41 @@
             </div>
         </div>
     </div>
+
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Pass server-side data to JavaScript
+        window.atletDetails = @json($atletDetailsForJs ?? []);
+        window.currentUserEmail = "{{ Auth::user()->email ?? '' }}";
+        window.existingA3Entries = @json($existingA3Entries);
+
+        // Pass kontingen details for the Estafet form
+        window.currentUserJenisDom = @json(Auth::user() -> JENISDOM ?? null);
+        window.currentUserNamaKotaDom = @json(Auth::user() -> NAMAKOTADOM ?? null);
+        window.currentUserNamaPropDom = @json(Auth::user() -> NAMAPROPDOM ?? null);
+        window.currentUserNamaClub = @json(Auth::user() -> NAMACLUB ?? null);
+        window.currentUserJnsKompetisi = @json(Auth::user() -> JNSKOMPETISI ?? null);
+
+        // Element references for form a3 noestafet
+        const kuSelectEstafet = $('#ku_select_estafet');
+        const genderPaRadioEstafet = $('#gender_estafet_pa');
+        const genderPiRadioEstafet = $('#gender_estafet_pi');
+        const genderMixRadioEstafet = $('#gender_estafet_mix');
+        const spStatusEstafet = $('input[name="sp_status_estafet"]');
+        const namaReguInput = $('#nama_regu');
+        const simpanReguButton = $('#simpan-regu-button');
+
+        // Time input references
+        const sf4x50mEnableCheckbox = $('#SF_4x50m_enable_time_chkbx');
+        const sf4x50mMmInput = $('#SF_4x50m_mm_txtbx');
+        const sf4x50mSsInput = $('#SF_4x50m_ss_txtbx');
+        const sf4x50mHsInput = $('#SF_4x50m_hs_txtbx');
+        // ... define all other SF, BF, Mix time input references here ...
+
+        console.log('All script data and element references are ready.');
+    </script>
+    @endpush
+
 </x-app-layout>

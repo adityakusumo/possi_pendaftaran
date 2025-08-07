@@ -17,8 +17,8 @@ $(document).ready(function () {
     const negaraInput = $('#negara');
 
     // Simpan button reference
-    const simpanButton = $('#simpan-button');
-    const hapusButton = $('#hapus-button');
+    const simpanReguButton = $('#simpan-regu-button');
+    const hapusReguButton = $('#hapus-regu-button');
     const selectedA3IdInput = $('#selected-a3-id');
     const selectedA3NameInput = $('#selected-a3-name');
 
@@ -219,7 +219,7 @@ $(document).ready(function () {
     }
 
     // Reusable function to get and validate time input data for a specific group
-    // Returns an object { mm, ss, hs, isValid, errorMessage }
+    // Helper function to process time input groups (re-used from perorangan)
     function processTimeInputGroupData(prefix, enableCheckbox, mmInput, ssInput, hsInput) {
         let mm = mmInput.val().trim();
         let ss = ssInput.val().trim();
@@ -228,30 +228,25 @@ $(document).ready(function () {
         let errorMessage = '';
 
         if (enableCheckbox.is(':checked')) {
-            // Check for all null
             if (mm === '' && ss === '' && hs === '') {
-                mm = '99';
+                mm = '99'; // Default to 99 if checked but empty
                 ss = '99';
                 hs = '99';
             } else {
-                // Handle partial nulls (set to 0)
                 mm = mm === '' ? '0' : mm;
                 ss = ss === '' ? '0' : ss;
                 hs = hs === '' ? '0' : hs;
 
-                // Validate SS value
-                if (parseInt(ss) < 1) {
+                if (parseInt(ss) < 1 && (mm !== '99' || ss !== '99' || hs !== '99')) {
                     isValid = false;
                     errorMessage = `Input waktu ${prefix} tidak boleh kurang dari 1 detik!`;
                 }
             }
         } else {
-            // If checkbox is not checked, values should be null/empty
-            mm = '';
-            ss = '';
-            hs = '';
+            mm = null; // Send null if checkbox is not checked
+            ss = null;
+            hs = null;
         }
-
         return { mm: mm, ss: ss, hs: hs, isValid: isValid, errorMessage: errorMessage };
     }
 
@@ -415,88 +410,127 @@ $(document).ready(function () {
     });
 
     // Event listener for the "Simpan" button
-    simpanButton.on('click', function (e) {
+    // Event listener for the "Simpan" button
+    simpanReguButton.on('click', async function (e) { // Added 'async' keyword
         e.preventDefault(); // Prevent default form submission
 
-        // const selectedAthleteName = $('#nama_regu').val(); // Get selected name
+        // 1. Collect basic form data
+        const ku = kuSelectEstafet.val();
+        const gender = $('input[name="gender_estafet"]:checked').val();
+        const spRadioValue = $('input[name="sp_status_estafet"]:checked').val();
+        const namaRegu = namaReguInput.val();
 
-        const selectedIdAtlet = namaReguSelect.val();
-        if (!selectedIdAtlet) {
-            alert('Silakan pilih atlet terlebih dahulu sebelum menyimpan.');
+        // 2. Basic Client-side Validation
+        if (!ku) {
+            alert('Silakan pilih Kelompok Umur (KU) terlebih dahulu.');
+            return;
+        }
+        if (!gender) {
+            alert('Silakan pilih Gender terlebih dahulu.');
+            return;
+        }
+        if (!namaRegu.trim()) {
+            alert('Silakan isi Nama Regu terlebih dahulu.');
             return;
         }
 
-        const athlete = allAtletDetails[selectedIdAtlet];
-        if (!athlete) {
-            alert('Data atlet tidak ditemukan. Mohon pilih atlet yang valid.');
-            return;
+        // 3. Determine GENDER and GENDERMIX values for database
+        let genderForDb = gender;
+        let genderMixForDb = 0;
+        if (gender === 'MIX') {
+            genderForDb = 'PA'; // As per rule: if MIX selected, GENDER column is 'PA'
+            genderMixForDb = 1; // And GENDERMIX is 1
         }
 
-        // --- MODIFIED SECTION: Get and convert SP value ---
-        // Get the value of the checked radio button (e.g., "SP" or "BUKAN_SP")
-        // Assuming your radio buttons have the name 'sp_status'. Adjust if needed.
-        const spRadioValue = $('input[name="sp_status"]:checked').val();
-
-        // Map the string value to an integer: 1 for "SP", 0 for "BUKAN_SP"
+        // 4. Convert SP radio button value to 1 or 0
         const spValueForDatabase = (spRadioValue === 'SP') ? 1 : 0;
 
-        // Log the converted value for debugging
-        console.log(`Radio button value is '${spRadioValue}', converted to '${spValueForDatabase}' for the database.`);
-        // --- END OF MODIFIED SECTION ---
+        // 5. Process all time input groups
+        const timeData = {};
+        const timeGroups = [
+            { prefix: 'SF_4x50m', mm: sf4x50mMmInput, ss: sf4x50mSsInput, hs: sf4x50mHsInput, enable: sf4x50mEnableCheckbox, db_mm: 'ESTMON200MM', db_ss: 'ESTMON200SS', db_hs: 'ESTMON200HS' },
+            { prefix: 'SF_4x100m', mm: sf4x100mMmInput, ss: sf4x100mSsInput, hs: sf4x100mHsInput, enable: sf4x100mEnableCheckbox, db_mm: 'ESTMON400MM', db_ss: 'ESTMON400SS', db_hs: 'ESTMON400HS' },
+            { prefix: 'SF_4x200m', mm: sf4x200mMmInput, ss: sf4x200mSsInput, hs: sf4x200mHsInput, enable: sf4x200mEnableCheckbox, db_mm: 'ESTMON800MM', db_ss: 'ESTMON800SS', db_hs: 'ESTMON800HS' },
 
-        // Collect general athlete data
-        const formData = {
-            _token: $('meta[name="csrf-token"]').attr('content'), // Get CSRF token
-            gender: $('input[name="gender"]:checked').val(),
-            ku: kuSelect.val(),
-            nama_atlet: athlete.NAMAATLET,
-            asal: athlete.ASAL, // Assuming ASAL is available in athleteDetails
-            nama_club: athlete.NAMACLUB,
-            jenis_dom: athlete.JENISDOM,
-            nama_kota_dom: athlete.NAMAKOTADOM,
-            nama_prop_dom: athlete.NAMAPROPDOM,
-            sp: spValueForDatabase, // sp: athlete.SP,
-            tgl_lahir: athlete.TGLLAHIR,
-            nomor: 'Estafet', // Fixed value as requested
-            email: currentUserEmail, // User's email from Blade
-        };
+            { prefix: 'BF_4x50m', mm: bf4x50mMmInput, ss: bf4x50mSsInput, hs: bf4x50mHsInput, enable: bf4x50mEnableCheckbox, db_mm: 'ESTSUB200MM', db_ss: 'ESTSUB200SS', db_hs: 'ESTSUB200HS' },
+            { prefix: 'BF_4x100m', mm: bf4x100mMmInput, ss: bf4x100mSsInput, hs: bf4x100mHsInput, enable: bf4x100mEnableCheckbox, db_mm: 'ESTSUB400MM', db_ss: 'ESTSUB400SS', db_hs: 'ESTSUB400HS' },
+            { prefix: 'BF_4x200m', mm: bf4x200mMmInput, ss: bf4x200mSsInput, hs: bf4x200mHsInput, enable: bf4x200mEnableCheckbox, db_mm: 'ESTSUB800MM', db_ss: 'ESTSUB800SS', db_hs: 'ESTSUB800HS' },
 
-        // Process SF 50m time data
-        const sf4x50mTimeData = processTimeInputGroupData(
-            '50m', sf4x50mEnableCheckbox, sf4x50mMmInput, sf4x50mSsInput, sf4x50mHsInput
-        );
+            { prefix: 'SF_4x50mMix', mm: sf4x50mMixMmInput, ss: sf4x50mMixSsInput, hs: sf4x50mMixHsInput, enable: sf4x50mMixEnableCheckbox, db_mm: 'ESTMONM200MM', db_ss: 'ESTMONM200SS', db_hs: 'ESTMONM200HS' },
+            { prefix: 'SF_4x100mMix', mm: sf4x100mMixMmInput, ss: sf4x100mMixSsInput, hs: sf4x100mMixHsInput, enable: sf4x100mMixEnableCheckbox, db_mm: 'ESTMONM400MM', db_ss: 'ESTMONM400SS', db_hs: 'ESTMONM400HS' }, // Corrected to ESTMONM400
 
-        if (!sf4x50mTimeData.isValid) {
-            alert(sf4x50mTimeData.errorMessage);
+            { prefix: 'BF_4x50mMix', mm: bf4x50mMixMmInput, ss: bf4x50mMixSsInput, hs: bf4x50mMixHsInput, enable: bf4x50mMixEnableCheckbox, db_mm: 'ESTSUBM200MM', db_ss: 'ESTSUBM200SS', db_hs: 'ESTSUBM200HS' }, // Corrected to ESTSUBM200
+            { prefix: 'BF_4x100mMix', mm: bf4x100mMixMmInput, ss: bf4x100mMixSsInput, hs: bf4x100mMixHsInput, enable: bf4x100mMixEnableCheckbox, db_mm: 'ESTSUBM400MM', db_ss: 'ESTSUBM400SS', db_hs: 'ESTSUBM400HS' }, // Corrected to ESTSUBM400
+        ];
+
+        for (const group of timeGroups) {
+            const result = processTimeInputGroupData(group.prefix, group.enable, group.mm, group.ss, group.hs);
+            if (!result.isValid) {
+                alert(result.errorMessage);
+                return;
+            }
+            timeData[group.db_mm] = result.mm;
+            timeData[group.db_ss] = result.ss;
+            timeData[group.db_hs] = result.hs;
+        }
+
+        // 6. Fetch TGLLAHIR (KU end date) via AJAX
+        let tglLahirForDb = null;
+        try {
+            const response = await $.ajax({
+                url: '/form-a3/get-ku-end-date', // New endpoint for KU end date
+                method: 'GET',
+                data: { ku: ku },
+                dataType: 'json'
+            });
+
+            if (response.success && response.kuEndDate) {
+                tglLahirForDb = response.kuEndDate; // YYYY-MM-DD format
+                console.log('Fetched KU End Date:', tglLahirForDb);
+            } else {
+                alert('Gagal mendapatkan tanggal akhir KU. Silakan coba lagi.');
+                console.error('Failed to fetch KU end date:', response.message);
+                return;
+            }
+        } catch (error) {
+            console.error('AJAX Error fetching KU End Date:', error.responseText);
+            alert('Terjadi kesalahan jaringan saat mendapatkan tanggal akhir KU.');
             return;
         }
 
-        // Add SF 50m data to formData
-        formData.MON50MM = sf4x50mTimeData.mm;
-        formData.MON50SS = sf4x50mTimeData.ss;
-        formData.MON50HS = sf4x50mTimeData.hs;
+        // 7. Construct final formData object
+        const formData = {
+            _token: $('meta[name="csrf-token"]').attr('content'),
+            KU: ku,
+            GENDER: genderForDb,
+            GENDERMIX: genderMixForDb,
+            NAMAATLET: namaRegu, // NAMAATLET column stores Nama Regu for Estafet
+            SP: spValueForDatabase,
+            NOMOR: 'Estafet', // Fixed value for Estafet form
+            email: currentUserEmail,
+            TGLLAHIR: tglLahirForDb, // Populated from MstKU table
 
-        // You would repeat this for SF 100m, SF 200m, SF 400m, SF 800m, SF 1500m etc.
-        // For example:
-        // const sf4x100mTimeData = processTimeInputGroupData(
-        //     '100m', sf4x100mEnableCheckbox, sf4x100mMmInput, sf4x100mSsInput, sf4x100mHsInput
-        // );
-        // if (!sf4x100mTimeData.isValid) { alert(sf4x100mTimeData.errorMessage); return; }
-        // formData.MON100MM = sf4x100mTimeData.mm;
-        // formData.MON100SS = sf4x100mTimeData.ss;
-        // formData.MON100HS = sf4x100mTimeData.hs;
+            // Add all processed time data
+            ...timeData,
 
+            // User's kontingen details (assuming these are available globally from Blade)
+            // These will be filled by the controller based on JNSKOMPETISI logic
+            // We send them as is, and the controller will decide how to use them
+            JENISDOM: window.currentUserJenisDom, // Assuming these are passed from Blade
+            NAMAKOTADOM: window.currentUserNamaKotaDom,
+            NAMAPROPDOM: window.currentUserNamaPropDom,
+            NAMACLUB: window.currentUserNamaClub, // User's club name
+            ASAL: window.currentUserAsal, // User's asal (could be same as NAMACLUB or derived)
+        };
 
-        console.log('Data to be sent:', formData); // For debugging
+        console.log('Final Data to be sent:', formData);
 
-        const athleteNameForConfirmation = formData.nama_atlet; // Get the athlete's name
+        // 8. Confirmation popup
+        const confirmationMessage = `Yakin ingin menyimpan data regu ${namaRegu} (KU: ${ku}, Gender: ${gender})?`;
+        if (confirm(confirmationMessage)) {
+            console.log('User confirmed. Sending data...');
 
-        const confirmationMessage = `Yakin ingin menyimpan data ${athleteNameForConfirmation}?`;
-
-        if (confirm(confirmationMessage)) { // Show the confirmation popup
-            console.log('User confirmed. Data to be sent:', formData); // For debugging AFTER confirmation
-
-            // Send data via AJAX
+            // 9. Send data via AJAX to saveEstafet endpoint
             $.ajax({
                 url: $('#form-a3-estafet').attr('action'), // Get URL from form action
                 method: 'POST',
@@ -506,7 +540,6 @@ $(document).ready(function () {
                         alert(response.message);
                         location.reload(); // Reload page after success
                     } else {
-                        // Handle server-side validation errors or custom messages
                         let errorMessage = response.message || 'Gagal menyimpan data.';
                         if (response.errors) {
                             for (const field in response.errors) {
@@ -518,7 +551,6 @@ $(document).ready(function () {
                     }
                 },
                 error: function (xhr) {
-                    // Handle AJAX request errors (network issues, 500 errors, etc.)
                     console.error('AJAX Error:', xhr.responseText);
                     let errorMessage = 'Terjadi kesalahan saat menyimpan data.';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
@@ -533,7 +565,6 @@ $(document).ready(function () {
                 }
             });
         } else {
-            // User clicked 'Cancel' on the confirmation
             alert('Penyimpanan data dibatalkan.');
             console.log('Data submission cancelled by user.');
         }
@@ -666,7 +697,7 @@ $(document).ready(function () {
     });
 
     // --- Event listener for the HAPUS button ---
-    hapusButton.on('click', function (e) {
+    hapusReguButton.on('click', function (e) {
         e.preventDefault();
 
         const idA3 = selectedA3IdInput.val();

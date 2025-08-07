@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/form-a3/nomor-estafet', [FormA3Controller::class, 'indexEstafet'])->name('form_a3.nomorEstafet');
     // Route::post('/form-a3/nomor-estafet/get-event-options', [FormA3Controller::class, 'getEstafetEvents']);
     Route::get('/form-a3/nomor-estafet/get-estafet-events', [FormA3Controller::class, 'getEstafetEvents']);
+    Route::get('/form-a3/get-ku-end-date', [FormA3Controller::class, 'getKuEndDate'])->name('form_a3.getKuEndDate');
     Route::post('/form-a3/save-estafet', [FormA3Controller::class, 'saveEstafet'])->name('form_a3.saveEstafet');
     Route::delete('/form-a3/delete-estafet/{id}', [FormA3Controller::class, 'deleteEstafet'])->name('form-a3.deleteEstafet');
 });
