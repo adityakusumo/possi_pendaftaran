@@ -561,6 +561,10 @@ class FormA3Controller extends Controller
                 'ESTSUBM400HS' => ['nullable', 'integer', 'min:0', 'max:99'],
             ]);
 
+            // Assumes a single active competition record is the first one found
+            $kompetisi = Kompetisi::first();
+            $jnsKompetisi = $kompetisi->JNSKOMPETISI ?? 'C'; // Default to 'C' if no record found
+
             // 2. Prepare data for insertion/update
             $dataToSave = $request->only([
                 'KU',
@@ -605,32 +609,32 @@ class FormA3Controller extends Controller
             ]);
 
             // 3. Handle NAMACLUB and ASAL based on JNSKOMPETISI
-            $jnsKompetisi = $user->JNSKOMPETISI ?? 'C'; // Default to 'C' if not set
             $namaclub = '';
             $asal = '';
 
             if ($jnsKompetisi === 'K') {
-                $namaclub = ($user->JENISDOM ?? '') . '.' . ($user->NAMAKOTADOM ?? '');
-                $asal = $namaclub; // ASAL is same as NAMACLUB
+                $namaclub = ($user->JENISDOM ?? '') . '. ' . ($user->NAMAKOTADOM ?? '');
+                $asal = $namaclub;
+                if (($user->JENISDOM ?? '') === 'KOTA') {
+                    $namaclub = 'KOTA ' . ($user->NAMAKOTADOM ?? '');
+                    $asal = $namaclub;
+                }
             } elseif ($jnsKompetisi === 'C') {
                 $namaclub = $user->NAMACLUB ?? '';
-                $asal = $namaclub; // ASAL is same as NAMACLUB
+                $asal = $namaclub;
             } elseif ($jnsKompetisi === 'P') {
                 $namaclub = $user->NAMAPROPDOM ?? '';
-                $asal = $namaclub; // ASAL is same as NAMACLUB
-            }
-            // If JNSKOMPETISI is 'K', and JENISDOM is 'KOTA', then it's 'KOTA SURABAYA'
-            if ($jnsKompetisi === 'K' && ($user->JENISDOM ?? '') === 'KOTA') {
-                $namaclub = 'KOTA ' . ($user->NAMAKOTADOM ?? '');
                 $asal = $namaclub;
             }
 
-
-            $dataToSave['NAMACLUB'] = $namaclub;
-            $dataToSave['ASAL'] = $asal;
-            $dataToSave['JENISDOM'] = $user->JENISDOM ?? null;
-            $dataToSave['NAMAKOTADOM'] = $user->NAMAKOTADOM ?? null;
-            $dataToSave['NAMAPROPDOM'] = $user->NAMAPROPDOM ?? null;
+            $dataToSave['KU'] = Str::upper($request->KU);
+            $dataToSave['GENDER'] = Str::upper($request->GENDER);
+            $dataToSave['NAMAATLET'] = Str::upper($request->NAMAATLET);
+            $dataToSave['NAMACLUB'] = Str::upper($namaclub);
+            $dataToSave['ASAL'] = Str::upper($asal);
+            $dataToSave['JENISDOM'] = Str::upper($user->JENISDOM ?? '');
+            $dataToSave['NAMAKOTADOM'] = Str::upper($user->NAMAKOTADOM ?? '');
+            $dataToSave['NAMAPROPDOM'] = Str::upper($user->NAMAPROPDOM ?? '');
 
 
             // 4. Define the attributes to find a matching record (upsert criteria)

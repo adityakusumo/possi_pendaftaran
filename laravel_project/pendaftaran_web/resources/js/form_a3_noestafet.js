@@ -570,6 +570,42 @@ $(document).ready(function () {
         }
     });
 
+    // Array of all event prefixes based on your Blade view IDs
+    const eventPrefixes = [
+        'SF_4x50m', 'SF_4x100m', 'SF_4x200m',
+        'BF_4x50m', 'BF_4x100m', 'BF_4x200m',
+        'SF_4x50mMix', 'SF_4x100mMix', 'SF_4x200mMix',
+        'BF_4x50mMix', 'BF_4x100mMix', 'BF_4x200mMix',
+        // Add all other event prefixes here as needed
+        // 'BF_4x50m', 'SF_4x50m', 'BF_4x100m', 'SF_4x100m', etc.
+    ];
+
+    eventPrefixes.forEach(function (prefix) {
+        const checkboxId = '#' + prefix + '_enable_time_chkbx';
+        const timeFieldsId = '#' + prefix + '_time_fields';
+
+        const checkbox = $(checkboxId);
+        const timeFields = $(timeFieldsId);
+        const timeInputs = timeFields.find('input[type="text"]');
+
+        // Attach a change event listener to each checkbox
+        checkbox.on('change', function () {
+            if ($(this).is(':checked')) {
+                // If checked, show the time fields and enable the inputs
+                timeFields.removeClass('hidden');
+                timeInputs.prop('disabled', false);
+            } else {
+                // If not checked, hide the time fields, disable inputs, and clear values
+                timeFields.addClass('hidden');
+                timeInputs.prop('disabled', true);
+                timeInputs.val('');
+            }
+        });
+
+        // Run the change event on page load to set the initial state
+        checkbox.trigger('change');
+    });
+
     // Function to set radio button value
     function setRadioValue(name, value) {
         $(`input[name="${name}"][value="${value}"]`).prop('checked', true);
