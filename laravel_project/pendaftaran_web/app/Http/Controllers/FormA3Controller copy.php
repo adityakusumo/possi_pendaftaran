@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\View\View; // Import View class
 use Illuminate\Support\Facades\Auth; // For Auth::user()
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use App\Models\Kompetisi; // Assuming you have a Kompetisi model
 use App\Models\MstPeserta;
 use App\Models\MstKU;
@@ -38,17 +40,25 @@ class FormA3Controller extends Controller
         $userEmail = $user->email;
         // This list will be populated by the "Daftar Entri" table on the right
         $daftarEntriList = \App\Models\A3::where('email', $userEmail)
+            ->where('NOMOR', 'Perorangan')
             ->orderBy('GENDER', 'asc')    // Sort by GENDER first
             ->orderBy('NAMAATLET', 'asc') // Then by NAMAATLET
             ->get();
 
-        // Kontingen Summary data
+        // --- ADAPTED PART: ACTIVATE KONTINGEN SUMMARY SECTION ---
+        // Base query for counting entries for the current user and 'Perorangan'
+        $baseSummaryQuery = A3::where('email', $userEmail)
+            ->where('NOMOR', 'Perorangan');
+
         $kontingenSummary = [
-            'atletPa' => 0,
-            'atletPi' => 0,
-            'totalAtlet' => 0,
-            'totalSp' => 0,
+            'atletPa' => $baseSummaryQuery->clone()->where('GENDER', 'PA')->count(),
+            'atletPi' => $baseSummaryQuery->clone()->where('GENDER', 'PI')->count(),
+            'totalAtlet' => $baseSummaryQuery->clone()->count(),
+            'totalSp' => $baseSummaryQuery->clone()->where('SP', 1)->count(), // Assuming 'SP' is stored as 1
         ];
+
+        Log::info('Kontingen Summary Data:', $kontingenSummary);
+        // --- END OF ADAPTED PART ---
 
         // You might fetch competition data here if needed for specific logic
         $kompetisi = Kompetisi::first(); // Or based on a specific competition ID
@@ -84,13 +94,26 @@ class FormA3Controller extends Controller
                 'NAMAKOTADOM' => $atlet->NAMAKOTADOM,
                 'NAMAPROPDOM' => $atlet->NAMAPROPDOM,
                 'SP' => $atlet->SP,
-                'TGLLAHIR' => $atlet->TGLLAHIR, // <-- MAKE SURE THIS LINE IS PRESENT
+                'TGLLAHIR' => Carbon::parse($atlet->TGLLAHIR)->toDateString(), // <-- MAKE SURE THIS LINE IS PRESENT
                 'ASAL' => $atlet->ASAL,       // <-- MAKE SURE THIS LINE IS PRESENT
                 // Add any other fields you might need for auto-filling later (e.g., TGLLAHIR, EXPIRED)
             ];
         }
 
         Log::info('Final atletDetailsForJs sent to view: ' . json_encode($atletDetailsForJs)); // <--- Log the final array
+
+        // Fetch A3 entries for the current user
+        // Select only the columns needed for matching (NAMAATLET, GENDER, TGLLAHIR, email)
+        $existingA3Entries = A3::where('email', $userEmail)
+            ->select('NAMAATLET', 'GENDER', 'TGLLAHIR', 'email')
+            ->get()
+            ->map(function ($entry) {
+                // Ensure TGLLAHIR is also formatted as YYYY-MM-DD for consistent matching
+                $entry->TGLLAHIR = Carbon::parse($entry->TGLLAHIR)->toDateString();
+                return $entry;
+            });
+
+        Log::info('Existing A3 entries for user (for filtering): ' . json_encode($existingA3Entries));
 
         // Pass data to the view
         return view('form_a3_noperorangan', compact(
@@ -101,7 +124,8 @@ class FormA3Controller extends Controller
             'daftarEntriList',
             'kontingenSummary',
             'NamaAtletList', // For the Blade dropdown
-            'atletDetailsForJs' // For JavaScript to read
+            'atletDetailsForJs', // For JavaScript to read
+            'existingA3Entries',
         ));
     }
 
@@ -226,5 +250,463 @@ class FormA3Controller extends Controller
         }
     }
 
+    public function deletePerorangan(Request $request, $id)
+    {
+        // 1. Get the authenticated user's email for a security check
+        $currentUserEmail = Auth::user()->email;
+
+        try {
+            // 2. Find the A3 record by its ID and the current user's email
+            $a3Record = A3::where('IDA3P', $id)
+                ->where('email', $currentUserEmail)
+                ->first();
+
+            // 3. Check if the record exists and belongs to the user
+            if (!$a3Record) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data tidak ditemukan atau Anda tidak memiliki izin untuk menghapusnya.'
+                ], 404); // 404 Not Found
+            }
+
+            // 4. Delete the record
+            $a3Record->delete();
+
+            // 5. Log and return a success response
+            Log::info("A3 record with IDA3P={$id} deleted by user {$currentUserEmail}.");
+            return response()->json([
+                'success' => true,
+                'message' => "Data {$a3Record->NAMAATLET} berhasil dihapus."
+            ]);
+        } catch (\Exception $e) {
+            // Handle any exceptions (e.g., database error)
+            Log::error('Error deleting A3 data: ' . $e->getMessage(), ['id' => $id, 'user_email' => $currentUserEmail]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server saat menghapus data.'
+            ], 500); // 500 Internal Server Error
+        }
+    }
+
     // You will add other methods (e.g., savePerorangan, deletePerorangan, searchAtlet) here later
+
+    /**
+     * Fetches the LAHIRSAMPAI date for a given KU from MstKU table.
+     */
+    public function getKuEndDate(Request $request)
+    {
+        $request->validate([
+            'ku' => 'required|string|max:30', // Validate KU
+        ]);
+
+        $ku = trim(strtoupper($request->input('ku')));
+
+        try {
+            $mstKuEntry = MstKU::where('KU', $ku)->first();
+
+            if ($mstKuEntry && $mstKuEntry->LAHIRSAMPAI) {
+                // Return date in YYYY-MM-DD format
+                $kuEndDate = Carbon::parse($mstKuEntry->LAHIRSAMPAI)->toDateString();
+                return response()->json(['success' => true, 'kuEndDate' => $kuEndDate]);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Tanggal akhir KU tidak ditemukan.'], 404);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error fetching KU end date: ' . $e->getMessage(), ['ku' => $ku]);
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan server.'], 500);
+        }
+    }
+
+    public function indexEstafet(): View
+    {
+        $user = Auth::user();
+
+        // If user is not authenticated, redirect to login
+        if (!$user) {
+            return redirect()->route('login')->withErrors('Silakan masuk untuk melanjutkan.');
+        }
+
+        // --- Data for the view (initialize as empty or default) ---
+        // These will be populated as you implement the actual logic for Form A3
+        $clubName = $user->NAMACLUB ?? 'Nama Club User'; // Example: Get from authenticated user
+        $kotaKab = $user->NAMAKOTADOM ?? 'Kota/Kab User'; // Example: Get from authenticated user
+        $propinsi = $user->NAMAPROPDOM ?? 'Propinsi User'; // Example: Get from authenticated user
+        $negara = 'INDONESIA'; // Default
+
+        $userEmail = $user->email;
+        // This list will be populated by the "Daftar Entri" table on the right
+        $daftarEntriList = \App\Models\A3::where('email', $userEmail)
+            ->where('NOMOR', 'Estafet')
+            ->orderBy('GENDER', 'asc')    // Sort by GENDER first
+            ->orderBy('NAMAATLET', 'asc') // Then by NAMAATLET
+            ->get();
+
+        // --- ADAPTED PART: ACTIVATE KONTINGEN SUMMARY SECTION ---
+        // Base query for counting entries for the current user and 'Perorangan'
+        $baseSummaryQuery = A3::where('email', $userEmail)
+            ->where('NOMOR', 'Estafet');
+
+        $kontingenSummary = [
+            'atletPa' => $baseSummaryQuery->clone()->where('GENDER', 'PA')->count(),
+            'atletPi' => $baseSummaryQuery->clone()->where('GENDER', 'PI')->count(),
+            'totalAtlet' => $baseSummaryQuery->clone()->count(),
+            'totalSp' => $baseSummaryQuery->clone()->where('SP', 1)->count(), // Assuming 'SP' is stored as 1
+        ];
+
+        Log::info('Kontingen Summary Data:', $kontingenSummary);
+        // --- END OF ADAPTED PART ---
+
+        // You might fetch competition data here if needed for specific logic
+        $kompetisi = Kompetisi::first(); // Or based on a specific competition ID
+
+        // $AtletData = Atlet::orderBy('NAMAATLET', 'asc')->get()->toArray();
+        // $NamaAtletList = array_column($AtletData, 'NAMAATLET', 'NAMAATLET');
+
+        // Fetch all relevant Atlet data for the dropdown and JavaScript processing
+        // Filter by the current user's updated_by, similar to Form A1, if that's the logic.
+        // Or fetch all if it's a global list. Assuming it's based on the user's entries.
+        $userID = $user->id;
+        $allAtletData = Atlet::where('updated_by', $userID) // Or remove this filter if all athletes are selectable
+            ->orderBy('NAMAATLET', 'asc')
+            ->get(); // Get all records, not just names
+
+        Log::info('Result of Atlet query (allAtletData): ' . $allAtletData->toJson()); // <--- Log the query result
+
+
+        // Prepare data for the dropdown (just name and IDATLET as value)
+        // And prepare a JavaScript-friendly array of full athlete details
+        $NamaAtletList = [];
+        $atletDetailsForJs = []; // This will hold the full details for JS
+        foreach ($allAtletData as $atlet) {
+            $NamaAtletList[$atlet->IDATLET] = $atlet->NAMAATLET; // Use IDATLET as value for dropdown
+            $atletDetailsForJs[$atlet->IDATLET] = [ // Store full details keyed by IDATLET
+                'IDATLET' => $atlet->IDATLET,
+                'NONIAS' => $atlet->NONIAS,
+                'NAMAATLET' => $atlet->NAMAATLET,
+                'GENDER' => $atlet->GENDER,
+                'KU' => $atlet->KU,
+                'NAMACLUB' => $atlet->NAMACLUB,
+                'JENISDOM' => $atlet->JENISDOM,
+                'NAMAKOTADOM' => $atlet->NAMAKOTADOM,
+                'NAMAPROPDOM' => $atlet->NAMAPROPDOM,
+                'SP' => $atlet->SP,
+                'TGLLAHIR' => Carbon::parse($atlet->TGLLAHIR)->toDateString(), // <-- MAKE SURE THIS LINE IS PRESENT
+                'ASAL' => $atlet->ASAL,       // <-- MAKE SURE THIS LINE IS PRESENT
+                // Add any other fields you might need for auto-filling later (e.g., TGLLAHIR, EXPIRED)
+            ];
+        }
+
+        Log::info('Final atletDetailsForJs sent to view: ' . json_encode($atletDetailsForJs)); // <--- Log the final array
+
+        // Fetch A3 entries for the current user
+        // Select only the columns needed for matching (NAMAATLET, GENDER, TGLLAHIR, email)
+        $existingA3Entries = A3::where('email', $userEmail)
+            ->select('NAMAATLET', 'GENDER', 'TGLLAHIR', 'email')
+            ->get()
+            ->map(function ($entry) {
+                // Ensure TGLLAHIR is also formatted as YYYY-MM-DD for consistent matching
+                $entry->TGLLAHIR = Carbon::parse($entry->TGLLAHIR)->toDateString();
+                return $entry;
+            });
+
+        Log::info('Existing A3 entries for user (for filtering): ' . json_encode($existingA3Entries));
+
+        // Pass data to the view
+        return view('form_a3_noestafet', compact(
+            'clubName',
+            'kotaKab',
+            'propinsi',
+            'negara',
+            'daftarEntriList',
+            'kontingenSummary',
+            'NamaAtletList', // For the Blade dropdown
+            'atletDetailsForJs', // For JavaScript to read
+            'existingA3Entries',
+        ));
+    }
+
+    public function getEstafetEvents(Request $request)
+    {
+        // Validate the incoming data
+        $request->validate([
+            'ku' => 'required|string',
+            'gender' => 'required|string',
+        ]);
+
+        $ku = trim(strtoupper($request->input('ku')));
+        $gender = trim(strtoupper($request->input('gender')));
+
+        // Query the tSyaratPrestasi table
+        try {
+            $query = DB::table('tSyaratPrestasi')
+                ->where('KU', $ku)
+                ->where('GAYA', 'LIKE', '%Estafet%');
+
+            // --- NEW LOGIC FOR MIX GENDER ---
+            // If the user selected 'MIX', we only show GAYA that contains 'Mix'.
+            if ($gender === 'MIX') {
+                $query->where('GAYA', 'LIKE', '%Mix%');
+            }
+            // If the user selected 'PA' or 'PI', we show GAYA that matches the gender
+            // AND does not contain 'Mix'.
+            else {
+                $query->where('GENDER', $gender)
+                    ->where('GAYA', 'NOT LIKE', '%Mix%');
+            }
+            // --- END OF NEW LOGIC ---
+
+            $events = $query->pluck('GAYA')
+                ->map(function ($gaya) {
+                    $normalized = '';
+                    $gayaLower = strtolower($gaya);
+
+                    // 1. Determine the style prefix (BF or SF)
+                    if (Str::contains($gayaLower, 'bifin')) {
+                        $normalized .= 'BF_';
+                    } elseif (Str::contains($gayaLower, 'surface')) {
+                        $normalized .= 'SF_';
+                    }
+
+                    // 2. Extract and normalize the distance (e.g., '4x50m')
+                    if (preg_match('/(\d+\s*x\s*\d+\s*m)/', $gayaLower, $matches)) {
+                        $distance = str_replace(' ', '', $matches[1]);
+                        $normalized .= $distance;
+                    }
+
+                    // 3. Add 'Mix' if applicable
+                    if (Str::contains($gayaLower, 'mix')) {
+                        $normalized .= 'Mix';
+                    }
+
+                    return $normalized;
+                })
+                ->unique()
+                ->values();
+
+            Log::info('Fetched Estafet Events:', ['ku' => $ku, 'gender' => $gender, 'events' => $events->toArray()]);
+
+            return response()->json([
+                'success' => true,
+                'events' => $events
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting estafet events: ' . $e->getMessage(), ['ku' => $ku, 'gender' => $gender]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server saat mencari acara.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Saves or updates an Estafet (relay) entry in the A3 table.
+     */
+    public function saveEstafet(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not authenticated.'], 401);
+        }
+
+        try {
+            // 1. Server-side Validation
+            $request->validate([
+                'KU' => ['required', 'string', 'max:255'],
+                'GENDER' => ['required', 'string', 'in:PA,PI'], // GENDER will be PA/PI only
+                'GENDERMIX' => ['required', 'integer', 'in:0,1'], // GENDERMIX will be 0 or 1
+                'NAMAATLET' => ['required', 'string', 'max:255'], // This is Nama Regu
+                'SP' => ['required', 'integer', 'in:0,1'],
+                'NOMOR' => ['required', 'string', 'in:Estafet'],
+                'email' => ['required', 'email', 'max:255'],
+                'TGLLAHIR' => ['required', 'date'], // KU End Date
+
+                // User's kontingen details (nullable if not always present)
+                'JENISDOM' => ['nullable', 'string', 'max:255'],
+                'NAMAKOTADOM' => ['nullable', 'string', 'max:255'],
+                'NAMAPROPDOM' => ['nullable', 'string', 'max:255'],
+
+                // Time fields validation (all are nullable integers)
+                'ESTMON200MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON200SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON200HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON400MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON400SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON400HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON800MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON800SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMON800HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+
+                'ESTSUB200MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB200SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB200HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB400MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB400SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB400HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB800MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB800SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUB800HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+
+                'ESTMONM200MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMONM200SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMONM200HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMONM400MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMONM400SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTMONM400HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+
+                'ESTSUBM200MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUBM200SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUBM200HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUBM400MM' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUBM400SS' => ['nullable', 'integer', 'min:0', 'max:99'],
+                'ESTSUBM400HS' => ['nullable', 'integer', 'min:0', 'max:99'],
+            ]);
+
+            // Assumes a single active competition record is the first one found
+            $kompetisi = Kompetisi::first();
+            $jnsKompetisi = $kompetisi->JNSKOMPETISI ?? 'C'; // Default to 'C' if no record found
+
+            // 2. Prepare data for insertion/update
+            $dataToSave = $request->only([
+                'KU',
+                'GENDER',
+                'GENDERMIX',
+                'NAMAATLET',
+                'SP',
+                'NOMOR',
+                'email',
+                'TGLLAHIR',
+                // Time fields
+                'ESTMON200MM',
+                'ESTMON200SS',
+                'ESTMON200HS',
+                'ESTMON400MM',
+                'ESTMON400SS',
+                'ESTMON400HS',
+                'ESTMON800MM',
+                'ESTMON800SS',
+                'ESTMON800HS',
+                'ESTSUB200MM',
+                'ESTSUB200SS',
+                'ESTSUB200HS',
+                'ESTSUB400MM',
+                'ESTSUB400SS',
+                'ESTSUB400HS',
+                'ESTSUB800MM',
+                'ESTSUB800SS',
+                'ESTSUB800HS',
+                'ESTMONM200MM',
+                'ESTMONM200SS',
+                'ESTMONM200HS',
+                'ESTMONM400MM',
+                'ESTMONM400SS',
+                'ESTMONM400HS',
+                'ESTSUBM200MM',
+                'ESTSUBM200SS',
+                'ESTSUBM200HS',
+                'ESTSUBM400MM',
+                'ESTSUBM400SS',
+                'ESTSUBM400HS',
+            ]);
+
+            // 3. Handle NAMACLUB and ASAL based on JNSKOMPETISI
+            $namaclub = '';
+            $asal = '';
+
+            if ($jnsKompetisi === 'K') {
+                $namaclub = ($user->JENISDOM ?? '') . '. ' . ($user->NAMAKOTADOM ?? '');
+                $asal = $namaclub;
+                if (($user->JENISDOM ?? '') === 'KOTA') {
+                    $namaclub = 'KOTA ' . ($user->NAMAKOTADOM ?? '');
+                    $asal = $namaclub;
+                }
+            } elseif ($jnsKompetisi === 'C') {
+                $namaclub = $user->NAMACLUB ?? '';
+                $asal = $namaclub;
+            } elseif ($jnsKompetisi === 'P') {
+                $namaclub = $user->NAMAPROPDOM ?? '';
+                $asal = $namaclub;
+            }
+
+            $dataToSave['KU'] = Str::upper($request->KU);
+            $dataToSave['GENDER'] = Str::upper($request->GENDER);
+            $dataToSave['NAMAATLET'] = Str::upper($request->NAMAATLET);
+            $dataToSave['NAMACLUB'] = Str::upper($namaclub);
+            $dataToSave['ASAL'] = Str::upper($asal);
+            $dataToSave['JENISDOM'] = Str::upper($user->JENISDOM ?? '');
+            $dataToSave['NAMAKOTADOM'] = Str::upper($user->NAMAKOTADOM ?? '');
+            $dataToSave['NAMAPROPDOM'] = Str::upper($user->NAMAPROPDOM ?? '');
+
+
+            // 4. Define the attributes to find a matching record (upsert criteria)
+            $matchCriteria = [
+                'NAMAATLET' => $request->NAMAATLET, // Nama Regu
+                'KU' => $request->KU,
+                'GENDER' => $request->GENDER,
+                'GENDERMIX' => $request->GENDERMIX,
+                'NOMOR' => 'Estafet',
+                'email' => $request->email,
+            ];
+
+            // 5. Use updateOrCreate to either update the existing record or create a new one
+            $a3Record = A3::updateOrCreate($matchCriteria, $dataToSave);
+
+            // 6. Log and return success response
+            if ($a3Record->wasRecentlyCreated) {
+                Log::info('New A3 Estafet record created:', $dataToSave);
+                return response()->json(['success' => true, 'message' => 'Data regu estafet berhasil disimpan!']);
+            } else {
+                Log::info('Existing A3 Estafet record updated:', $dataToSave);
+                return response()->json(['success' => true, 'message' => 'Data regu estafet berhasil diperbarui!']);
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation Error saving A3 Estafet data: ' . $e->getMessage(), $e->errors());
+            return response()->json(['success' => false, 'message' => 'Validasi gagal', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Error saving A3 Estafet data: ' . $e->getMessage(), $request->all());
+            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan server saat menyimpan data.'], 500);
+        }
+    }
+
+    /**
+     * Deletes a specific estafet record from the A3 table.
+     */
+    public function deleteEstafet(Request $request, $id)
+    {
+        // 1. Get the authenticated user's email for a security check
+        $currentUserEmail = Auth::user()->email;
+
+        try {
+            // 2. Find the A3 record by its ID, the current user's email,
+            //    and ensure it is an 'Estafet' record.
+            $a3Record = A3::where('IDA3P', $id) // Use IDA3P as per your perorangan method
+                ->where('email', $currentUserEmail)
+                ->where('NOMOR', 'Estafet')
+                ->first();
+
+            // 3. Check if the record exists and belongs to the user
+            if (!$a3Record) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data estafet tidak ditemukan atau Anda tidak memiliki izin untuk menghapusnya.'
+                ], 404); // 404 Not Found
+            }
+
+            // 4. Delete the record
+            $a3Record->delete();
+
+            // 5. Log and return a success response
+            Log::info("A3 Estafet record with ID={$id} deleted by user {$currentUserEmail}.");
+            return response()->json([
+                'success' => true,
+                'message' => "Data regu {$a3Record->NAMAATLET} berhasil dihapus."
+            ]);
+        } catch (\Exception $e) {
+            // Handle any exceptions (e.g., database error)
+            Log::error('Error deleting A3 Estafet data: ' . $e->getMessage(), ['id' => $id, 'user_email' => $currentUserEmail]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server saat menghapus data.'
+            ], 500); // 500 Internal Server Error
+        }
+    }
 }

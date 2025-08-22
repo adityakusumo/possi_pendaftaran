@@ -326,49 +326,61 @@ class FormA3Controller extends Controller
             return redirect()->route('login')->withErrors('Silakan masuk untuk melanjutkan.');
         }
 
-        // --- Data for the view (initialize as empty or default) ---
-        // These will be populated as you implement the actual logic for Form A3
-        $clubName = $user->NAMACLUB ?? 'Nama Club User'; // Example: Get from authenticated user
-        $kotaKab = $user->NAMAKOTADOM ?? 'Kota/Kab User'; // Example: Get from authenticated user
-        $propinsi = $user->NAMAPROPDOM ?? 'Propinsi User'; // Example: Get from authenticated user
-        $negara = 'INDONESIA'; // Default
+        $currentUserEmail = $user->email;
 
-        $userEmail = $user->email;
+        // Fetch user's MstPeserta data for default form values
+        $mstPesertaData = MstPeserta::where('email', $currentUserEmail)->first();
+
+        $kotaKab = Str::upper($mstPesertaData->JENISDOM ?? '');
+        $namaKotaKab = Str::upper($mstPesertaData->NAMAKOTADOM ?? '');
+        $propinsi = Str::upper($mstPesertaData->NAMAPROPDOM ?? '');
+        $negara = Str::upper($mstPesertaData->NAMANEGDOM ?? 'INDONESIA'); // Default to INDONESIA
+
+        // Fetch Competition data for radio button defaults
+        $kompetisi = Kompetisi::first(); // Assumes there's one active competition record
+
+        $defaultSpType = 'BEBAS'; // Default if WAJIBNIAS is not 1
+        if (($kompetisi->WAJIBNIAS ?? 0) == 1) { // WAJIBNIAS (0 or 1)
+            $defaultSpType = 'SP_TANPA_NIAS';
+        }
+
+        $defaultCompetitionType = 'ANTAR_PROPINSI'; // Default if JNSKOMPETISI is not K or C
+        $jnsKompetisi = Str::upper($kompetisi->JNSKOMPETISI ?? ''); // Ensure uppercase
+        if ($jnsKompetisi === 'K') {
+            $defaultCompetitionType = 'ANTAR_KOTAKAB';
+        } elseif ($jnsKompetisi === 'C') {
+            $defaultCompetitionType = 'ANTAR_CLUB';
+        }
+
+
         // This list will be populated by the "Daftar Entri" table on the right
-        $daftarEntriList = \App\Models\A3::where('email', $userEmail)
-            ->where('NOMOR', 'Estafet')
-            ->orderBy('GENDER', 'asc')    // Sort by GENDER first
-            ->orderBy('NAMAATLET', 'asc') // Then by NAMAATLET
+        $daftarEntriList = A3::where('email', $currentUserEmail)
+            ->where('NOMOR', 'Estafet') // Only show Estafet entries
+            ->orderBy('KU', 'asc')
+            ->orderBy('NAMAATLET', 'asc')
             ->get();
 
-        // --- ADAPTED PART: ACTIVATE KONTINGEN SUMMARY SECTION ---
-        // Base query for counting entries for the current user and 'Perorangan'
-        $baseSummaryQuery = A3::where('email', $userEmail)
-            ->where('NOMOR', 'Estafet');
+        // Kontingen Summary data for Estafet
+        $baseSummaryQuery = A3::where('email', $currentUserEmail)
+            ->where('NOMOR', 'Estafet'); // Ensure it's for Estafet
 
         $kontingenSummary = [
             'atletPa' => $baseSummaryQuery->clone()->where('GENDER', 'PA')->count(),
             'atletPi' => $baseSummaryQuery->clone()->where('GENDER', 'PI')->count(),
             'totalAtlet' => $baseSummaryQuery->clone()->count(),
-            'totalSp' => $baseSummaryQuery->clone()->where('SP', 1)->count(), // Assuming 'SP' is stored as 1
+            'totalSp' => $baseSummaryQuery->clone()->where('SP', 1)->count(),
         ];
 
         Log::info('Kontingen Summary Data:', $kontingenSummary);
         // --- END OF ADAPTED PART ---
 
-        // You might fetch competition data here if needed for specific logic
-        $kompetisi = Kompetisi::first(); // Or based on a specific competition ID
-
-        // $AtletData = Atlet::orderBy('NAMAATLET', 'asc')->get()->toArray();
-        // $NamaAtletList = array_column($AtletData, 'NAMAATLET', 'NAMAATLET');
-
-        // Fetch all relevant Atlet data for the dropdown and JavaScript processing
-        // Filter by the current user's updated_by, similar to Form A1, if that's the logic.
-        // Or fetch all if it's a global list. Assuming it's based on the user's entries.
+        // Fetch all Atlet data for the dropdown (if used, though Estafet uses Nama Regu)
+        // If you are NOT using Atlet selection for Estafet, you can simplify this.
+        // Assuming NamaAtletList and atletDetailsForJs are still relevant for something else.
         $userID = $user->id;
-        $allAtletData = Atlet::where('updated_by', $userID) // Or remove this filter if all athletes are selectable
+        $allAtletData = Atlet::where('updated_by', $userID)
             ->orderBy('NAMAATLET', 'asc')
-            ->get(); // Get all records, not just names
+            ->get();
 
         Log::info('Result of Atlet query (allAtletData): ' . $allAtletData->toJson()); // <--- Log the query result
 
@@ -376,10 +388,10 @@ class FormA3Controller extends Controller
         // Prepare data for the dropdown (just name and IDATLET as value)
         // And prepare a JavaScript-friendly array of full athlete details
         $NamaAtletList = [];
-        $atletDetailsForJs = []; // This will hold the full details for JS
+        $atletDetailsForJs = [];
         foreach ($allAtletData as $atlet) {
-            $NamaAtletList[$atlet->IDATLET] = $atlet->NAMAATLET; // Use IDATLET as value for dropdown
-            $atletDetailsForJs[$atlet->IDATLET] = [ // Store full details keyed by IDATLET
+            $NamaAtletList[$atlet->IDATLET] = $atlet->NAMAATLET;
+            $atletDetailsForJs[$atlet->IDATLET] = [
                 'IDATLET' => $atlet->IDATLET,
                 'NONIAS' => $atlet->NONIAS,
                 'NAMAATLET' => $atlet->NAMAATLET,
@@ -390,21 +402,21 @@ class FormA3Controller extends Controller
                 'NAMAKOTADOM' => $atlet->NAMAKOTADOM,
                 'NAMAPROPDOM' => $atlet->NAMAPROPDOM,
                 'SP' => $atlet->SP,
-                'TGLLAHIR' => Carbon::parse($atlet->TGLLAHIR)->toDateString(), // <-- MAKE SURE THIS LINE IS PRESENT
-                'ASAL' => $atlet->ASAL,       // <-- MAKE SURE THIS LINE IS PRESENT
-                // Add any other fields you might need for auto-filling later (e.g., TGLLAHIR, EXPIRED)
+                'TGLLAHIR' => Carbon::parse($atlet->TGLLAHIR)->toDateString(),
+                'ASAL' => $atlet->ASAL,
             ];
         }
 
         Log::info('Final atletDetailsForJs sent to view: ' . json_encode($atletDetailsForJs)); // <--- Log the final array
 
-        // Fetch A3 entries for the current user
-        // Select only the columns needed for matching (NAMAATLET, GENDER, TGLLAHIR, email)
-        $existingA3Entries = A3::where('email', $userEmail)
+        // Existing A3 entries for user (for filtering dropdown, if you still have an atlet dropdown)
+        // For Estafet, if 'Nama Regu' is a text input, this might not be needed for filtering.
+        // If you're filtering a 'Nama Regu' dropdown, keep it.
+        $existingA3Entries = A3::where('email', $currentUserEmail)
+            ->where('NOMOR', 'Estafet') // Ensure this is filtered for Estafet
             ->select('NAMAATLET', 'GENDER', 'TGLLAHIR', 'email')
             ->get()
             ->map(function ($entry) {
-                // Ensure TGLLAHIR is also formatted as YYYY-MM-DD for consistent matching
                 $entry->TGLLAHIR = Carbon::parse($entry->TGLLAHIR)->toDateString();
                 return $entry;
             });
@@ -413,10 +425,12 @@ class FormA3Controller extends Controller
 
         // Pass data to the view
         return view('form_a3_noestafet', compact(
-            'clubName',
             'kotaKab',
+            'namaKotaKab',
             'propinsi',
             'negara',
+            'defaultSpType', // For SP_type radio button
+            'defaultCompetitionType', // For competition_type radio button
             'daftarEntriList',
             'kontingenSummary',
             'NamaAtletList', // For the Blade dropdown
@@ -664,6 +678,49 @@ class FormA3Controller extends Controller
         } catch (\Exception $e) {
             Log::error('Error saving A3 Estafet data: ' . $e->getMessage(), $request->all());
             return response()->json(['success' => false, 'message' => 'Terjadi kesalahan server saat menyimpan data.'], 500);
+        }
+    }
+
+    /**
+     * Deletes a specific estafet record from the A3 table.
+     */
+    public function deleteEstafet(Request $request, $id)
+    {
+        // 1. Get the authenticated user's email for a security check
+        $currentUserEmail = Auth::user()->email;
+
+        try {
+            // 2. Find the A3 record by its ID, the current user's email,
+            //    and ensure it is an 'Estafet' record.
+            $a3Record = A3::where('IDA3P', $id) // Use IDA3P as per your perorangan method
+                ->where('email', $currentUserEmail)
+                ->where('NOMOR', 'Estafet')
+                ->first();
+
+            // 3. Check if the record exists and belongs to the user
+            if (!$a3Record) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data estafet tidak ditemukan atau Anda tidak memiliki izin untuk menghapusnya.'
+                ], 404); // 404 Not Found
+            }
+
+            // 4. Delete the record
+            $a3Record->delete();
+
+            // 5. Log and return a success response
+            Log::info("A3 Estafet record with ID={$id} deleted by user {$currentUserEmail}.");
+            return response()->json([
+                'success' => true,
+                'message' => "Data regu {$a3Record->NAMAATLET} berhasil dihapus."
+            ]);
+        } catch (\Exception $e) {
+            // Handle any exceptions (e.g., database error)
+            Log::error('Error deleting A3 Estafet data: ' . $e->getMessage(), ['id' => $id, 'user_email' => $currentUserEmail]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server saat menghapus data.'
+            ], 500); // 500 Internal Server Error
         }
     }
 }

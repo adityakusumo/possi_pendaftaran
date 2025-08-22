@@ -105,45 +105,62 @@
                                         </div> -->
                                         <div>
                                             <label for="kota_kab" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Kota / Kab') }}</label>
-                                            <input type="text" id="kota_kab" name="kota_kab" readonly
+                                            <input type="text" id="kota_kab" name="kota_kab" value="{{ $kotaKab }}" readonly
                                                 class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         </div>
                                         <div class="col-span-2">
                                             <label for="nama_kota_kab" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Kota / Kab') }}</label>
-                                            <input type="text" id="nama_kota_kab" name="nama_kota_kab" readonly
+                                            <input type="text" id="nama_kota_kab" name="nama_kota_kab" value="{{ $namaKotaKab }}" readonly
                                                 class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         </div>
                                         <div>
                                             <label for="propinsi" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Propinsi') }}</label>
-                                            <input type="text" id="propinsi" name="propinsi" readonly
+                                            <input type="text" id="propinsi" name="propinsi" value="{{ $propinsi }}" readonly
                                                 class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         </div>
                                         <div>
                                             <label for="negara" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Negara') }}</label>
-                                            <input type="text" id="negara" name="negara" readonly
+                                            <input type="text" id="negara" name="negara" value="{{ $negara }}" readonly
                                                 class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         </div>
                                     </div>
                                     {{-- Competition Type Radios --}}
                                     <div class="mt-4 flex flex-wrap gap-4">
                                         <label class="inline-flex items-center">
-                                            <input type="radio" name="competition_type" value="SP_TANPA_NIAS" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                            <input type="radio" name="SP_type" value="SP_TANPA_NIAS"
+                                                {{ $defaultSpType === 'SP_TANPA_NIAS' ? 'checked' : '' }}
+                                                disabled
+                                                class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                             <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('SP Jika Tanpa NIAS') }}</span>
                                         </label>
                                         <label class="inline-flex items-center">
-                                            <input type="radio" name="competition_type" value="BEBAS" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                            <input type="radio" name="SP_type" value="BEBAS"
+                                                {{ $defaultSpType === 'BEBAS' ? 'checked' : '' }}
+                                                disabled
+                                                class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                             <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Bebas') }}</span>
                                         </label>
+                                    </div>
+                                    <div class="mt-4 flex flex-wrap gap-4">
                                         <label class="inline-flex items-center">
-                                            <input type="radio" name="competition_type" value="ANTAR_CLUB" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                            <input type="radio" name="competition_type" value="ANTAR_CLUB"
+                                                {{ $defaultCompetitionType === 'ANTAR_CLUB' ? 'checked' : '' }}
+                                                disabled
+                                                class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                             <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Antar Club') }}</span>
                                         </label>
                                         <label class="inline-flex items-center">
-                                            <input type="radio" name="competition_type" value="ANTAR_KOTAKAB" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                            <input type="radio" name="competition_type" value="ANTAR_KOTAKAB"
+                                                {{ $defaultCompetitionType === 'ANTAR_KOTAKAB' ? 'checked' : '' }}
+                                                disabled
+                                                class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                             <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Antar Kota/Kab') }}</span>
                                         </label>
                                         <label class="inline-flex items-center">
-                                            <input type="radio" name="competition_type" value="ANTAR_PROPINSI" class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
+                                            <input type="radio" name="competition_type" value="ANTAR_PROPINSI"
+                                                {{ $defaultCompetitionType === 'ANTAR_PROPINSI' ? 'checked' : '' }}
+                                                disabled
+                                                class="form-radio text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                             <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('Antar Propinsi') }}</span>
                                         </label>
                                     </div>
