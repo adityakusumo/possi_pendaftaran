@@ -180,7 +180,7 @@
                                         {{-- Row 1: SF 4x50m and SF 4x100m Group --}}
                                         <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mb-4"> {{-- New wrapper for the first row --}}
                                             {{-- SF 4x50m Group --}}
-                                            <div id="SF_4x50m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
+                                            <div id="SF_4x50m_container" class="gaya-container p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="SF_4x50m_enable_time_chkbx" name="SF_4x50m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                     <label for="SF_4x50m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x50m') }}</label>
@@ -205,7 +205,7 @@
                                             </div>
 
                                             {{-- SF 4x100m Group --}}
-                                            <div id="SF_4x100m_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
+                                            <div id="SF_4x100m_container" class="gaya-container p-2 hidden flex-1 sm:w-1/2 pl-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="SF_4x100m_enable_time_chkbx" name="SF_4x100m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                     <label for="SF_4x100m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x100m') }}</label>
@@ -233,7 +233,7 @@
                                         {{-- Row 2: SF 4x200m and SF 4x50mMix Group --}}
                                         <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mt-4"> {{-- New wrapper for the second row, added sm:mt-4 for spacing --}}
                                             {{-- SF 4x200m Group (Previously UW_200m_container, now SF_4x200m_container) --}}
-                                            <div id="SF_4x200m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
+                                            <div id="SF_4x200m_container" class="gaya-container p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="SF_4x200m_enable_time_chkbx" name="SF_4x200m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                     <label for="SF_4x200m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x200m') }}</label>
@@ -258,7 +258,7 @@
                                             </div>
 
                                             {{-- SF 4x50mMix Group (SF_4x50mMix_container) --}}
-                                            <div id="SF_4x50mMix_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
+                                            <div id="SF_4x50mMix_container" class="gaya-container p-2 hidden flex-1 sm:w-1/2 pl-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="SF_4x50mMix_enable_time_chkbx" name="SF_4x50mMix_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                     <label for="SF_4x50mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x50m Mix') }}</label>
@@ -286,7 +286,7 @@
                                         {{-- Row 3: SF 4x100mMix and SF 4x200mMix Group --}}
                                         <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mt-4"> {{-- New wrapper for the second row, added sm:mt-4 for spacing --}}
                                             {{-- SF 4x100mMix Group (Previously UW_800m_container, now SF_4x100mMix_container) --}}
-                                            <div id="SF_4x100mMix_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
+                                            <div id="SF_4x100mMix_container" class="gaya-container p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="SF_4x100mMix_enable_time_chkbx" name="SF_4x100mMix_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                     <label for="SF_4x100mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x100m Mix') }}</label>
@@ -311,7 +311,7 @@
                                             </div>
 
                                             {{-- SF 4x200mMix Group (Previously UW_1500m_container, now SF_4x200mMix_container) --}}
-                                            <div id="SF_4x200mMix_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
+                                            <div id="SF_4x200mMix_container" class="gaya-container p-2 hidden flex-1 sm:w-1/2 pl-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="SF_4x200mMix_enable_time_chkbx" name="SF_4x200mMix_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                     <label for="SF_4x200mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x200m Mix') }}</label>
@@ -346,7 +346,7 @@
                                         {{-- Row 1: BF 4x50m and BF 4x100m Group --}}
                                         <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mb-4"> {{-- New wrapper for the first row --}}
                                             {{-- BF 4x50m Group --}}
-                                            <div id="BF_4x50m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
+                                            <div id="BF_4x50m_container" class="gaya-container p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="BF_4x50m_enable_time_chkbx" name="BF_4x50m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                     <label for="BF_4x50m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x50m') }}</label>
@@ -371,7 +371,7 @@
                                             </div>
 
                                             {{-- BF 4x100m Group --}}
-                                            <div id="BF_4x100m_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
+                                            <div id="BF_4x100m_container" class="gaya-container p-2 hidden flex-1 sm:w-1/2 pl-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="BF_4x100m_enable_time_chkbx" name="BF_4x100m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                     <label for="BF_4x100m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x100m') }}</label>
@@ -399,7 +399,7 @@
                                         {{-- Row 2: BF 4x200m and BF 4x50mMix Group --}}
                                         <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mt-4"> {{-- New wrapper for the second row, added sm:mt-4 for spacing --}}
                                             {{-- BF 4x200m Group --}}
-                                            <div id="BF_4x200m_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
+                                            <div id="BF_4x200m_container" class="gaya-container p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="BF_4x200m_enable_time_chkbx" name="BF_4x200m_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                     <label for="BF_4x200m_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x200m') }}</label>
@@ -424,7 +424,7 @@
                                             </div>
 
                                             {{-- BF 4x50mMix Group --}}
-                                            <div id="BF_4x50mMix_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
+                                            <div id="BF_4x50mMix_container" class="gaya-container p-2 hidden flex-1 sm:w-1/2 pl-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="BF_4x50mMix_enable_time_chkbx" name="BF_4x50mMix_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                     <label for="BF_4x50mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x50m Mix') }}</label>
@@ -452,7 +452,7 @@
                                         {{-- Row 3: BF 4x100mMix and BF 4x200mMix Group --}}
                                         <div class="flex flex-col sm:flex-row justify-center items-start w-full sm:mt-4"> {{-- New wrapper for the third row, added sm:mt-4 for spacing --}}
                                             {{-- BF 4x100mMix Group --}}
-                                            <div id="BF_4x100mMix_container" class="p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
+                                            <div id="BF_4x100mMix_container" class="gaya-container p-2 hidden flex-1 sm:w-1/2 border-r sm:border-r border-gray-300 dark:border-gray-600 pr-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="BF_4x100mMix_enable_time_chkbx" name="BF_4x100mMix_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                     <label for="BF_4x100mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x100m Mix') }}</label>
@@ -477,7 +477,7 @@
                                             </div>
 
                                             {{-- BF 4x200mMix Group --}}
-                                            <div id="BF_4x200mMix_container" class="p-2 hidden flex-1 sm:w-1/2 pl-4">
+                                            <div id="BF_4x200mMix_container" class="gaya-container p-2 hidden flex-1 sm:w-1/2 pl-4">
                                                 <div class="flex items-center mb-4">
                                                     <input type="checkbox" id="BF_4x200mMix_enable_time_chkbx" name="BF_4x200mMix_enable_time_chkbx" class="form-checkbox text-indigo-600 dark:bg-gray-800 dark:border-gray-600 dark:checked:bg-indigo-600">
                                                     <label for="BF_4x200mMix_enable_time_chkbx" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('4x200m Mix') }}</label>

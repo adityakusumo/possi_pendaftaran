@@ -14,6 +14,7 @@ use App\Models\MstKU;
 use App\Models\NIAS;
 use App\Models\Atlet;
 use App\Models\A3;
+use App\Models\tSyaratPrestasi;
 use Carbon\Carbon;
 
 class FormA3Controller extends Controller
@@ -722,5 +723,60 @@ class FormA3Controller extends Controller
                 'message' => 'Terjadi kesalahan server saat menghapus data.'
             ], 500); // 500 Internal Server Error
         }
+    }
+
+    public function getEstafetGayas(Request $request)
+    {
+        $ku = Str::upper($request->input('ku'));
+        $gender = Str::upper($request->input('gender'));
+
+        // Define the base query
+        $query = tSyaratPrestasi::query();
+
+        if ($gender === 'MIX') {
+            // Logic for 'Mix' gender
+            $query->where(function ($q) {
+                $q->where('GAYA', 'like', '%Mix%')
+                    ->orWhere('GAYA', 'like', '%mix%')
+                    ->orWhere('GAYA', 'like', '%MIX%');
+            })
+                ->where('KU', $ku);
+        } else {
+            // Logic for 'PA' or 'PI' gender
+            $query->where(function ($q) {
+                $q->where('GAYA', 'not like', '%Mix%')
+                    ->where('GAYA', 'not like', '%mix%')
+                    ->where('GAYA', 'not like', '%MIX%');
+            })
+                ->where('KU', $ku)
+                ->where('GENDER', $gender);
+        }
+
+        $validGayas = $query->pluck('GAYA')->unique();
+
+        // Map the database 'GAYA' names to the container IDs
+        $gayaToContainerMap = [
+            '4 x 50 m Estafet Surface' => 'SF_4x50m_container',
+            '4 x 100 m Estafet Surface' => 'SF_4x100m_container',
+            '4 x 200 m Estafet Surface' => 'SF_4x200m_container',
+            '4 x 50 m Estafet Bifin' => 'BF_4x50m_container',
+            '4 x 100 m Estafet Bifin' => 'BF_4x100m_container',
+            '4 x 200 m Estafet Bifin' => 'BF_4x200m_container',
+            '4 x 50 m Estafet Surface Mix' => 'SF_4x50mMix_container',
+            '4 x 100 m Estafet Surface Mix' => 'SF_4x100mMix_container',
+            '4 x 200 m Estafet Surface Mix' => 'SF_4x200mMix_container',
+            '4 x 50 m Estafet Bifin Mix' => 'BF_4x50mMix_container',
+            '4 x 100 m Estafet Bifin Mix' => 'BF_4x100mMix_container',
+            '4 x 200 m Estafet Bifin Mix' => 'BF_4x200mMix_container',
+        ];
+
+        $containersToShow = [];
+        foreach ($validGayas as $gaya) {
+            if (isset($gayaToContainerMap[$gaya])) {
+                $containersToShow[] = $gayaToContainerMap[$gaya];
+            }
+        }
+
+        return response()->json(['containers' => $containersToShow]);
     }
 }

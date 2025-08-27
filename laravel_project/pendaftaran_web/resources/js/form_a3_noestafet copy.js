@@ -16,9 +16,6 @@ $(document).ready(function () {
     const propinsiInput = $('#propinsi');
     const negaraInput = $('#negara');
 
-    // Select all the main containers for each gaya
-    const allGayaContainers = $('.gaya-container'); // You'll need to add this class to your divs
-
     // Simpan button reference
     const simpanReguButton = $('#simpan-regu-button');
     const hapusReguButton = $('#hapus-regu-button');
@@ -793,73 +790,4 @@ $(document).ready(function () {
         });
     });
 
-    function updateGayaContainers() {
-        // Get selected KU and Gender
-        const selectedKu = kuSelectEstafet.val();
-        let selectedGender = $('input[name="gender_estafet"]:checked').val();
-
-        // If no gender is selected, stop the function
-        if (!selectedKu || !selectedGender) {
-            return;
-        }
-
-        // Hide all containers by default
-        allGayaContainers.addClass('hidden');
-
-        // Make an AJAX request to the server
-        $.ajax({
-            url: "{{ route('estafet.gayas') }}", // Use the named route
-            method: 'GET',
-            data: {
-                ku: selectedKu,
-                gender: selectedGender
-            },
-            success: function (response) {
-                // Iterate through the containers to show and unhide them
-                response.containers.forEach(function (containerId) {
-                    $('#' + containerId).removeClass('hidden');
-                });
-            },
-            error: function (xhr) {
-                console.error("Error fetching gaya list:", xhr.responseText);
-            }
-        });
-    }
-
-    // Attach the event listener to the KU dropdown and gender radio buttons
-    kuSelectEstafet.on('change', updateGayaContainers);
-    $('input[name="gender_estafet"]').on('change', updateGayaContainers);
-
-    // Call the function on page load to set the initial state
-    updateGayaContainers();
-
-});
-
-$(document).ready(function () {
-    const eventPrefixes = [
-        'SF_4x50m', 'SF_4x100m', 'SF_4x200m',
-        'BF_4x50m', 'BF_4x100m', 'BF_4x200m',
-        'SF_4x50mMix', 'SF_4x100mMix', 'SF_4x200mMix',
-        'BF_4x50mMix', 'BF_4x100mMix', 'BF_4x200mMix',
-    ];
-
-    eventPrefixes.forEach(function (prefix) {
-        const checkboxId = '#' + prefix + '_enable_time_chkbx';
-        const timeFieldsId = '#' + prefix + '_time_fields';
-        const checkbox = $(checkboxId);
-        const timeFields = $(timeFieldsId);
-        const timeInputs = timeFields.find('input[type="text"]');
-
-        checkbox.on('change', function () {
-            if ($(this).is(':checked')) {
-                timeFields.removeClass('hidden');
-                timeInputs.prop('disabled', false);
-            } else {
-                timeFields.addClass('hidden');
-                timeInputs.prop('disabled', true);
-                timeInputs.val('');
-            }
-        });
-        checkbox.trigger('change');
-    });
 });
