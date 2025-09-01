@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserManagementController; // Ensure this is corre
 use App\Http\Controllers\CompetitionSettingController;
 use App\Http\Controllers\FormA1Controller;
 use App\Http\Controllers\FormA3Controller;
+use App\Http\Controllers\FormBiayaController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -69,6 +70,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/form-a3/get-ku-end-date', [FormA3Controller::class, 'getKuEndDate'])->name('form_a3.getKuEndDate');
     Route::post('/form-a3/save-estafet', [FormA3Controller::class, 'saveEstafet'])->name('form_a3.saveEstafet');
     Route::delete('/form-a3/delete-estafet/{id}', [FormA3Controller::class, 'deleteEstafet'])->name('form-a3.deleteEstafet');
+    Route::get('/form-a3/nomor-estafet/gayas', [FormA3Controller::class, 'getEstafetGayas'])->name('estafet.gayas');
+
+    Route::get('/form-biaya/hitung-biaya', [FormBiayaController::class, 'indexHitungBiaya'])->name('form_biaya.hitungbiayaview');
 });
 
 require __DIR__ . '/auth.php';

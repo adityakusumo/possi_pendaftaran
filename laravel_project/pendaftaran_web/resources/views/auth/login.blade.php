@@ -35,8 +35,8 @@
         <div>
             <x-primary-button class="ms-3">
                 {{ __('Log in') }}
-            </x-primary-button>              
-            
+            </x-primary-button>
+
             {{-- This is your Register button, modified to be a link --}}
             @if (Route::has('register')) {{-- Good practice: check if the 'register' route exists --}}
                 <a href="{{ route('register') }}" class="ms-3"> {{-- Add ms-3 for margin --}}
@@ -44,8 +44,8 @@
                         {{ __('Register') }}
                     </x-primary-button>
                 </a>
-            @endif  
-        </div>        
+            @endif
+        </div>
 
         <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
@@ -53,7 +53,7 @@
                     {{ __('Forgot your password?') }}
                 </a>
             @endif
-      
+
         </div>
 
     </form>

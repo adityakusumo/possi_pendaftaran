@@ -1,9 +1,9 @@
 /*M!999999\- enable the sandbox mode */ 
--- MariaDB dump 10.19-11.8.2-MariaDB, for Linux (x86_64)
+-- MariaDB dump 10.19-12.0.2-MariaDB, for Linux (x86_64)
 --
 -- Host: localhost    Database: DBPendaftaran
 -- ------------------------------------------------------
--- Server version	11.8.2-MariaDB
+-- Server version	12.0.2-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -102,12 +102,15 @@ CREATE TABLE `A3` (
   `ESTSUBM400SS` varchar(2) DEFAULT NULL,
   `ESTSUBM400HS` varchar(2) DEFAULT NULL,
   `SP` varchar(1) DEFAULT NULL,
-  `TGLLAHIR` timestamp NULL DEFAULT NULL,
+  `TGLLAHIR` date DEFAULT NULL,
   `NOMOR` varchar(15) DEFAULT NULL,
   `GENDERMIX` varchar(50) DEFAULT NULL,
   `IDA3P` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`IDA3P`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -118,7 +121,11 @@ LOCK TABLES `A3` WRITE;
 /*!40000 ALTER TABLE `A3` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `A3` VALUES
-('Pa','C','MUHAMMAD ABIY NUSANTARA RAIS','KOTA JAKARTA TIMUR','KOTA JAKARTA TIMUR','KOTA','JAKARTA TIMUR','DKI JAKARTA','','','','','','','','','','','','','','','','','','','00','26','70','00','58','60','02','08','50','','','','','','','','','','','','','','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0',NULL,'Perorangan','0',1);
+('Pa','C','MUHAMMAD ABIY NUSANTARA RAIS','KOTA JAKARTA TIMUR','KOTA JAKARTA TIMUR','KOTA','JAKARTA TIMUR','DKI JAKARTA','','','','','','','','','','','','','','','','','','','00','26','70','00','58','60','02','08','50','','','','','','','','','','','','','','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0',NULL,'Perorangan','0',1,'landonorris@mail.com',NULL,NULL),
+('PI','C','Aprila Widyatamaka','BLITAR','TIRTA KHARISMA DC','KAB','BLITAR','JAWA TIMUR','1','12','1',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0','2010-04-12','Perorangan','0',8,'landonorris@mail.com','2025-07-29 22:38:24','2025-07-30 18:11:51'),
+('PA','B','Mohammad Syaeful','BLITAR','TIRTA KHARISMA DC','KAB','BLITAR','JAWA TIMUR','99','99','99',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1','2007-10-30','Perorangan','0',12,'landonorris@mail.com','2025-07-31 18:50:08','2025-07-31 18:50:08'),
+('PA','B','REGU KAB. BLITAR','BLITAR','KAB. BLITAR','KAB','BLITAR','JAWA TIMUR','99','99','99',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0','2007-10-30','Estafet','0',14,'landonorris@mail.com','2025-07-31 18:50:08','2025-07-31 18:50:08'),
+('PA','B','REGU KAB. BLITAR MIX','BLITAR','KAB. BLITAR','KAB','BLITAR','JAWA TIMUR','','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'12','14','15',NULL,NULL,NULL,NULL,NULL,NULL,'0','2007-10-30','Estafet','1',15,'landonorris@mail.com','2025-07-31 18:50:08','2025-07-31 18:50:08');
 /*!40000 ALTER TABLE `A3` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -252,8 +259,9 @@ CREATE TABLE `Atlet` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `created_by` bigint(20) unsigned DEFAULT NULL,
   `updated_by` bigint(20) unsigned DEFAULT NULL,
+  `EXPIRED` date DEFAULT NULL,
   PRIMARY KEY (`IDATLET`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -264,7 +272,12 @@ LOCK TABLES `Atlet` WRITE;
 /*!40000 ALTER TABLE `Atlet` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `Atlet` VALUES
-('Oktakirana Nadha Rizqy Kharisma','BLITAR','TIRTA KHARISMA DC','1','BLITAR','JAWA TIMUR','PI','E','0','05135054040059','2013-10-15',2,'2025-07-23 18:49:08','2025-07-23 18:49:08',7,7);
+('Aprila Widyatamaka','BLITAR','TIRTA KHARISMA DC','KAB','BLITAR','JAWA TIMUR','PI','C','0','05035793011097','2010-04-12',4,'2025-07-24 00:24:41','2025-07-24 01:30:42',7,7,'2026-03-28'),
+('Inez Gildas Agatha','BLITAR','TIRTA KHARISMA DC','KAB','BLITAR','JAWA TIMUR','PI','B','0','05135054040049','2007-02-09',7,'2025-07-24 00:31:02','2025-07-24 00:31:02',7,7,'2026-03-28'),
+('Mohammad Syaeful','BLITAR','TIRTA KHARISMA DC','KAB','BLITAR','JAWA TIMUR','PA','B','0','05135054040039','2007-10-30',8,'2025-07-24 18:00:38','2025-07-24 18:01:02',7,7,'2024-03-28'),
+('Made Aditiya Pratama','BLITAR','SAILFISH DC','KAB','BLITAR','JAWA TIMUR','PA','A','1','05135054030023','2006-09-27',9,'2025-07-24 18:05:39','2025-07-24 18:05:39',7,7,'2024-03-28'),
+('Embun Fajar Rani Prayitno','BLITAR','PRADAH DC','KAB','BLITAR','JAWA TIMUR','PI','E','0','05135054020018','2007-10-23',10,'2025-07-25 02:17:26','2025-07-25 02:17:26',7,7,'2024-03-28'),
+('Khairul Prasetyo','BLITAR','SAILFISH DC','KAB','BLITAR','JAWA TIMUR','PA','E','0','05135054030013','2002-08-14',11,'2025-07-25 02:19:47','2025-07-25 02:19:47',7,7,'2024-03-28');
 /*!40000 ALTER TABLE `Atlet` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -297,6 +310,32 @@ set autocommit=0;
 INSERT INTO `Kompetisi` VALUES
 (1,'K','ANTAR KOTA','2025-07-08 19:33:07','2025-07-22 18:01:21','0');
 /*!40000 ALTER TABLE `Kompetisi` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
+-- Table structure for table `MstBiayaExtra`
+--
+
+DROP TABLE IF EXISTS `MstBiayaExtra`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `MstBiayaExtra` (
+  `RPBIAYAEXTRA` int(11) DEFAULT 0,
+  `KETERANGAN` varchar(50) DEFAULT NULL,
+  `IDExtra` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`IDExtra`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `MstBiayaExtra`
+--
+
+LOCK TABLES `MstBiayaExtra` WRITE;
+/*!40000 ALTER TABLE `MstBiayaExtra` DISABLE KEYS */;
+set autocommit=0;
+/*!40000 ALTER TABLE `MstBiayaExtra` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
 
@@ -438,6 +477,60 @@ UNLOCK TABLES;
 commit;
 
 --
+-- Table structure for table `MstDenda`
+--
+
+DROP TABLE IF EXISTS `MstDenda`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `MstDenda` (
+  `IDDenda` int(11) NOT NULL AUTO_INCREMENT,
+  `RPDENDAOL` int(11) DEFAULT 0,
+  `RPDENDADQ` int(11) DEFAULT 0,
+  `RPDENDANOSWIM` int(11) DEFAULT 0,
+  PRIMARY KEY (`IDDenda`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `MstDenda`
+--
+
+LOCK TABLES `MstDenda` WRITE;
+/*!40000 ALTER TABLE `MstDenda` DISABLE KEYS */;
+set autocommit=0;
+/*!40000 ALTER TABLE `MstDenda` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
+-- Table structure for table `MstDeposit`
+--
+
+DROP TABLE IF EXISTS `MstDeposit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `MstDeposit` (
+  `IDMstDeposit` int(11) NOT NULL AUTO_INCREMENT,
+  `JMLATLETMULAI` int(11) DEFAULT 0,
+  `JMLATLETSAMPAI` int(11) DEFAULT 0,
+  `RPDEPOSIT` int(11) DEFAULT 0,
+  PRIMARY KEY (`IDMstDeposit`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `MstDeposit`
+--
+
+LOCK TABLES `MstDeposit` WRITE;
+/*!40000 ALTER TABLE `MstDeposit` DISABLE KEYS */;
+set autocommit=0;
+/*!40000 ALTER TABLE `MstDeposit` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
 -- Table structure for table `MstEvent`
 --
 
@@ -465,6 +558,51 @@ set autocommit=0;
 INSERT INTO `MstEvent` VALUES
 ('Gub Cup 2024','Kejurnas Fin Swimming Gubernur Cup Jatim 2024','2024-11-15','2024-11-17','Kolam Renang GAJAYANA di MALANG',1);
 /*!40000 ALTER TABLE `MstEvent` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
+-- Table structure for table `MstGaya`
+--
+
+DROP TABLE IF EXISTS `MstGaya`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `MstGaya` (
+  `IDGaya` int(11) NOT NULL,
+  `NoUrut` varchar(2) DEFAULT NULL,
+  `Gaya` varchar(50) DEFAULT NULL,
+  `Keterangan` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `MstGaya`
+--
+
+LOCK TABLES `MstGaya` WRITE;
+/*!40000 ALTER TABLE `MstGaya` DISABLE KEYS */;
+set autocommit=0;
+INSERT INTO `MstGaya` VALUES
+(1,'01','400 m Surface',''),
+(2,'02','100 m Surface',''),
+(3,'03','100 m Bifin',''),
+(4,'04','4 x 50 m Estafet Surface',''),
+(5,'05','50 m Surface',''),
+(6,'06','4 x 50 m Estafet Bifin Mix',''),
+(7,'07','4 x 100 m Estafet Bifin',''),
+(9,'09','200 m Bifin',''),
+(10,'10','4 x 100 m Estafet Surface',''),
+(11,'11','400 m Bifin',''),
+(12,'12','4 x 100 m Estafet Surface Mix',''),
+(13,'13','4 x 50 m Estafet Surface Mix',''),
+(14,'14','200 m Surface',''),
+(15,'15','4 x 100 m Estafet Bifin Mix',''),
+(16,'16','4 x 50 m Estafet Bifin',''),
+(17,'17','50 m Bifin',''),
+(18,'18','50 m Apnea',''),
+(19,'19','800 m Surface',NULL);
+/*!40000 ALTER TABLE `MstGaya` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
 
@@ -540,6 +678,38 @@ INSERT INTO `MstPeserta` VALUES
 ('SURABAYA','KOTA SURABAYA','KOTA','SURABAYA','JAWA TIMUR','INDONESIA','LAWRENCE STROLL','123','1',NULL,3,'lancestroll@mail.com','2025-07-14 20:45:01','2025-07-15 01:40:54'),
 ('BLITAR','KAB BLITAR','KAB','BLITAR','JAWA TIMUR','INDONESIA','LANDO NORRIS','123','1',NULL,9,'landonorris@mail.com','2025-07-22 18:29:51','2025-07-22 18:29:51');
 /*!40000 ALTER TABLE `MstPeserta` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
+-- Table structure for table `MstTarif`
+--
+
+DROP TABLE IF EXISTS `MstTarif`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `MstTarif` (
+  `IDTARIF` int(11) NOT NULL AUTO_INCREMENT,
+  `NOURUT` varchar(2) DEFAULT NULL,
+  `ASALPESERTA` varchar(50) DEFAULT NULL,
+  `NAMAPROPINSI` varchar(50) DEFAULT NULL,
+  `NAMANEGARA` varchar(50) DEFAULT NULL,
+  `NOMOR` varchar(15) DEFAULT NULL,
+  `KDTARIF` varchar(1) DEFAULT NULL,
+  `KETERANGAN` varchar(20) DEFAULT NULL,
+  `RPTARIF` int(11) DEFAULT 0,
+  PRIMARY KEY (`IDTARIF`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `MstTarif`
+--
+
+LOCK TABLES `MstTarif` WRITE;
+/*!40000 ALTER TABLE `MstTarif` DISABLE KEYS */;
+set autocommit=0;
+/*!40000 ALTER TABLE `MstTarif` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
 
@@ -4022,7 +4192,7 @@ LOCK TABLES `cache` WRITE;
 /*!40000 ALTER TABLE `cache` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `cache` VALUES
-('possi_jatim_cache_spatie.permission.cache','a:3:{s:5:\"alias\";a:4:{s:1:\"a\";s:2:\"id\";s:1:\"b\";s:4:\"name\";s:1:\"c\";s:10:\"guard_name\";s:1:\"r\";s:5:\"roles\";}s:11:\"permissions\";a:11:{i:0;a:4:{s:1:\"a\";i:19;s:1:\"b\";s:12:\"create users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:1;a:4:{s:1:\"a\";i:20;s:1:\"b\";s:10:\"edit users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:2;a:4:{s:1:\"a\";i:21;s:1:\"b\";s:12:\"delete users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:3;a:4:{s:1:\"a\";i:22;s:1:\"b\";s:10:\"view users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:4;a:4:{s:1:\"a\";i:23;s:1:\"b\";s:12:\"create posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:9;i:1;i:10;i:2;i:12;}}i:5;a:4:{s:1:\"a\";i:24;s:1:\"b\";s:10:\"edit posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:9;i:1;i:10;i:2;i:12;}}i:6;a:4:{s:1:\"a\";i:25;s:1:\"b\";s:12:\"delete posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:7;a:4:{s:1:\"a\";i:26;s:1:\"b\";s:13:\"publish posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:9;i:1;i:10;i:2;i:12;}}i:8;a:4:{s:1:\"a\";i:27;s:1:\"b\";s:10:\"view posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:4:{i:0;i:9;i:1;i:10;i:2;i:11;i:3;i:12;}}i:9;a:4:{s:1:\"a\";i:28;s:1:\"b\";s:13:\"view settings\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:10;a:4:{s:1:\"a\";i:29;s:1:\"b\";s:15:\"manage settings\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}}s:5:\"roles\";a:4:{i:0;a:3:{s:1:\"a\";i:9;s:1:\"b\";s:5:\"admin\";s:1:\"c\";s:3:\"web\";}i:1;a:3:{s:1:\"a\";i:10;s:1:\"b\";s:6:\"editor\";s:1:\"c\";s:3:\"web\";}i:2;a:3:{s:1:\"a\";i:12;s:1:\"b\";s:8:\"operator\";s:1:\"c\";s:3:\"web\";}i:3;a:3:{s:1:\"a\";i:11;s:1:\"b\";s:4:\"user\";s:1:\"c\";s:3:\"web\";}}}',1753408139);
+('possi_jatim_cache_spatie.permission.cache','a:3:{s:5:\"alias\";a:4:{s:1:\"a\";s:2:\"id\";s:1:\"b\";s:4:\"name\";s:1:\"c\";s:10:\"guard_name\";s:1:\"r\";s:5:\"roles\";}s:11:\"permissions\";a:11:{i:0;a:4:{s:1:\"a\";i:19;s:1:\"b\";s:12:\"create users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:1;a:4:{s:1:\"a\";i:20;s:1:\"b\";s:10:\"edit users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:2;a:4:{s:1:\"a\";i:21;s:1:\"b\";s:12:\"delete users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:3;a:4:{s:1:\"a\";i:22;s:1:\"b\";s:10:\"view users\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:4;a:4:{s:1:\"a\";i:23;s:1:\"b\";s:12:\"create posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:9;i:1;i:10;i:2;i:12;}}i:5;a:4:{s:1:\"a\";i:24;s:1:\"b\";s:10:\"edit posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:9;i:1;i:10;i:2;i:12;}}i:6;a:4:{s:1:\"a\";i:25;s:1:\"b\";s:12:\"delete posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:7;a:4:{s:1:\"a\";i:26;s:1:\"b\";s:13:\"publish posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:3:{i:0;i:9;i:1;i:10;i:2;i:12;}}i:8;a:4:{s:1:\"a\";i:27;s:1:\"b\";s:10:\"view posts\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:4:{i:0;i:9;i:1;i:10;i:2;i:11;i:3;i:12;}}i:9;a:4:{s:1:\"a\";i:28;s:1:\"b\";s:13:\"view settings\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}i:10;a:4:{s:1:\"a\";i:29;s:1:\"b\";s:15:\"manage settings\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:9;}}}s:5:\"roles\";a:4:{i:0;a:3:{s:1:\"a\";i:9;s:1:\"b\";s:5:\"admin\";s:1:\"c\";s:3:\"web\";}i:1;a:3:{s:1:\"a\";i:10;s:1:\"b\";s:6:\"editor\";s:1:\"c\";s:3:\"web\";}i:2;a:3:{s:1:\"a\";i:12;s:1:\"b\";s:8:\"operator\";s:1:\"c\";s:3:\"web\";}i:3;a:3:{s:1:\"a\";i:11;s:1:\"b\";s:4:\"user\";s:1:\"c\";s:3:\"web\";}}}',1756776154);
 /*!40000 ALTER TABLE `cache` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -4427,10 +4597,7 @@ LOCK TABLES `sessions` WRITE;
 /*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
 set autocommit=0;
 INSERT INTO `sessions` VALUES
-('aREsqJW1Sm1VxkLbtDBuL2yVSnckKx16H7W6l8l8',7,'127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36','YTo0OntzOjY6Il90b2tlbiI7czo0MDoiZUhYVHJuVFBLU0JwNkZTdUlSbGYwaHNEUE1iTnF5NkhSeXJPQ0hDRiI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDI6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9mb3JtLWExL2RhZnRhci1hdGxldCI7fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjc7fQ==',1753234647),
-('t4GmKA7aQN3P0tXRfdo6x48dAuLnYYxFRYi9SApB',2,'127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36','YTo0OntzOjY6Il90b2tlbiI7czo0MDoiYVkwNDNoT1NDWEdteFJwbTVMaEgxVEJaemU1dHpFbmVMbGNsT29KZSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDI6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9jb21wZXRpdGlvbi1zZXR0aW5ncyI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjI7fQ==',1753234648),
-('V80FyqF0v0Mx584CCLExrXH5dlVFGNP1m5sMeoZ3',7,'127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36','YTo1OntzOjY6Il90b2tlbiI7czo0MDoiRjVaeWFMSFloMWtIWHdkU2p2c09kYmVtaEx4Vk5pWWtvcElsYU1nRyI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjQyOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvZm9ybS1hMS9kYWZ0YXItYXRsZXQiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aTo3O30=',1753264071),
-('wzNV5SXQsGgF140mnCOtYNARSe2JRZKuMSNDSRgI',7,'127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36','YTo0OntzOjY6Il90b2tlbiI7czo0MDoiUTIwVExETDhBeDhHRW83YUdaVWs0NERVeEVDdU5ZdlRqNFFUdEk4QyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDI6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9mb3JtLWExL2RhZnRhci1hdGxldCI7fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjc7fQ==',1753321748);
+('cUnNBG3wRfuEXE4EnXrjXWmJCns3B3Dk93oGngFf',7,'127.0.0.1','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36','YTo0OntzOjY6Il90b2tlbiI7czo0MDoiQ2dnWWVnZ0ROUVdWTzZtM2d2S1hlbzh0V0ZHNkh6NldNUlZUY2hLeiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDU6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9mb3JtLWJpYXlhL2hpdHVuZy1iaWF5YSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjc7fQ==',1756690014);
 /*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
@@ -4462,6 +4629,186 @@ LOCK TABLES `special_users` WRITE;
 /*!40000 ALTER TABLE `special_users` DISABLE KEYS */;
 set autocommit=0;
 /*!40000 ALTER TABLE `special_users` ENABLE KEYS */;
+UNLOCK TABLES;
+commit;
+
+--
+-- Table structure for table `tSyaratPrestasi`
+--
+
+DROP TABLE IF EXISTS `tSyaratPrestasi`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tSyaratPrestasi` (
+  `NOACARA` varchar(3) DEFAULT NULL,
+  `NOACARAGAB` varchar(3) DEFAULT NULL,
+  `GAYA` varchar(50) DEFAULT NULL,
+  `GAYA2` varchar(50) DEFAULT NULL,
+  `KU` varchar(30) DEFAULT NULL,
+  `KUGAB` varchar(30) DEFAULT NULL,
+  `GENDER` varchar(2) DEFAULT NULL,
+  `SYARATPRESTASI` varchar(8) DEFAULT NULL,
+  `YESNO` tinyint(1) DEFAULT NULL,
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=147 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tSyaratPrestasi`
+--
+
+LOCK TABLES `tSyaratPrestasi` WRITE;
+/*!40000 ALTER TABLE `tSyaratPrestasi` DISABLE KEYS */;
+set autocommit=0;
+INSERT INTO `tSyaratPrestasi` VALUES
+('001',NULL,'800 m Surface',NULL,'A',NULL,'Pa',NULL,0,1),
+('002',NULL,'800 m Surface',NULL,'A',NULL,'Pi',NULL,0,2),
+('003',NULL,'100 m Bifin',NULL,'A',NULL,'Pa',NULL,0,3),
+('004',NULL,'100 m Bifin',NULL,'A',NULL,'Pi',NULL,0,4),
+('005',NULL,'100 m Bifin',NULL,'B',NULL,'Pa',NULL,0,5),
+('006',NULL,'100 m Bifin',NULL,'B',NULL,'Pi',NULL,0,6),
+('007',NULL,'100 m Bifin',NULL,'C',NULL,'Pa',NULL,0,7),
+('008',NULL,'100 m Bifin',NULL,'C',NULL,'Pi',NULL,0,8),
+('009',NULL,'100 m Surface',NULL,'A',NULL,'Pa',NULL,0,9),
+('010',NULL,'100 m Surface',NULL,'A',NULL,'Pi',NULL,0,10),
+('011',NULL,'100 m Surface',NULL,'B',NULL,'Pa',NULL,0,11),
+('012',NULL,'100 m Surface',NULL,'B',NULL,'Pi',NULL,0,12),
+('013',NULL,'100 m Surface',NULL,'C',NULL,'Pa',NULL,0,13),
+('014',NULL,'100 m Surface',NULL,'C',NULL,'Pi',NULL,0,14),
+('015',NULL,'4 x 100 m Estafet Bifin Mix',NULL,'A',NULL,'Pa',NULL,0,15),
+('016',NULL,'4 x 100 m Estafet Bifin Mix',NULL,'A',NULL,'Pi',NULL,0,16),
+('017',NULL,'4 x 100 m Estafet Bifin Mix',NULL,'B',NULL,'Pa',NULL,0,17),
+('018',NULL,'4 x 100 m Estafet Bifin Mix',NULL,'B',NULL,'Pi',NULL,0,18),
+('019',NULL,'4 x 100 m Estafet Bifin Mix',NULL,'C',NULL,'Pa',NULL,0,19),
+('020',NULL,'4 x 100 m Estafet Bifin Mix',NULL,'C',NULL,'Pi',NULL,0,20),
+('021',NULL,'4 x 100 m Estafet Surface',NULL,'A',NULL,'Pa',NULL,0,21),
+('022',NULL,'4 x 100 m Estafet Surface',NULL,'A',NULL,'Pi',NULL,0,22),
+('023',NULL,'4 x 100 m Estafet Surface',NULL,'B',NULL,'Pa',NULL,0,23),
+('024',NULL,'4 x 100 m Estafet Surface',NULL,'B',NULL,'Pi',NULL,0,24),
+('025',NULL,'4 x 100 m Estafet Surface',NULL,'C',NULL,'Pa',NULL,0,25),
+('026',NULL,'4 x 100 m Estafet Surface',NULL,'C',NULL,'Pi',NULL,0,26),
+('027',NULL,'100 m Surface',NULL,'D',NULL,'Pa',NULL,0,27),
+('028',NULL,'100 m Surface',NULL,'D',NULL,'Pi',NULL,0,28),
+('029',NULL,'50 m Surface',NULL,'E',NULL,'Pa',NULL,0,29),
+('030',NULL,'50 m Surface',NULL,'E',NULL,'Pi',NULL,0,30),
+('031',NULL,'50 m Surface',NULL,'F',NULL,'Pa',NULL,0,31),
+('032',NULL,'50 m Surface',NULL,'F',NULL,'Pi',NULL,0,32),
+('033',NULL,'100 m Bifin',NULL,'D',NULL,'Pa',NULL,0,33),
+('034',NULL,'100 m Bifin',NULL,'D',NULL,'Pi',NULL,0,34),
+('035',NULL,'50 m Bifin',NULL,'E',NULL,'Pa',NULL,0,35),
+('036',NULL,'50 m Bifin',NULL,'E',NULL,'Pi',NULL,0,36),
+('037',NULL,'50 m Bifin',NULL,'F',NULL,'Pa',NULL,0,37),
+('038',NULL,'50 m Bifin',NULL,'F',NULL,'Pi',NULL,0,38),
+('039',NULL,'4 x 100 m Estafet Surface Mix',NULL,'D',NULL,'Pa',NULL,0,39),
+('040',NULL,'4 x 100 m Estafet Surface Mix',NULL,'D',NULL,'Pi',NULL,0,40),
+('041',NULL,'4 x 50 m Estafet Surface Mix',NULL,'E',NULL,'Pa',NULL,0,41),
+('042',NULL,'4 x 50 m Estafet Surface Mix',NULL,'E',NULL,'Pi',NULL,0,42),
+('043',NULL,'4 x 50 m Estafet Surface Mix',NULL,'F',NULL,'Pa',NULL,0,43),
+('044',NULL,'4 x 50 m Estafet Surface Mix',NULL,'F',NULL,'Pi',NULL,0,44),
+('045',NULL,'4 x 100 m Estafet Bifin Mix',NULL,'D',NULL,'Pa',NULL,0,45),
+('046',NULL,'4 x 100 m Estafet Bifin Mix',NULL,'D',NULL,'Pi',NULL,0,46),
+('047',NULL,'4 x 50 m Estafet Bifin Mix',NULL,'E',NULL,'Pa',NULL,0,47),
+('048',NULL,'4 x 50 m Estafet Bifin Mix',NULL,'E',NULL,'Pi',NULL,0,48),
+('049',NULL,'4 x 50 m Estafet Bifin Mix',NULL,'F',NULL,'Pa',NULL,0,49),
+('050',NULL,'4 x 50 m Estafet Bifin Mix',NULL,'F',NULL,'Pi',NULL,0,50),
+('051',NULL,'400 m Surface',NULL,'D',NULL,'Pa',NULL,0,51),
+('052',NULL,'400 m Surface',NULL,'D',NULL,'Pi',NULL,0,52),
+('053',NULL,'200 m Surface',NULL,'A',NULL,'Pa',NULL,0,53),
+('054',NULL,'200 m Surface',NULL,'A',NULL,'Pi',NULL,0,54),
+('055',NULL,'200 m Surface',NULL,'B',NULL,'Pa',NULL,0,55),
+('056',NULL,'200 m Surface',NULL,'B',NULL,'Pi',NULL,0,56),
+('057',NULL,'200 m Surface',NULL,'C',NULL,'Pa',NULL,0,57),
+('058',NULL,'200 m Surface',NULL,'C',NULL,'Pi',NULL,0,58),
+('059',NULL,'400 m Bifin',NULL,'A',NULL,'Pa',NULL,0,59),
+('060',NULL,'400 m Bifin',NULL,'A',NULL,'Pi',NULL,0,60),
+('061',NULL,'400 m Bifin',NULL,'B',NULL,'Pa',NULL,0,61),
+('062',NULL,'400 m Bifin',NULL,'B',NULL,'Pi',NULL,0,62),
+('063',NULL,'400 m Bifin',NULL,'C',NULL,'Pa',NULL,0,63),
+('064',NULL,'400 m Bifin',NULL,'C',NULL,'Pi',NULL,0,64),
+('065',NULL,'50 m Apnea',NULL,'A',NULL,'Pa',NULL,0,65),
+('066',NULL,'50 m Apnea',NULL,'A',NULL,'Pi',NULL,0,66),
+('067',NULL,'50 m Apnea',NULL,'B',NULL,'Pa',NULL,0,67),
+('068',NULL,'50 m Apnea',NULL,'B',NULL,'Pi',NULL,0,68),
+('069',NULL,'50 m Apnea',NULL,'C',NULL,'Pa',NULL,0,69),
+('070',NULL,'50 m Apnea',NULL,'C',NULL,'Pi',NULL,0,70),
+('071',NULL,'50 m Bifin',NULL,'A',NULL,'Pa',NULL,0,71),
+('072',NULL,'50 m Bifin',NULL,'A',NULL,'Pi',NULL,0,72),
+('073',NULL,'50 m Bifin',NULL,'B',NULL,'Pa',NULL,0,73),
+('074',NULL,'50 m Bifin',NULL,'B',NULL,'Pi',NULL,0,74),
+('075',NULL,'50 m Bifin',NULL,'C',NULL,'Pa',NULL,0,75),
+('076',NULL,'50 m Bifin',NULL,'C',NULL,'Pi',NULL,0,76),
+('077',NULL,'4 x 100 m Estafet Surface Mix',NULL,'A',NULL,'Pa',NULL,0,77),
+('078',NULL,'4 x 100 m Estafet Surface Mix',NULL,'A',NULL,'Pi',NULL,0,78),
+('079',NULL,'4 x 100 m Estafet Surface Mix',NULL,'B',NULL,'Pa',NULL,0,79),
+('080',NULL,'4 x 100 m Estafet Surface Mix',NULL,'B',NULL,'Pi',NULL,0,80),
+('081',NULL,'4 x 100 m Estafet Surface Mix',NULL,'C',NULL,'Pa',NULL,0,81),
+('082',NULL,'4 x 100 m Estafet Surface Mix',NULL,'C',NULL,'Pi',NULL,0,82),
+('083',NULL,'4 x 100 m Estafet Surface',NULL,'D',NULL,'Pa',NULL,0,83),
+('084',NULL,'4 x 100 m Estafet Surface',NULL,'D',NULL,'Pi',NULL,0,84),
+('085',NULL,'4 x 50 m Estafet Surface',NULL,'E',NULL,'Pa',NULL,0,85),
+('086',NULL,'4 x 50 m Estafet Surface',NULL,'E',NULL,'Pi',NULL,0,86),
+('087',NULL,'4 x 50 m Estafet Surface',NULL,'F',NULL,'Pa',NULL,0,87),
+('088',NULL,'4 x 50 m Estafet Surface',NULL,'F',NULL,'Pi',NULL,0,88),
+('089',NULL,'400 m Bifin',NULL,'D',NULL,'Pa',NULL,0,89),
+('090',NULL,'400 m Bifin',NULL,'D',NULL,'Pi',NULL,0,90),
+('091',NULL,'200 m Bifin',NULL,'E',NULL,'Pa',NULL,0,91),
+('092',NULL,'200 m Bifin',NULL,'E',NULL,'Pi',NULL,0,92),
+('093',NULL,'200 m Bifin',NULL,'F',NULL,'Pa',NULL,0,93),
+('094',NULL,'200 m Bifin',NULL,'F',NULL,'Pi',NULL,0,94),
+('095',NULL,'50 m Surface',NULL,'D',NULL,'Pa',NULL,0,95),
+('096',NULL,'50 m Surface',NULL,'D',NULL,'Pi',NULL,0,96),
+('097',NULL,'100 m Surface',NULL,'E',NULL,'Pa',NULL,0,97),
+('098',NULL,'100 m Surface',NULL,'E',NULL,'Pi',NULL,0,98),
+('099',NULL,'100 m Surface',NULL,'F',NULL,'Pa',NULL,0,99),
+('100',NULL,'100 m Surface',NULL,'F',NULL,'Pi',NULL,0,100),
+('101',NULL,'4 x 100 m Estafet Bifin',NULL,'D',NULL,'Pa',NULL,0,101),
+('102',NULL,'4 x 100 m Estafet Bifin',NULL,'D',NULL,'Pi',NULL,0,102),
+('103',NULL,'4 x 50 m Estafet Bifin',NULL,'E',NULL,'Pa',NULL,0,103),
+('104',NULL,'4 x 50 m Estafet Bifin',NULL,'E',NULL,'Pi',NULL,0,104),
+('105',NULL,'4 x 50 m Estafet Bifin',NULL,'F',NULL,'Pa',NULL,0,105),
+('106',NULL,'4 x 50 m Estafet Bifin',NULL,'F',NULL,'Pi',NULL,0,106),
+('107',NULL,'200 m Surface',NULL,'D',NULL,'Pa',NULL,0,107),
+('108',NULL,'200 m Surface',NULL,'D',NULL,'Pi',NULL,0,108),
+('109',NULL,'400 m Surface',NULL,'A',NULL,'Pa',NULL,0,109),
+('110',NULL,'400 m Surface',NULL,'A',NULL,'Pi',NULL,0,110),
+('111',NULL,'400 m Surface',NULL,'B',NULL,'Pa',NULL,0,111),
+('112',NULL,'400 m Surface',NULL,'B',NULL,'Pi',NULL,0,112),
+('113',NULL,'400 m Surface',NULL,'C',NULL,'Pa',NULL,0,113),
+('114',NULL,'400 m Surface',NULL,'C',NULL,'Pi',NULL,0,114),
+('115',NULL,'200 m Bifin',NULL,'A',NULL,'Pa',NULL,0,115),
+('116',NULL,'200 m Bifin',NULL,'A',NULL,'Pi',NULL,0,116),
+('117',NULL,'200 m Bifin',NULL,'B',NULL,'Pa',NULL,0,117),
+('118',NULL,'200 m Bifin',NULL,'B',NULL,'Pi',NULL,0,118),
+('119',NULL,'200 m Bifin',NULL,'C',NULL,'Pa',NULL,0,119),
+('120',NULL,'200 m Bifin',NULL,'C',NULL,'Pi',NULL,0,120),
+('121',NULL,'50 m Surface',NULL,'A',NULL,'Pa',NULL,0,121),
+('122',NULL,'50 m Surface',NULL,'A',NULL,'Pi',NULL,0,122),
+('123',NULL,'50 m Surface',NULL,'B',NULL,'Pa',NULL,0,123),
+('124',NULL,'50 m Surface',NULL,'B',NULL,'Pi',NULL,0,124),
+('125',NULL,'50 m Surface',NULL,'C',NULL,'Pa',NULL,0,125),
+('126',NULL,'50 m Surface',NULL,'C',NULL,'Pi',NULL,0,126),
+('127',NULL,'4 x 100 m Estafet Bifin',NULL,'A',NULL,'Pa',NULL,0,127),
+('128',NULL,'4 x 100 m Estafet Bifin',NULL,'A',NULL,'Pi',NULL,0,128),
+('129',NULL,'4 x 100 m Estafet Bifin',NULL,'B',NULL,'Pa',NULL,0,129),
+('130',NULL,'4 x 100 m Estafet Bifin',NULL,'B',NULL,'Pi',NULL,0,130),
+('131',NULL,'4 x 100 m Estafet Bifin',NULL,'C',NULL,'Pa',NULL,0,131),
+('132',NULL,'4 x 100 m Estafet Bifin',NULL,'C',NULL,'Pi',NULL,0,132),
+('133',NULL,'50 m Apnea',NULL,'D',NULL,'Pa',NULL,0,133),
+('134',NULL,'50 m Apnea',NULL,'D',NULL,'Pi',NULL,0,134),
+('135',NULL,'100 m Bifin',NULL,'E',NULL,'Pa',NULL,0,135),
+('136',NULL,'100 m Bifin',NULL,'E',NULL,'Pi',NULL,0,136),
+('137',NULL,'100 m Bifin',NULL,'F',NULL,'Pa',NULL,0,137),
+('138',NULL,'100 m Bifin',NULL,'F',NULL,'Pi',NULL,0,138),
+('139',NULL,'50 m Bifin',NULL,'D',NULL,'Pa',NULL,0,139),
+('140',NULL,'50 m Bifin',NULL,'D',NULL,'Pi',NULL,0,140),
+('141',NULL,'200 m Surface',NULL,'E',NULL,'Pa',NULL,0,141),
+('142',NULL,'200 m Surface',NULL,'E',NULL,'Pi',NULL,0,142),
+('143',NULL,'200 m Surface',NULL,'F',NULL,'Pa',NULL,0,143),
+('144',NULL,'200 m Surface',NULL,'F',NULL,'Pi',NULL,0,144),
+('145',NULL,'200 m Bifin',NULL,'D',NULL,'Pa',NULL,0,145),
+('146',NULL,'200 m Bifin',NULL,'D',NULL,'Pi',NULL,0,146);
+/*!40000 ALTER TABLE `tSyaratPrestasi` ENABLE KEYS */;
 UNLOCK TABLES;
 commit;
 
@@ -4533,4 +4880,4 @@ commit;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2025-07-24  8:55:21
+-- Dump completed on 2025-09-01  8:34:20

@@ -496,7 +496,7 @@
                     </div>
                     <ul class="sub-menu">
                         <li><a class="link_name" href="#">biaya</a></li>
-                        <li><a href="#">Total Biaya</a></li>
+                        <li><a href="{{ route('form_biaya.hitungbiayaview') }}">Total Biaya</a></li>
                     </ul>
                 </li>
                 <li>
