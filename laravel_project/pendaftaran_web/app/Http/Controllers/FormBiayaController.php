@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\Kompetisi; // Assuming you have a Kompetisi model
 use App\Models\MstPeserta;
+use App\Models\rKwtDaftarDeposit;
 use App\Models\MstKU;
 use App\Models\Atlet;
 use App\Models\A3;
@@ -49,6 +50,10 @@ class FormBiayaController extends Controller
             default => 'ANTAR_PROPINSI',
         };
 
+        // Fetch all data from the rKwtDaftarDeposit table
+        // $biayaList = rKwtDaftarDeposit::all();
+        $biayaList = RKwtDaftarDeposit::where('email', $user->email)->get();
+
         // 4. Pass all data to the view
         return view('hitung_biaya', compact(
             'namaClub',
@@ -57,7 +62,8 @@ class FormBiayaController extends Controller
             'propinsi',
             'negara',
             'defaultSpType',
-            'defaultCompetitionType'
+            'defaultCompetitionType',
+            'biayaList'
         ));
     }
 }
