@@ -14,3 +14,4 @@ Pilot project for web-based Finswimming Competition Registration
 - cd (project directory)
 - npm run dev
 - php artisan serve
+- localhost:8000
