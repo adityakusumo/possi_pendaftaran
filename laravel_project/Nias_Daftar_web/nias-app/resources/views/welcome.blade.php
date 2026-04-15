@@ -162,7 +162,7 @@
             <img src="{{ asset('images/logo-possi.jpg') }}" alt="POSSI">
         </div>
         <h3>POSSI Jawa Timur</h3>
-        <p>Sistem Informasi Renang</p>
+        <p>Sistem Informasi Finswimming</p>
     </div>
 
     <div class="user-info">

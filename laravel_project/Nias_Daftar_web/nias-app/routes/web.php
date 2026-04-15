@@ -4,6 +4,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NiasController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\LombaController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +16,12 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('auth.login.sho
 Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
 Route::get('/register', [AuthController::class, 'showRegister'])->name('auth.register.show');
 Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
+
+// ── Forgot / Reset Password ───────────────────────────────────────
+Route::get('/forgot-password',       [ForgotPasswordController::class, 'showForm'])->name('password.request');
+Route::post('/forgot-password',      [ForgotPasswordController::class, 'sendLink'])->name('password.send');
+Route::get('/reset-password/{token}',[ResetPasswordController::class,  'showForm'])->name('password.reset');
+Route::post('/reset-password',       [ResetPasswordController::class,  'reset'])->name('password.update');
 
 // ── Protected ────────────────────────────────────────────────────
 Route::post('/logout', [AuthController::class, 'logout'])

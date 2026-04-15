@@ -59,12 +59,13 @@ class SettingController extends Controller
         AppSetting::set('nias_close_date', $request->nias_close_date);
 
         // Simpan batas akun per club
-        $allClubs = array_keys(Nias::$clubLookup);
+        // Blade menggunakan name="max_accounts[NamaClub]" sehingga Laravel
+        // otomatis parse sebagai array $request->max_accounts
+        $maxAccounts = $request->input('max_accounts', []);
         $map = [];
-        foreach ($allClubs as $club) {
-            $key = 'max_' . md5($club); // key unik per club di form
-            if ($request->filled($key)) {
-                $map[$club] = (int) $request->input($key);
+        foreach ($maxAccounts as $club => $max) {
+            if ($max !== null && $max !== '') {
+                $map[$club] = (int) $max;
             }
         }
         AppSetting::set('nias_max_accounts_per_club', json_encode($map));
