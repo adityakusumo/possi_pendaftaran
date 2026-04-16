@@ -7,6 +7,7 @@ use App\Http\Controllers\LombaController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\UserSettingController;
 use Illuminate\Support\Facades\Route;
 
 // ── Public ──────────────────────────────────────────────────────
@@ -18,10 +19,10 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('auth.reg
 Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
 
 // ── Forgot / Reset Password ───────────────────────────────────────
-Route::get('/forgot-password',       [ForgotPasswordController::class, 'showForm'])->name('password.request');
-Route::post('/forgot-password',      [ForgotPasswordController::class, 'sendLink'])->name('password.send');
-Route::get('/reset-password/{token}',[ResetPasswordController::class,  'showForm'])->name('password.reset');
-Route::post('/reset-password',       [ResetPasswordController::class,  'reset'])->name('password.update');
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showForm'])->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendLink'])->name('password.send');
+Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showForm'])->name('password.reset');
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 // ── Protected ────────────────────────────────────────────────────
 Route::post('/logout', [AuthController::class, 'logout'])
@@ -33,6 +34,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/welcome', [WelcomeController::class, 'show'])->name('welcome');
     Route::post('/welcome/choice', [WelcomeController::class, 'saveChoice'])->name('welcome.saveChoice');
     Route::get('/welcome/reset', [WelcomeController::class, 'reset'])->name('welcome.reset');
+
+    // ── Setting Akun User ─────────────────────────────────────────
+    Route::get('/account/setting',           [UserSettingController::class, 'index'])->name('user.setting');
+    Route::post('/account/setting/password', [UserSettingController::class, 'updatePassword'])->name('user.setting.password');    
 });
 
 Route::middleware('auth')->group(function () {
