@@ -4,10 +4,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\NiasController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\LombaController;
-use App\Http\Controllers\ForgotPasswordController;
-use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserSettingController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\ResetPasswordController; 
 use Illuminate\Support\Facades\Route;
 
 // ── Public ──────────────────────────────────────────────────────
@@ -22,7 +22,7 @@ Route::post('/register', [AuthController::class, 'register'])->name('auth.regist
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showForm'])->name('password.request');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendLink'])->name('password.send');
 Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showForm'])->name('password.reset');
-Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update'); 
 
 // ── Protected ────────────────────────────────────────────────────
 Route::post('/logout', [AuthController::class, 'logout'])
@@ -37,7 +37,7 @@ Route::middleware('auth')->group(function () {
 
     // ── Setting Akun User ─────────────────────────────────────────
     Route::get('/account/setting',           [UserSettingController::class, 'index'])->name('user.setting');
-    Route::post('/account/setting/password', [UserSettingController::class, 'updatePassword'])->name('user.setting.password');    
+    Route::post('/account/setting/password', [UserSettingController::class, 'updatePassword'])->name('user.setting.password');
 });
 
 Route::middleware('auth')->group(function () {
@@ -99,7 +99,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/nias/{id}', [NiasController::class, 'update'])->name('nias.update');
     Route::delete('/nias/{id}', [NiasController::class, 'destroy'])->name('nias.destroy');
     Route::delete('/nias-selected', [NiasController::class, 'destroySelected'])->name('nias.destroy-selected');
-    Route::delete('/nias-all', [NiasController::class, 'destroyAll'])->name('nias.destroy-all');
+    Route::delete('/nias-all',          [NiasController::class, 'destroyAll'])->name('nias.destroy-all');
+    Route::delete('/nias-sent-selected',[NiasController::class, 'destroySentSelected'])->name('nias.destroy-sent-selected');
+    Route::delete('/nias-sent-all',     [NiasController::class, 'destroySentAll'])->name('nias.destroy-sent-all');
     Route::post('/nias/send-email', [NiasController::class, 'sendEmail'])->name('nias.send-email');
 
     // Daftar Lomba

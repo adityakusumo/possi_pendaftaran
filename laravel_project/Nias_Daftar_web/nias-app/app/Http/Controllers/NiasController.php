@@ -61,7 +61,14 @@ class NiasController extends Controller
         $sentRecords = $sentQuery->orderBy('sent_at', 'desc')
             ->paginate(10, ['*'], 'sent_page');
 
-        return view('nias.index', compact('records', 'sentRecords'));
+        // Hitung total untuk tab badge — admin tanpa filter user_id
+        $isAdmin    = $user->role === 'admin';
+        $baseQuery  = $isAdmin ? Nias::where('is_sent', false) : Nias::where('user_id', $user->id)->where('is_sent', false);
+        $totalSemua  = (clone $baseQuery)->count();
+        $totalBaru   = (clone $baseQuery)->where('is_update', false)->count();
+        $totalUpdate = (clone $baseQuery)->where('is_update', true)->count();
+
+        return view('nias.index', compact('records', 'sentRecords', 'totalSemua', 'totalBaru', 'totalUpdate'));
     }
 
     // -------------------------------------------------------------------------
@@ -180,7 +187,7 @@ class NiasController extends Controller
                 'NAMAPROPDOM' => 'JAWA TIMUR',
                 'KDKOTADOM' => $domInfo[2] ?? null,
                 'NAMAKOTADOM' => $validated['NAMAKOTADOM'],
-                'STATUS' => 2, // 2 = pending acc (belum disetujui admin)
+                'STATUS' => 2, // 2 = pending acc
                 'TGLDAFTAR' => $today->toDateString(),
                 'TGLDAFTAR_UPDATE' => $isUpdate ? $today->toDateString() : null,
                 'EXPIRED' => $expired->toDateString(),
@@ -332,9 +339,12 @@ class NiasController extends Controller
             return redirect()->route('nias.index')->with('error', 'Tidak ada data yang dipilih.');
         }
 
-        $records = Nias::whereIn('ID', $ids)
-            ->where('user_id', Auth::id())
-            ->get();
+        $query = Nias::whereIn('ID', $ids);
+        // Admin bisa hapus data siapapun, regular hanya milik sendiri
+        if (Auth::user()->role !== 'admin') {
+            $query->where('user_id', Auth::id());
+        }
+        $records = $query->get();
 
         foreach ($records as $nias) {
             foreach (['file_kk', 'file_foto', 'file_akte', 'file_ijazah', 'file_sk_mutasi'] as $col) {
@@ -353,7 +363,12 @@ class NiasController extends Controller
     // -------------------------------------------------------------------------
     public function destroyAll()
     {
-        $records = Nias::where('user_id', Auth::id())->get();
+        // Admin hapus semua, regular hanya milik sendiri
+        $query = Auth::user()->role === 'admin'
+            ? Nias::query()
+            : Nias::where('user_id', Auth::id());
+
+        $records = $query->get();
 
         foreach ($records as $nias) {
             foreach (['file_kk', 'file_foto', 'file_akte', 'file_ijazah', 'file_sk_mutasi'] as $col) {
@@ -368,10 +383,55 @@ class NiasController extends Controller
     }
 
     // -------------------------------------------------------------------------
+    // DESTROY SENT SELECTED — admin only
+    // -------------------------------------------------------------------------
+    public function destroySentSelected(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->route('nias.index')->with('error', 'Tidak ada data yang dipilih.');
+        }
+
+        $records = Nias::whereIn('ID', $ids)->where('is_sent', true)->get();
+
+        foreach ($records as $nias) {
+            foreach (['file_kk','file_foto','file_akte','file_ijazah','file_sk_mutasi'] as $col) {
+                if ($nias->$col) Storage::disk('local')->delete($nias->$col);
+            }
+            $nias->delete();
+        }
+
+        return redirect()->route('nias.index')
+            ->with('success', count($records) . ' data terkirim berhasil dihapus.');
+    }
+
+    // -------------------------------------------------------------------------
+    // DESTROY SENT ALL — admin only
+    // -------------------------------------------------------------------------
+    public function destroySentAll()
+    {
+        $records = Nias::where('is_sent', true)->get();
+
+        foreach ($records as $nias) {
+            foreach (['file_kk','file_foto','file_akte','file_ijazah','file_sk_mutasi'] as $col) {
+                if ($nias->$col) Storage::disk('local')->delete($nias->$col);
+            }
+            $nias->delete();
+        }
+
+        return redirect()->route('nias.index')
+            ->with('success', 'Semua data terkirim (' . count($records) . ' data) berhasil dihapus.');
+    }
+
+    // -------------------------------------------------------------------------
     // HELPER
     // -------------------------------------------------------------------------
     private function authorizeNias(Nias $nias): void
     {
+        // Admin bisa akses semua data tanpa filter user_id
+        if (Auth::user()->role === 'admin') {
+            return;
+        }
         if ((int) $nias->user_id !== (int) Auth::id()) {
             abort(403, 'Kamu tidak punya akses ke data ini.');
         }
@@ -656,6 +716,7 @@ class NiasController extends Controller
             ->update([
                 'is_sent' => true,
                 'sent_at' => now(),
+                'STATUS'  => 3, // 3 = sudah dikirim, menunggu acc
             ]);
 
         return redirect()->route('nias.index')
