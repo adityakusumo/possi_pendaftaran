@@ -152,10 +152,42 @@
         .logout-link a:hover {
             color: #fff;
         }
+        .welcome-navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            background: linear-gradient(135deg, var(--possi-blue) 0%, #0057cc 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,.25);
+            padding: .5rem 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: .5rem;
+        }
+        body { padding-top: 52px; }
     </style>
 </head>
 
 <body>
+
+    {{-- Navbar --}}
+    <nav class="welcome-navbar">
+        @auth
+        <span class="text-white-50 small me-2">
+            <i class="bi bi-person-circle me-1"></i>{{ Auth::user()->nama }}
+        </span>
+        <a href="{{ route('user.setting') }}"
+           class="btn btn-sm btn-outline-light">
+            <i class="bi bi-person-gear me-1"></i>Akun
+        </a>
+        <form method="POST" action="{{ route('auth.logout') }}" class="m-0">
+            @csrf
+            <button type="submit" class="btn btn-sm btn-outline-light">
+                <i class="bi bi-box-arrow-right me-1"></i>Logout
+            </button>
+        </form>
+        @endauth
+    </nav>
 
     <div class="welcome-header">
         <div class="logo-wrap">
@@ -213,14 +245,7 @@
         @endif
     </div>
 
-    <div class="logout-link">
-        <form method="POST" action="{{ route('auth.logout') }}">
-            @csrf
-            <button type="submit" class="btn btn-link text-white-50 text-decoration-underline p-0 small">
-                <i class="bi bi-box-arrow-left me-1"></i>Logout
-            </button>
-        </form>
-    </div>
+
 
     {{-- MODAL --}}
     @if(!$isNiasOpen)
