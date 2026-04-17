@@ -180,7 +180,7 @@ class NiasController extends Controller
                 'NAMAPROPDOM' => 'JAWA TIMUR',
                 'KDKOTADOM' => $domInfo[2] ?? null,
                 'NAMAKOTADOM' => $validated['NAMAKOTADOM'],
-                'STATUS' => 1,
+                'STATUS' => 2, // 2 = pending acc (belum disetujui admin)
                 'TGLDAFTAR' => $today->toDateString(),
                 'TGLDAFTAR_UPDATE' => $isUpdate ? $today->toDateString() : null,
                 'EXPIRED' => $expired->toDateString(),
