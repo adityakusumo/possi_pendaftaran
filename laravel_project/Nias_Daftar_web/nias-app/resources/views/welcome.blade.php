@@ -152,42 +152,10 @@
         .logout-link a:hover {
             color: #fff;
         }
-        .welcome-navbar {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 1000;
-            background: linear-gradient(135deg, var(--possi-blue) 0%, #0057cc 100%);
-            box-shadow: 0 2px 10px rgba(0,0,0,.25);
-            padding: .5rem 1.5rem;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: .5rem;
-        }
-        body { padding-top: 52px; }
     </style>
 </head>
 
 <body>
-
-    {{-- Navbar --}}
-    <nav class="welcome-navbar">
-        @auth
-        <span class="text-white-50 small me-2">
-            <i class="bi bi-person-circle me-1"></i>{{ Auth::user()->nama }}
-        </span>
-        <a href="{{ route('user.setting') }}"
-           class="btn btn-sm btn-outline-light">
-            <i class="bi bi-person-gear me-1"></i>Akun
-        </a>
-        <form method="POST" action="{{ route('auth.logout') }}" class="m-0">
-            @csrf
-            <button type="submit" class="btn btn-sm btn-outline-light">
-                <i class="bi bi-box-arrow-right me-1"></i>Logout
-            </button>
-        </form>
-        @endauth
-    </nav>
 
     <div class="welcome-header">
         <div class="logo-wrap">
@@ -209,14 +177,19 @@
         @php $isNiasOpen = \App\Models\AppSetting::isNiasOpen(); @endphp
 
         {{-- Kartu NIAS --}}
-        <a href="{{ $isNiasOpen ? route('nias.index') : 'javascript:void(0)' }}" class="app-card" @if(!$isNiasOpen)
-        data-bs-toggle="modal" data-bs-target="#modalNiasClosed" @else onclick="saveChoice('nias')" @endif>
+        <a href="{{ route('nias.index') }}" class="app-card" onclick="saveChoice('nias')">
             <div class="icon-wrap" style="background:#e3f2fd;color:#0d6efd;">
                 <i class="bi bi-person-vcard"></i>
             </div>
             <div class="app-info">
                 <h3>Pendaftaran NIAS</h3>
-                <p>Input data atlet untuk nomor NIAS baru.</p>
+                <p>
+                    @if($isNiasOpen)
+                        Pendaftaran sedang <span class="text-success fw-semibold">dibuka</span>.
+                    @else
+                        Pendaftaran sedang <span class="text-danger fw-semibold">ditutup</span>.
+                    @endif
+                </p>
             </div>
         </a>
 
@@ -245,29 +218,16 @@
         @endif
     </div>
 
+    <div class="logout-link">
+        <form method="POST" action="{{ route('auth.logout') }}">
+            @csrf
+            <button type="submit" class="btn btn-link text-white-50 text-decoration-underline p-0 small">
+                <i class="bi bi-box-arrow-left me-1"></i>Logout
+            </button>
+        </form>
+    </div>
 
 
-    {{-- MODAL --}}
-    @if(!$isNiasOpen)
-        <div class="modal fade" id="modalNiasClosed" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content text-dark">
-                    <div class="modal-header bg-warning border-0">
-                        <h5 class="modal-title fw-bold"><i class="bi bi-calendar-x me-2"></i>Pendaftaran Ditutup</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body text-center py-4">
-                        <i class="bi bi-lock-fill fs-1 text-warning mb-3 d-block"></i>
-                        <p class="mb-1 fw-bold">Maaf, masa pendaftaran NIAS sedang ditutup.</p>
-                        <p class="text-muted small">Silakan hubungi admin atau cek jadwal secara berkala.</p>
-                    </div>
-                    <div class="modal-footer border-0 justify-content-center">
-                        <button type="button" class="btn btn-dark px-4" data-bs-dismiss="modal">Mengerti</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
 
     {{-- SCRIPTS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

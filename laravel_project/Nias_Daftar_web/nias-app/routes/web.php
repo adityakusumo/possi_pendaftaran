@@ -6,8 +6,6 @@ use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\LombaController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserSettingController;
-use App\Http\Controllers\ForgotPasswordController;
-use App\Http\Controllers\ResetPasswordController; 
 use Illuminate\Support\Facades\Route;
 
 // ── Public ──────────────────────────────────────────────────────
@@ -22,7 +20,7 @@ Route::post('/register', [AuthController::class, 'register'])->name('auth.regist
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showForm'])->name('password.request');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendLink'])->name('password.send');
 Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showForm'])->name('password.reset');
-Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update'); 
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 // ── Protected ────────────────────────────────────────────────────
 Route::post('/logout', [AuthController::class, 'logout'])
@@ -53,7 +51,10 @@ Route::middleware('auth')->group(function () {
         // Sesuaikan juga yang lainnya agar konsisten
         Route::post('/settings/reset-nias-schedule', [SettingController::class, 'resetNiasSchedule'])->name('settings.nias.reset');
         Route::post('/settings/users/{user}/reset-password', [SettingController::class, 'resetUserPassword'])->name('settings.resetPassword');
-        Route::delete('/settings/users/{user}/delete', [SettingController::class, 'deleteUser'])->name('settings.deleteUser');
+        Route::delete('/settings/users/{user}/delete',    [SettingController::class, 'deleteUser'])->name('settings.deleteUser');
+        Route::get('/settings/akun/{user}',                [SettingController::class, 'showAkun'])->name('settings.akun.show');
+        Route::delete('/settings/akun/selected',           [SettingController::class, 'destroySelectedAkun'])->name('settings.akun.destroySelected');
+        Route::delete('/settings/akun/all',                [SettingController::class, 'destroyAllAkun'])->name('settings.akun.destroyAll');
     });
 
     // Club info helper
@@ -75,21 +76,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/nias/export', [NiasController::class, 'export'])
         ->name('nias.export');
 
-    Route::get('/nias/update-data', [NiasController::class, 'showUpdateForm'])->name('nias.update-data');
+    Route::get('/nias/update-data', function () {
+        if (auth()->user()->role !== 'admin' && !\App\Models\AppSetting::isNiasOpen()) {
+            return redirect()->route('nias.index')->with('nias_closed', true);
+        }
+        return app(\App\Http\Controllers\NiasController::class)->showUpdateForm();
+    })->name('nias.update-data');
     Route::get('/nias/existing', [NiasController::class, 'existing'])->name('nias.existing');
+    Route::get('/nias/{id}/file/{col}', [NiasController::class, 'serveFile'])->name('nias.file');
 
     // NIAS CRUD — explicit routes agar tidak bentrok
     // Guard jadwal: regular user dicek apakah pendaftaran sedang dibuka
-    Route::get('/nias', function () {
-        if (auth()->user()->role !== 'admin' && !\App\Models\AppSetting::isNiasOpen()) {
-            return redirect()->route('welcome')->with('nias_closed', true);
-        }
-        return app(\App\Http\Controllers\NiasController::class)->index(request());
-    })->name('nias.index');
+    // Index selalu bisa diakses (admin & regular)
+    Route::get('/nias', [NiasController::class, 'index'])->name('nias.index');
 
     Route::get('/nias/create', function () {
         if (auth()->user()->role !== 'admin' && !\App\Models\AppSetting::isNiasOpen()) {
-            return redirect()->route('welcome')->with('nias_closed', true);
+            return redirect()->route('nias.index')->with('nias_closed', true);
         }
         return app(\App\Http\Controllers\NiasController::class)->create();
     })->name('nias.create');

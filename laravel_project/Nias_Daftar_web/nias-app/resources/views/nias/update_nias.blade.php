@@ -38,11 +38,13 @@
                     <div class="col-md-12">
                         <label class="form-label fw-bold">Tipe Update <span class="text-danger">*</span></label>
                         <select name="tipe_update" id="tipe_update" class="form-select border-primary" required>
+                            <option value="" selected disabled>— Pilih Tipe Update —</option>
                             <option value="perpanjangan">Perpanjangan (Club dan Domisili tidak berubah)</option>
                             <option value="update_club">Pindah Club</option>
-                            <option value="update_domisili">Pindah Domisili</option>
+                            <option value="update_domisili">Pindah Domisili (KK)</option>
                             <option value="update_all">Pindah Club dan Domisili</option>
                         </select>
+                        <div class="invalid-feedback">Silakan pilih tipe update terlebih dahulu.</div>
                     </div>
 
                     {{-- No NIAS Jatim — wajib pilih dari data existing, tidak boleh manual --}}
@@ -131,7 +133,7 @@
                     <div class="col-12" id="wrapper_domisili" style="display:none;">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="form-label">
+                                <label class="form-label" id="label_jenisdom">
                                     Jenis Wilayah (KK) <span class="text-danger">*</span>
                                 </label>
                                 <select name="JENISDOM" id="JENISDOM" class="form-select">
@@ -141,7 +143,7 @@
                                 </select>
                             </div>
                             <div class="col-md-8">
-                                <label class="form-label">
+                                <label class="form-label" id="label_kotadom">
                                     Nama Kota/Kab (KK) <span class="text-danger">*</span>
                                 </label>
                                 <select name="NAMAKOTADOM" id="NAMAKOTADOM" class="form-select select2">
@@ -360,10 +362,15 @@
                 $('#file_kk').prop('required', domisiliRequired).val('');
                 $('#wrapper_file_sk_mutasi').toggle(clubRequired);
                 $('#file_sk_mutasi').prop('required', clubRequired).val('');
+
+                // Update label domisili — tambahkan "(KK Terbaru)" saat domisili dipindah
+                const domisiliSuffix = domisiliRequired ? ' (KK Terbaru)' : ' (KK)';
+                $('#label_jenisdom').html('Jenis Wilayah' + domisiliSuffix + ' <span class="text-danger">*</span>');
+                $('#label_kotadom').html('Nama Kota/Kab' + domisiliSuffix + ' <span class="text-danger">*</span>');
             }
 
-            // Load awal
-            applyTipe($('#tipe_update').val());
+            // Load awal — tidak ada yang terpilih, sembunyikan semua conditional field
+            applyTipe('');
 
             $('#tipe_update').on('change', function () {
                 applyTipe($(this).val());
@@ -372,6 +379,22 @@
             $('form').on('submit', function (e) {
                 e.preventDefault();
                 const form = this;
+
+                // Validasi tipe update wajib dipilih
+                const tipe = $('#tipe_update').val();
+                if (!tipe) {
+                    $('#tipe_update').addClass('is-invalid').focus();
+                    Swal.fire({
+                        title: 'Tipe Update Belum Dipilih',
+                        text: 'Silakan pilih tipe update terlebih dahulu sebelum melanjutkan.',
+                        icon: 'warning',
+                        confirmButtonColor: '#0d6efd',
+                        confirmButtonText: 'Pilih Sekarang',
+                    });
+                    return;
+                }
+                $('#tipe_update').removeClass('is-invalid');
+
                 Swal.fire({
                     title: 'Konfirmasi Update',
                     text: 'Apakah data yang diisi sudah benar?',

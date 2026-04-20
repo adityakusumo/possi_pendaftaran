@@ -30,7 +30,7 @@ class SettingController extends Controller
             ];
         }
 
-        // Data untuk tab Lomba — daftar user (sama seperti template lama)
+        // Data untuk tab Lomba
         $search = request('cari');
         $users  = User::when($search, fn($q) => $q->where('nama', 'like', "%{$search}%")
                                                    ->orWhere('email', 'like', "%{$search}%"))
@@ -38,10 +38,22 @@ class SettingController extends Controller
                       ->paginate(20)
                       ->withQueryString();
 
+        // Data untuk tab Akun — dengan sort
+        $akunSortables = ['nama', 'namaclub', 'email', 'role', 'created_at', 'updated_at'];
+        $akunSortCol   = in_array(request('sort_akun'), $akunSortables) ? request('sort_akun') : 'nama';
+        $akunSortDir   = request('dir_akun') === 'desc' ? 'desc' : 'asc';
+        $akunSearch    = request('cari');
+        $akunUsers = User::when($akunSearch, fn($q) => $q->where('nama',     'like', "%{$akunSearch}%")
+                                                          ->orWhere('email',    'like', "%{$akunSearch}%")
+                                                          ->orWhere('namaclub', 'like', "%{$akunSearch}%"))
+                         ->orderBy($akunSortCol, $akunSortDir)
+                         ->paginate(20, ['*'], 'akun_page')
+                         ->withQueryString();
+
         return view('settings', compact(
             'niasOpenDate', 'niasCloseDate',
             'clubStats', 'allClubs',
-            'users'
+            'users', 'akunUsers'
         ));
     }
 
@@ -59,13 +71,12 @@ class SettingController extends Controller
         AppSetting::set('nias_close_date', $request->nias_close_date);
 
         // Simpan batas akun per club
-        // Blade menggunakan name="max_accounts[NamaClub]" sehingga Laravel
-        // otomatis parse sebagai array $request->max_accounts
-        $maxAccounts = $request->input('max_accounts', []);
+        $allClubs = array_keys(Nias::$clubLookup);
         $map = [];
-        foreach ($maxAccounts as $club => $max) {
-            if ($max !== null && $max !== '') {
-                $map[$club] = (int) $max;
+        foreach ($allClubs as $club) {
+            $key = 'max_' . md5($club); // key unik per club di form
+            if ($request->filled($key)) {
+                $map[$club] = (int) $request->input($key);
             }
         }
         AppSetting::set('nias_max_accounts_per_club', json_encode($map));
@@ -101,5 +112,36 @@ class SettingController extends Controller
         $user->delete();
         return redirect()->route('settings', ['tab' => 'lomba'])
             ->with('success', "Akun {$user->nama} berhasil dihapus.");
+    }
+
+    // ── Detail akun (tab Akun) ────────────────────────────────────
+    public function showAkun(User $user)
+    {
+        $statNias = [
+            'total'    => \App\Models\Nias::where('user_id', $user->id)->count(),
+            'pending'  => \App\Models\Nias::where('user_id', $user->id)->where('STATUS', 2)->count(),
+            'terkirim' => \App\Models\Nias::where('user_id', $user->id)->where('is_sent', true)->count(),
+        ];
+        return view('setting_akun_show', compact('user', 'statNias'));
+    }
+
+    // ── Hapus akun terpilih (tab Akun) ───────────────────────────
+    public function destroySelectedAkun(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->route('settings', ['tab' => 'akun'])->with('error', 'Tidak ada yang dipilih.');
+        }
+        $count = User::whereIn('id', $ids)->where('role', '!=', 'admin')->delete();
+        return redirect()->route('settings', ['tab' => 'akun'])
+            ->with('success', "{$count} akun berhasil dihapus.");
+    }
+
+    // ── Hapus semua akun non-admin (tab Akun) ────────────────────
+    public function destroyAllAkun()
+    {
+        $count = User::where('role', '!=', 'admin')->delete();
+        return redirect()->route('settings', ['tab' => 'akun'])
+            ->with('success', "Semua {$count} akun regular berhasil dihapus.");
     }
 }

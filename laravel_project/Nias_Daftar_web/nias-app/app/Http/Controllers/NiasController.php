@@ -68,7 +68,8 @@ class NiasController extends Controller
         $totalBaru   = (clone $baseQuery)->where('is_update', false)->count();
         $totalUpdate = (clone $baseQuery)->where('is_update', true)->count();
 
-        return view('nias.index', compact('records', 'sentRecords', 'totalSemua', 'totalBaru', 'totalUpdate'));
+        $isNiasOpen = \App\Models\AppSetting::isNiasOpen();
+        return view('nias.index', compact('records', 'sentRecords', 'totalSemua', 'totalBaru', 'totalUpdate', 'isNiasOpen'));
     }
 
     // -------------------------------------------------------------------------
@@ -235,7 +236,14 @@ class NiasController extends Controller
         sort($domisilis);
         $userClub = Auth::user()->namaclub;
 
-        return view('nias.edit', compact('nias', 'domisilis', 'userClub'));
+        // $allClubs diperlukan di _form.blade.php untuk dropdown admin
+        $allClubs = [];
+        if (Auth::user()->role === 'admin') {
+            $allClubs = array_keys(Nias::$clubLookup);
+            sort($allClubs);
+        }
+
+        return view('nias.edit', compact('nias', 'domisilis', 'userClub', 'allClubs'));
     }
 
     // -------------------------------------------------------------------------
@@ -326,6 +334,27 @@ class NiasController extends Controller
 
         return redirect()->route('nias.index')
             ->with('success', 'Data NIAS berhasil dihapus.');
+    }
+
+    // -------------------------------------------------------------------------
+    // SERVE FILE — tampilkan file dokumen (admin bisa lihat semua)
+    // -------------------------------------------------------------------------
+    public function serveFile($id, string $col)
+    {
+        $allowed = ['file_kk','file_foto','file_akte','file_ijazah','file_sk_mutasi'];
+        if (!in_array($col, $allowed)) {
+            abort(404);
+        }
+
+        $nias = Nias::findOrFail($id);
+        $this->authorizeNias($nias);
+
+        $path = $nias->$col;
+        if (!$path || !Storage::disk('local')->exists($path)) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
+        return response()->file(Storage::disk('local')->path($path));
     }
 
     // -------------------------------------------------------------------------
@@ -426,6 +455,13 @@ class NiasController extends Controller
     // -------------------------------------------------------------------------
     // HELPER
     // -------------------------------------------------------------------------
+// Helper: strip prefix kota/kab dari nama wilayah untuk CSV
+    private function stripWilayahPrefix(?string $nama): string
+    {
+        if (!$nama) return '';
+        return trim(preg_replace('/^(kota|kab\.?|kabupaten)\s+/i', '', $nama));
+    }
+
     private function authorizeNias(Nias $nias): void
     {
         // Admin bisa akses semua data tanpa filter user_id
@@ -471,6 +507,7 @@ class NiasController extends Controller
             'STATUS NIAS [BARU / UPDATE]',
             'NO. NIAS JATIM (UPDATE)',
             'Daftar NIAS',
+            'Jenis Daftar',
             'Keterangan',
         ], ';');
         fputcsv($out, [
@@ -490,6 +527,7 @@ class NiasController extends Controller
             '',
             '',
             '',
+            '',
         ], ';');
 
         foreach ($allRecords as $i => $r) {
@@ -501,14 +539,15 @@ class NiasController extends Controller
                 $r->EMAIL ?? '',
                 ($r->mutasi_luar_jatim === 'ya') ? '' : 'Jawa Timur',
                 $r->JENISDOM ?? '',
-                $r->NAMAKOTADOM ?? '',
+                $this->stripWilayahPrefix($r->NAMAKOTADOM),
                 $r->GENDER === 'L' ? 'Pa' : 'Pi',
                 $r->TEMPATLAHIR,
-                $r->TGLLAHIR?->format('d-m-Y') ?? '',
-                $r->NIK ?? '',
+                $r->TGLLAHIR?->format('m/d/Y') ?? '',
+                $r->NIK    ? "'" . $r->NIK    : '',
                 $r->is_update ? 'UPDATE' : 'BARU',
-                $r->NONIAS ?? '',
+                $r->NONIAS ? "'" . $r->NONIAS : '',
                 'JTM',
+                $r->tipe_update ?? '',
                 '',
             ], ';');
         }
@@ -609,6 +648,7 @@ class NiasController extends Controller
             'STATUS NIAS [BARU / UPDATE]',
             'NO. NIAS JATIM (UPDATE)',
             'Daftar NIAS',
+            'Jenis Daftar',
             'Keterangan',
         ], ';');
         fputcsv($out, [
@@ -628,6 +668,7 @@ class NiasController extends Controller
             '',
             '',
             '',
+            '',
         ], ';');
 
         foreach ($allRecords as $i => $r) {
@@ -639,14 +680,15 @@ class NiasController extends Controller
                 $r->EMAIL ?? '',
                 ($r->mutasi_luar_jatim === 'ya') ? '' : 'Jawa Timur',
                 $r->JENISDOM ?? '',
-                $r->NAMAKOTADOM ?? '',
+                $this->stripWilayahPrefix($r->NAMAKOTADOM),
                 $r->GENDER === 'L' ? 'Pa' : 'Pi',
                 $r->TEMPATLAHIR,
-                $r->TGLLAHIR?->format('d-m-Y') ?? '',
-                $r->NIK ?? '',
+                $r->TGLLAHIR?->format('m/d/Y') ?? '',
+                $r->NIK    ? "'" . $r->NIK    : '',
                 $r->is_update ? 'UPDATE' : 'BARU',
-                $r->NONIAS ?? '',
+                $r->NONIAS ? "'" . $r->NONIAS : '',
                 'JTM',
+                $r->tipe_update ?? '',
                 '',
             ], ';');
         }
@@ -732,7 +774,7 @@ class NiasController extends Controller
         $isAdmin = $user->role === 'admin';
         $namaclub = $user->namaclub;
 
-        $sortableColumns = ['NAMA', 'GENDER', 'TPTLAHIR', 'TGLLAHIR', 'NONIAS', 'EXPIRED'];
+        $sortableColumns = ['NAMA', 'GENDER', 'TPTLAHIR', 'TGLLAHIR', 'NONIAS', 'JENISDOM', 'NAMAKOTADOM', 'EXPIRED'];
         $sortCol = in_array($request->sort, $sortableColumns) ? $request->sort : 'EXPIRED';
         $sortDir = $request->has('dir') ? ($request->dir === 'desc' ? 'desc' : 'asc') : 'desc';
 

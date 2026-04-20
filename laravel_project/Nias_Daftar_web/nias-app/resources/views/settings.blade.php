@@ -25,6 +25,12 @@
                         <i class="bi bi-trophy me-2"></i>Setting Lomba (User)
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request('tab') === 'akun' ? 'active fw-bold border-bottom-0' : '' }}"
+                        href="{{ route('settings', ['tab' => 'akun']) }}">
+                        <i class="bi bi-people me-2"></i>Manajemen Akun
+                    </a>
+                </li>
             </ul>
 
             <div class="p-4">
@@ -172,6 +178,157 @@
                         </div>
                     </div>
                 @endif
+
+                {{-- KONTEN TAB 3: MANAJEMEN AKUN --}}
+                @if(request('tab') === 'akun')
+                <div class="tab-content-area">
+
+                    {{-- Toolbar: search + bulk action --}}
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="checkbox" id="chk_akun_all" class="form-check-input mt-0" title="Pilih semua">
+                            <span id="akun_selected_count" class="text-muted small">0 dipilih</span>
+                            <button type="button" id="btn_delete_akun_selected"
+                                    class="btn btn-sm btn-outline-danger d-none"
+                                    onclick="confirmDeleteAkunSelected()">
+                                <i class="bi bi-trash me-1"></i>Hapus Dipilih
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="confirmDeleteAkunAll()">
+                                <i class="bi bi-trash3 me-1"></i>Hapus Semua Non-Admin
+                            </button>
+                        </div>
+                        <form method="GET" action="{{ route('settings', ['tab' => 'akun']) }}"
+                              class="d-flex gap-2">
+                            <input type="hidden" name="tab" value="akun">
+                            <input type="text" name="cari" class="form-control form-control-sm"
+                                   placeholder="Cari nama / email / club…"
+                                   value="{{ request('cari') }}" style="min-width:220px">
+                            <button type="submit" class="btn btn-sm btn-primary">Cari</button>
+                            @if(request('cari'))
+                            <a href="{{ route('settings', ['tab' => 'akun']) }}"
+                               class="btn btn-sm btn-outline-secondary">Reset</a>
+                            @endif
+                        </form>
+                    </div>
+
+                    @php
+                        // Helper sort URL untuk tab akun
+                        $akunSortCol = request('sort_akun', 'nama');
+                        $akunSortDir = request('dir_akun', 'asc');
+                        $akunSortables = ['nama', 'namaclub', 'email', 'role', 'created_at', 'updated_at'];
+                        $thAkun = function(string $col, string $label) use ($akunSortCol, $akunSortDir): string {
+                            $isActive = $col === $akunSortCol;
+                            $nextDir  = ($isActive && $akunSortDir === 'asc') ? 'desc' : 'asc';
+                            $url = request()->fullUrlWithQuery([
+                                'tab'      => 'akun',
+                                'sort_akun'=> $col,
+                                'dir_akun' => $nextDir,
+                                'page'     => 1,
+                            ]);
+                            $icon = $isActive
+                                ? ($akunSortDir === 'asc'
+                                    ? ' <i class="bi bi-caret-up-fill small"></i>'
+                                    : ' <i class="bi bi-caret-down-fill small"></i>')
+                                : ' <i class="bi bi-chevron-expand small opacity-50"></i>';
+                            return '<th><a href="' . $url . '" class="text-white text-decoration-none d-flex align-items-center gap-1 justify-content-between">'
+                                . e($label) . $icon . '</a></th>';
+                        };
+                    @endphp
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width:36px"></th>
+                                    <th>#</th>
+                                    {!! $thAkun('nama',       'Nama') !!}
+                                    {!! $thAkun('email',      'Email') !!}
+                                    {!! $thAkun('namaclub',   'Club') !!}
+                                    {!! $thAkun('role',       'Role') !!}
+                                    {!! $thAkun('created_at', 'Dibuat') !!}
+                                    {!! $thAkun('updated_at', 'Diperbarui') !!}
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($akunUsers as $u)
+                                <tr>
+                                    <td class="text-center">
+                                        @if($u->role !== 'admin')
+                                        <input type="checkbox" class="form-check-input chk_akun_row mt-0"
+                                               value="{{ $u->id }}">
+                                        @endif
+                                    </td>
+                                    <td class="text-muted small">{{ $akunUsers->firstItem() + $loop->index }}</td>
+                                    <td class="fw-semibold small">{{ $u->nama }}</td>
+                                    <td class="small">{{ $u->email }}</td>
+                                    <td class="small">{{ $u->namaclub ?? '—' }}</td>
+                                    <td>
+                                        <span class="badge {{ $u->role === 'admin' ? 'bg-danger' : 'bg-secondary' }}">
+                                            {{ $u->role === 'admin' ? 'Admin' : 'Regular' }}
+                                        </span>
+                                    </td>
+                                    <td class="small text-muted">
+                                        {{ $u->created_at?->format('d/m/Y H:i') ?? '—' }}
+                                    </td>
+                                    <td class="small text-muted">
+                                        {{ $u->updated_at?->format('d/m/Y H:i') ?? '—' }}
+                                    </td>
+                                    <td class="text-center" style="white-space:nowrap">
+                                        <a href="{{ route('settings.akun.show', $u->id) }}"
+                                           class="btn btn-sm btn-outline-primary py-0" title="Detail">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        @if($u->role !== 'admin')
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger py-0"
+                                                title="Hapus"
+                                                onclick="confirmDeleteAkunOne({{ $u->id }}, '{{ addslashes($u->nama) }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-4">
+                                        <i class="bi bi-inbox fs-2 d-block mb-2 opacity-50"></i>
+                                        Tidak ada akun ditemukan.
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {{-- Pagination --}}
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
+                        <small class="text-muted">
+                            @if($akunUsers->total())
+                                Menampilkan {{ $akunUsers->firstItem() }}–{{ $akunUsers->lastItem() }}
+                                dari <strong>{{ $akunUsers->total() }}</strong> akun
+                            @endif
+                        </small>
+                        {{ $akunUsers->links() }}
+                    </div>
+
+                    {{-- Hidden forms --}}
+                    <form id="form_delete_akun_one" method="POST" style="display:none;">
+                        @csrf @method('DELETE')
+                    </form>
+                    <form id="form_delete_akun_selected" method="POST"
+                          action="{{ route('settings.akun.destroySelected') }}" style="display:none;">
+                        @csrf @method('DELETE')
+                    </form>
+                    <form id="form_delete_akun_all" method="POST"
+                          action="{{ route('settings.akun.destroyAll') }}" style="display:none;">
+                        @csrf @method('DELETE')
+                    </form>
+
+                </div>
+                @endif
+
             </div>
         </div>
     </div>
@@ -214,6 +371,85 @@
                     document.getElementById('form_reset_nias').submit();
                 }
             })
+        }
+
+        // ── Tab Akun: checkbox ────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            const chkAll = document.getElementById('chk_akun_all');
+            if (!chkAll) return;
+
+            chkAll.addEventListener('change', function () {
+                document.querySelectorAll('.chk_akun_row').forEach(c => c.checked = this.checked);
+                updateAkunCount();
+            });
+            document.addEventListener('change', function (e) {
+                if (e.target.classList.contains('chk_akun_row')) updateAkunCount();
+            });
+        });
+
+        function updateAkunCount() {
+            const count = document.querySelectorAll('.chk_akun_row:checked').length;
+            const el    = document.getElementById('akun_selected_count');
+            const btn   = document.getElementById('btn_delete_akun_selected');
+            if (el)  el.textContent  = count + ' dipilih';
+            if (btn) btn.classList.toggle('d-none', count === 0);
+        }
+
+        // ── Delete satu akun ──────────────────────────────────────
+        function confirmDeleteAkunOne(userId, nama) {
+            Swal.fire({
+                title: 'Hapus Akun?',
+                html: 'Akun <strong>' + nama + '</strong> akan dihapus permanen.',
+                icon: 'warning', showCancelButton: true,
+                confirmButtonColor: '#dc3545', cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal',
+            }).then(result => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('form_delete_akun_one');
+                    form.action = '/settings/users/' + userId + '/delete';
+                    form.submit();
+                }
+            });
+        }
+
+        // ── Delete selected ───────────────────────────────────────
+        function confirmDeleteAkunSelected() {
+            const ids = [...document.querySelectorAll('.chk_akun_row:checked')].map(c => c.value);
+            if (!ids.length) return;
+            Swal.fire({
+                title: 'Hapus ' + ids.length + ' Akun?',
+                text: 'Akun yang dipilih akan dihapus permanen.',
+                icon: 'warning', showCancelButton: true,
+                confirmButtonColor: '#dc3545', cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal',
+            }).then(result => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('form_delete_akun_selected');
+                    form.querySelectorAll('input[name="ids[]"]').forEach(el => el.remove());
+                    ids.forEach(id => {
+                        const inp = document.createElement('input');
+                        inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = id;
+                        form.appendChild(inp);
+                    });
+                    form.submit();
+                }
+            });
+        }
+
+        // ── Delete all non-admin ──────────────────────────────────
+        function confirmDeleteAkunAll() {
+            Swal.fire({
+                title: 'Hapus Semua Akun Non-Admin?',
+                html: 'Seluruh akun <strong>regular</strong> akan dihapus permanen.<br>'
+                    + '<span class="text-danger fw-bold">Tindakan ini tidak bisa dibatalkan!</span>',
+                icon: 'warning', showCancelButton: true,
+                confirmButtonColor: '#dc3545', cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus Semua!', cancelButtonText: 'Batal',
+                input: 'text', inputPlaceholder: 'Ketik HAPUS untuk konfirmasi',
+                inputValidator: (value) => { if (value !== 'HAPUS') return 'Ketik HAPUS untuk melanjutkan.'; }
+            }).then(result => {
+                if (result.isConfirmed) document.getElementById('form_delete_akun_all').submit();
+            });
         }
     </script>
 @endpush

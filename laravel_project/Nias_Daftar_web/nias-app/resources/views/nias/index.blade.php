@@ -2,18 +2,21 @@
 @section('title', 'Data NIAS')
 
 @section('content')
+@php $isNiasOpen = $isNiasOpen ?? \App\Models\AppSetting::isNiasOpen(); @endphp
 
     {{-- SECTION 1: DATA BELUM DIKIRIM --}}
     <div class="card page-card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h5 class="mb-0"><i class="bi bi-table me-2"></i>Pendaftaran Nias Baru/Update</h5>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 flex-wrap">
+                @if(Auth::user()->role === 'admin' || $isNiasOpen)
                 <a href="{{ route('nias.create') }}" class="btn btn-warning btn-sm fw-semibold shadow-sm">
                     <i class="bi bi-person-plus me-1"></i>Daftar NIAS Baru
                 </a>
                 <a href="{{ route('nias.update-data') }}" class="btn btn-primary btn-sm fw-semibold shadow-sm">
                     <i class="bi bi-arrow-repeat me-1"></i>Update NIAS
                 </a>
+                @endif
                 <a href="{{ route('nias.existing') }}" class="btn btn-secondary btn-sm fw-semibold shadow-sm">
                     <i class="bi bi-people me-1"></i>NIAS Jatim yang sudah terdaftar
                 </a>
@@ -65,6 +68,18 @@
                     </a>
                 </li>
             </ul>
+
+            {{-- Alert jadwal tutup untuk user regular --}}
+            @if(!$isNiasOpen && Auth::user()->role !== 'admin')
+            <div class="alert alert-warning small mb-3 d-flex align-items-center gap-2">
+                <i class="bi bi-lock-fill fs-5 text-warning"></i>
+                <div>
+                    <strong>Masa pendaftaran NIAS sedang ditutup.</strong>
+                    Anda hanya dapat melihat data yang sudah ada dan mengakses data NIAS existing.
+                    Untuk informasi jadwal pembukaan, silakan hubungi admin.
+                </div>
+            </div>
+            @endif
 
             {{-- Toolbar bulk action --}}
             <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
